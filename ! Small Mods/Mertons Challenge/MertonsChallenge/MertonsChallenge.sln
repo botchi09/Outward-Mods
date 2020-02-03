@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MertonsChallenge", "MertonsChallenge.csproj", "{76DD4207-D043-435D-AA68-7D4821F6842A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{76DD4207-D043-435D-AA68-7D4821F6842A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76DD4207-D043-435D-AA68-7D4821F6842A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76DD4207-D043-435D-AA68-7D4821F6842A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76DD4207-D043-435D-AA68-7D4821F6842A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F8BD00E7-A2A6-4E2F-8B30-3C95C217B837}
+	EndGlobalSection
+EndGlobal

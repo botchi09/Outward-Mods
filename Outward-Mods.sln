@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "! Small Mods", "! Small Mods", "{D4ED1719-C87C-498D-A772-121C2636DE1D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatAndDodgeOverhaul", "Combat and Dodge Overhaul\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul.csproj", "{2B6018A4-7387-45B9-9FA0-7C7709BD2917}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD", "Combat HUD\CombatHUD\CombatHUD.csproj", "{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataminer", "Dataminer\Dataminer\Dataminer.csproj", "{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explorer\Explorer.csproj", "{77E56333-6F32-40D5-813C-BC9ABE688B2B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedQuickslotsPartiality", "Extended Quickslots\EQS\ExtendedQuickslotsPartiality.csproj", "{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapMarkers", "Map Markers\MapMarkers\MapMarkers.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixedGrip", "Mixed Grip\Mixed Grip\MixedGrip.csproj", "{37023A33-A1C2-4260-834E-EF2ABDACB3C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPLimitRemover", "MP Limit Remover\MPLimitRemover\MPLimitRemover.csproj", "{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NecromancerSkills", "Necromancy Skills\NecromancySkills\NecromancerSkills.csproj", "{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77E56333-6F32-40D5-813C-BC9ABE688B2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77E56333-6F32-40D5-813C-BC9ABE688B2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77E56333-6F32-40D5-813C-BC9ABE688B2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77E56333-6F32-40D5-813C-BC9ABE688B2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E61EA2C4-5D64-4828-A24A-47E3EB51A10C}
+	EndGlobalSection
+EndGlobal
