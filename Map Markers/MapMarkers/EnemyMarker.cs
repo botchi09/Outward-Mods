@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace MapMarkers
 {
+	// Custom class for enemy markers that you can hover over to reveal the name.
 	public class EnemyMarker : MapWorldMarker
 	{
 		public Character LinkedCharacter;

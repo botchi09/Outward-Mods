@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using Partiality.Modloader;
-using SinAPI;
+//using SinAPI;
 
 namespace ImprovedChakrams
 {

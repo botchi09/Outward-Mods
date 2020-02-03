@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Partiality.Modloader;
 using UnityEngine;
-using SinAPI;
+//using SinAPI;
 using Localizer;
 using static CustomKeybindings;
 

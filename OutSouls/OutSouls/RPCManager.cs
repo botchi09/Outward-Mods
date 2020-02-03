@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using Photon;
 using UnityEngine;
-using SinAPI;
+//using SinAPI;
 
 namespace OutSoulsMod
 {

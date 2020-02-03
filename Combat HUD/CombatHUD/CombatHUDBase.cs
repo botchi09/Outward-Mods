@@ -7,7 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using Partiality.Modloader;
-using SinAPI;
+//using SinAPI;
 using static CustomKeybindings;
 
 namespace CombatHUD

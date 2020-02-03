@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using SinAPI;
+//using SinAPI;
 using Partiality.Modloader;
 
 namespace NecromancerSkills

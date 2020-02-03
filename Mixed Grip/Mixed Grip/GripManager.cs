@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-using SinAPI;
+//using SinAPI;
 using static CustomKeybindings;
 
 namespace MixedGrip

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-using SinAPI;
+//using SinAPI;
 using System.Reflection;
 
 namespace MapMarkers
@@ -187,7 +187,7 @@ namespace MapMarkers
 
         /*
          * HOOK Character.Die
-         * Remove MapMarker on character death
+         * Remove Enemy MapMarker on character death
         */
         private void CharDieHook(On.Character.orig_Die orig, Character self, Vector3 _hitVec, bool _loadedDead = false)
         {
@@ -201,12 +201,6 @@ namespace MapMarkers
                 }
                 Destroy(enemymarker.gameObject);
             }
-
-            if (self.GetComponentInChildren<MapWorldMarker>() is MapWorldMarker marker)
-            {
-                MapDisplay.UnregisterMapMarker(marker);
-                Destroy(marker.gameObject);
-            }
         }
 
         // ==================== CUSTOM FUNCTIONS ==================== //
@@ -214,7 +208,6 @@ namespace MapMarkers
         /*
          * AddWorldMarker
          * Adds a simple MapWorldMarker on a new gameobject as a child for the specified GameObject.
-         * You can set the name, ShowCircle, and Anchored.
          * Returns the MapWorldMarker component.
         */
         public MapWorldMarker AddWorldMarker(GameObject go, string name)
@@ -242,8 +235,12 @@ namespace MapMarkers
 
         /*
          * AddTextHolder
-         * Add another MapWorldMarkerDisplay holder to the MapDisplay.
+         * Add another MapWorldMarkerDisplay holder to the MapDisplay.m_markerTexts list.
          * The game will not add more if we use them all, so we have to do it ourselves
+         * 
+         * Note: Since I moved enemies to their own m_enemyTexts holder, we will probably never actually use this.
+         * But incase I end up wanting to use more than the default text holders in the future, I'll leave this.
+         * The only case I can think it would be used is maybe in Monsoon with MP Limit Remover and like 10+ people in the city.
         */
         private void AddTextHolder(MapWorldMarkerDisplay[] markerTexts)
         {
@@ -267,7 +264,7 @@ namespace MapMarkers
 
         /*
          * AddEnemyWorldMarker
-         * Custom class for enemy markers that you can hover over to reveal the name.
+         * Basically the same as AddWorldMarker, but adds our custom EnemyMarker class.
         */
 
         public EnemyMarker AddEnemyWorldMarker(GameObject go, string name)
@@ -294,7 +291,8 @@ namespace MapMarkers
 
         /*
          * AddEnemyTextHolder
-         * Custom function to add a new EnemyMarkerDisplay to our list.
+         * Same as AddTextHolder, but using our custom m_enemyTexts list, attached to our custom m_customMarkerHolder.
+         * For the first map, we will do this for every active enemy, since our list starts our with 0 holders.
         */
         private void AddEnemyTextHolder()
         {

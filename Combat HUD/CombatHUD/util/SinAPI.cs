@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace SinAPI
+namespace CombatHUD
 {
     public static class At // Access Tools
     {
