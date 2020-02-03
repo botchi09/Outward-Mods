@@ -10,7 +10,7 @@ namespace MapMarkers
 {
     public class ModBase : PartialityMod
     {
-        public static string ModName = "BetterMapMarkers";
+        public static string ModName = "MapMarkers";
         public static double ModVersion = 1.0;
         public static string ModAuthor = "Sinai";
 

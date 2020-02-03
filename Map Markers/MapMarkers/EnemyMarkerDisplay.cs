@@ -16,24 +16,16 @@ namespace MapMarkers
 
 		protected override void StartInit()
 		{
-			//base.StartInit();
-			//this.Circle.transform.SetParent(base.transform.parent);
-			//this.Circle.transform.SetAsFirstSibling();
-			//this.Circle.gameObject.SetActive(base.gameObject.activeSelf);
+			// do nothing (override Circle setup)
 		}
 
 		public new void SetActive(bool _active)
 		{
 			base.gameObject.SetActive(_active);
-			//this.Circle.gameObject.SetActive(_active);
 		}
 
 		public void UpdateDisplay(EnemyMarker _marker)
 		{
-			//if (this.Text.text != _marker.Text)
-			//{
-			//	this.Text.text = _marker.Text;
-			//}
 			if (m_hover)
 			{
 				if (this.Text.text != _marker.Text)
@@ -91,7 +83,6 @@ namespace MapMarkers
 		public void OnPointerEnter(PointerEventData _eventData)
 		{
 			this.m_hover = true;
-			//MapDisplay.Instance.HoveredMarker = this;
 		}
 
 		public void OnPointerExit(PointerEventData _eventData)

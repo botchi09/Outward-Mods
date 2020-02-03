@@ -1276,11 +1276,15 @@ namespace OutwardExplorer
         {
             if (type == LogType.Exception && !message.Contains("Repaint"))
             {
-                Debug.LogError(message + "\r\nStack Trace: " + stackTrace);
+                OLogger.Error(message + "\r\nStack Trace: " + stackTrace);
             }
-            else if (type == LogType.Log)
+            else if (type == LogType.Warning)
             {
-                Debug.Log(message);
+                OLogger.Warning(message);
+            }
+            else
+            {
+                OLogger.Log(message);
             }
         }
 
