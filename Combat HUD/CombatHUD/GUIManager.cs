@@ -108,7 +108,7 @@ namespace CombatHUD
                 }
                 catch //(Exception ex)
                 {
-                    // OLogger.Log("[CombatHUD::OnGUI] " + ex.Message + "\r\n" + ex.StackTrace);
+                    // Debug.Log("[CombatHUD::OnGUI] " + ex.Message + "\r\n" + ex.StackTrace);
                 }
             }
         }
@@ -286,7 +286,7 @@ namespace CombatHUD
                                     time = marshpoison.RemainingLifespan;
                                 break;
                             default:
-                                //OLogger.Log(entry.Key);
+                                //Debug.Log(entry.Key);
                                 continue;
                         }
                     }
@@ -311,7 +311,7 @@ namespace CombatHUD
             }
             catch //(Exception ex)
             {
-                //OLogger.Log("DrawStatusTimers error: " + ex.Message);
+                //Debug.Log("DrawStatusTimers error: " + ex.Message);
             }
         }
 
@@ -453,7 +453,7 @@ namespace CombatHUD
                 }
                 catch // (Exception ex)
                 {
-                    //OLogger.Log("[Combat HUD] Enemy Buildups: " + ex.Message);
+                    //Debug.Log("[Combat HUD] Enemy Buildups: " + ex.Message);
                 }
             }
         }

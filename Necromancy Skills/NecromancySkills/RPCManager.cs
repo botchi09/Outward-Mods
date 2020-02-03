@@ -33,7 +33,7 @@ namespace NecromancerSkills
         [PunRPC]
         public void SendSummonSpawn(string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura)
         {
-            //OLogger.Log("SendSummonSpawn received with UID: " + summonUID + " and scene view ID: " + sceneViewID);
+            //Debug.Log("SendSummonSpawn received with UID: " + summonUID + " and scene view ID: " + sceneViewID);
 
             if (CharacterManager.Instance.GetCharacter(summonUID) is Character c)
             {
@@ -47,7 +47,7 @@ namespace NecromancerSkills
 
         private IEnumerator SummonSpawnCoroutine(string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura)
         {
-            // OLogger.Log("Couldn't get character immediately, starting coroutine to find character...");
+            // Debug.Log("Couldn't get character immediately, starting coroutine to find character...");
 
             float t = Time.time;
 
@@ -75,7 +75,7 @@ namespace NecromancerSkills
         [PunRPC]
         public void SendTrainerSpawn(string trainerUID, int sceneViewID)
         {
-            //OLogger.Log("TrainerSpawn received with UID: " + trainerUID + " and scene view ID: " + sceneViewID);
+            //Debug.Log("TrainerSpawn received with UID: " + trainerUID + " and scene view ID: " + sceneViewID);
 
             if (CharacterManager.Instance.GetCharacter(trainerUID) is Character c)
             {
@@ -89,7 +89,7 @@ namespace NecromancerSkills
 
         private IEnumerator TrainerSetupCoroutine(string trainerUID, int trainerViewID)
         {
-            // OLogger.Log("Couldn't get character immediately, starting coroutine to find character...");
+            // Debug.Log("Couldn't get character immediately, starting coroutine to find character...");
 
             float t = Time.time;
 

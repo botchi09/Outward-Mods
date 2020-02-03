@@ -1,5 +1,4 @@
-﻿using OModAPI;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -182,7 +181,7 @@ namespace OutwardExplorer
                 }
                 yield return null;
             }
-            OLogger.Warning("ResourcesPrefabManager done!");
+            Debug.LogWarning("ResourcesPrefabManager done!");
         }
 
         public IEnumerator DumpEffectPrefabs()
@@ -200,7 +199,7 @@ namespace OutwardExplorer
                             EffectID = effect.PresetID
                         };
 
-                        try { ParseStatusEffect(effect, ref statustemplate); } catch (Exception e) { OLogger.Log(e.Message + "\r\n" + e.StackTrace); }
+                        try { ParseStatusEffect(effect, ref statustemplate); } catch (Exception e) { Debug.Log(e.Message + "\r\n" + e.StackTrace); }
 
                         SaveJsonOverwrite(statustemplate, Folders["Effects"], effect.name);
                     }
@@ -208,7 +207,7 @@ namespace OutwardExplorer
                 yield return null;
             }
 
-            OLogger.Warning("Effects done!");
+            Debug.LogWarning("Effects done!");
         }
 
         public void DumpRecipes()
@@ -234,7 +233,7 @@ namespace OutwardExplorer
                 //if (File.Exists(path)) { File.Delete(path); }
                 //File.WriteAllLines(path, simpleList.ToArray());
 
-                OLogger.Warning("Recipes done!");
+                Debug.LogWarning("Recipes done!");
             }
         }
 
@@ -594,7 +593,7 @@ namespace OutwardExplorer
 
         public IEnumerator DumpAllScenes()
         {
-            OLogger.Log("beginning all scenes dump! ...");
+            Debug.Log("beginning all scenes dump! ...");
 
             foreach (string s in utils.sceneBuildNames)
             {
@@ -611,15 +610,15 @@ namespace OutwardExplorer
 
                 if (SceneManagerHelper.ActiveSceneName != s)
                 {
-                    try { NetworkLevelLoader.Instance.RequestSwitchArea(s, 0, 1.5f); } catch (Exception e) { OLogger.Error("Error getting level! Message: " + e.Message); }
+                    try { NetworkLevelLoader.Instance.RequestSwitchArea(s, 0, 1.5f); } catch (Exception e) { Debug.LogError("Error getting level! Message: " + e.Message); }
 
-                    OLogger.Log("Loading " + s + "...");
+                    Debug.Log("Loading " + s + "...");
 
                     yield return new WaitForSeconds(5);
 
                     while (NetworkLevelLoader.Instance.IsGameplayPaused)
                     {
-                        OLogger.Log("trying to resume gameplay");
+                        Debug.Log("trying to resume gameplay");
 
                         NetworkLevelLoader loader = NetworkLevelLoader.Instance;
 
@@ -640,7 +639,7 @@ namespace OutwardExplorer
                 while (!currentSceneDumped) { yield return new WaitForSeconds(1); }
             }
 
-            OLogger.Log("all scenes complete!");
+            Debug.Log("all scenes complete!");
 
             yield return null;
         }
@@ -652,19 +651,19 @@ namespace OutwardExplorer
             lootDumped = false;
             enemiesDumped = false;
 
-            OLogger.Log("Dumping merchants...");
+            Debug.Log("Dumping merchants...");
 
             StartCoroutine(DumpMerchants());
 
             while (!merchantsDumped) { yield return new WaitForSeconds(1); }
 
-            OLogger.Log("Dumping loot...");
+            Debug.Log("Dumping loot...");
 
             StartCoroutine(DumpLoot());
 
             while (!lootDumped) { yield return new WaitForSeconds(1); }
 
-            OLogger.Log("Dumping enemies...");
+            Debug.Log("Dumping enemies...");
 
             StartCoroutine(DumpEnemies());
 
@@ -690,7 +689,7 @@ namespace OutwardExplorer
 
                 c.transform.position = CharacterManager.Instance.GetFirstLocalCharacter().transform.position;
 
-                OLogger.Log(c.Name);
+                Debug.Log(c.Name);
 
                 c.gameObject.SetActive(true);
                 c.transform.parent.gameObject.SetActive(true);
@@ -749,7 +748,7 @@ namespace OutwardExplorer
                     }
                 }
 
-                try { DumpEnemySingle(c, ref enemy); } catch (Exception e) { OLogger.Log("Exception: " + e.Message + "\r\n Trace:" + e.StackTrace); }
+                try { DumpEnemySingle(c, ref enemy); } catch (Exception e) { Debug.Log("Exception: " + e.Message + "\r\n Trace:" + e.StackTrace); }
 
                 SaveJsonOverwrite(enemy, Folders["Scenes"]
                     + "/" + utils.GetCurrentRegion()
@@ -759,7 +758,7 @@ namespace OutwardExplorer
                 c.transform.position = origpos;
             }
 
-            OLogger.Log("Enemy dump finished");
+            Debug.Log("Enemy dump finished");
             enemiesDumped = true;
             yield return null;
         }
@@ -908,7 +907,7 @@ namespace OutwardExplorer
                             {
                                 // same droptable name, but they are not the same.
                                 var uid = UID.Generate();
-                                OLogger.Warning("Dumping " + dropper.name + " but the new table is not equal to the orig! Generated UID: " + uid);
+                                Debug.LogWarning("Dumping " + dropper.name + " but the new table is not equal to the orig! Generated UID: " + uid);
 
                                 tableName += "_" + uid;
                                 path = Folders["Droptables"] + "/" + tableName + ".json";
@@ -970,14 +969,14 @@ namespace OutwardExplorer
                 yield return null;
             }
 
-            OLogger.Log("Merchant dump finished");
+            Debug.Log("Merchant dump finished");
             merchantsDumped = true;
             yield return null;
         }
 
         public void DumpMerchantSingle(Merchant c, Vector3 origPos, string UID)
         {
-            OLogger.Log(c.ShopName);
+            Debug.Log(c.ShopName);
 
             Templates._Merchant merchant = new Templates._Merchant
             {
@@ -1016,7 +1015,7 @@ namespace OutwardExplorer
 
                 DumpLootSingle(item, item.transform.position);
             }
-            OLogger.Log("Loot dump finished");
+            Debug.Log("Loot dump finished");
             lootDumped = true;
 
             yield return null;
@@ -1024,7 +1023,7 @@ namespace OutwardExplorer
 
         public void DumpLootSingle(Item item, Vector3 origPos)
         {
-            OLogger.Log(item.Name);
+            Debug.Log(item.Name);
 
             if (item is SelfFilledItemContainer itemContainer)
             {
@@ -1092,7 +1091,7 @@ namespace OutwardExplorer
 
         public string DumpDropTable(Dropable dropper)
         {
-            //OLogger.Log(dropper.name);
+            //Debug.Log(dropper.name);
 
             Templates._DropTableContainer template = new Templates._DropTableContainer
             {

@@ -55,7 +55,7 @@ namespace CombatAndDodgeOverhaul
 
                 if (!m_impactImmune && hit > 0f)
                 {
-                    //OLogger.Log("--------- " + self.Name + " ---------");
+                    //Debug.Log("--------- " + self.Name + " ---------");
 
                     // check stagger immunity dictionary (custom)
                     float lastStagger = -1;
@@ -168,7 +168,7 @@ namespace CombatAndDodgeOverhaul
                     // else if we are not blocking...
                     else if (!_block)
                     {
-                        // OLogger.Log("Value: " + _knockValue + ", new stability: " + m_stability);
+                        // Debug.Log("Value: " + _knockValue + ", new stability: " + m_stability);
                         if (m_knockHurtAllowed)
                         {
                             At.SetValue(Character.HurtType.Hurt, typeof(Character), self, "m_hurtType");
@@ -207,7 +207,7 @@ namespace CombatAndDodgeOverhaul
 
         private void StaggerAttacker(Character self, Animator m_animator, Character _dealerChar)
         {
-            // OLogger.Log(self.Name + " blocked the attack. Shield stability: " + m_shieldStability);
+            // Debug.Log(self.Name + " blocked the attack. Shield stability: " + m_shieldStability);
             At.SetValue(Character.HurtType.NONE, typeof(Character), self, "m_hurtType");
             if (self.InLocomotion)
             {
@@ -216,7 +216,7 @@ namespace CombatAndDodgeOverhaul
 
             if (OverhaulGlobal.settings.Enable_StabilityMods && OverhaulGlobal.settings.Blocking_Staggers_Attacker)
             {
-                // OLogger.Log("autoknocking " + _dealerChar.Name);
+                // Debug.Log("autoknocking " + _dealerChar.Name);
                 if (_dealerChar.CurrentWeapon.Type != Weapon.WeaponType.Bow)
                 {
                     _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
@@ -264,7 +264,7 @@ namespace CombatAndDodgeOverhaul
                         At.SetValue(num2, typeof(Character), self, "m_knockbackCount");
                         if (flag && num2 <= 0)
                         {
-                            // OLogger.Log("Resetting AI stagger count for " + self.Name);
+                            // Debug.Log("Resetting AI stagger count for " + self.Name);
                         }
                     }
                 }

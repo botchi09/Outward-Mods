@@ -65,7 +65,7 @@ namespace NecromancerSkills
                 //OLogger.Warning("Trainer already exists on scene change, skipping setup!");
                 if (CurrentSceneName != TrainerSceneName)
                 {
-                    //OLogger.Log("Destroying trainer");
+                    //Debug.Log("Destroying trainer");
                     DestroyImmediate(_o);
                 }
                 return;

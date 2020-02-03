@@ -97,7 +97,7 @@ namespace PrefabEditor
 
             init = true;
 
-            // OLogger.Log("Initialised item editor");
+            // Debug.Log("Initialised item editor");
         }
 
         internal void Update()
@@ -203,7 +203,7 @@ namespace PrefabEditor
 
         public void SetItemPrefab(Item item)
         {
-            // OLogger.Log("setting item prefab");
+            // Debug.Log("setting item prefab");
 
             currentTarget = item;
 
@@ -767,7 +767,7 @@ namespace PrefabEditor
             if (weapon.transform.Find("HitEffects") is Transform origEffects)
             {
                 origEffects.transform.parent = null;
-                //OLogger.Log("destroying existing hiteffects");
+                //Debug.Log("destroying existing hiteffects");
                 Destroy(origEffects.gameObject);
             }
 
@@ -776,7 +776,7 @@ namespace PrefabEditor
 
             foreach (string s in template.hitEffects)
             {
-                // OLogger.Log("adding status " + s);
+                // Debug.Log("adding status " + s);
                 AddStatusEffectBuildUp newstatus = new AddStatusEffectBuildUp()
                 {
                     BuildUpValue = 60.0f,

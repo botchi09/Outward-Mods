@@ -41,7 +41,7 @@ namespace BetterSummonedGhost
             //custom keybindings
             AddAction(MenuKey, KeybindingsCategory.Actions, ControlType.Both, 5);
 
-            //OLogger.Log("Custom ally init");
+            //Debug.Log("Custom ally init");
         }  
 
         internal void Update()
@@ -146,7 +146,7 @@ namespace BetterSummonedGhost
                 if (settings.KeepGhostClose 
                     && Vector3.Distance(player.Character.transform.position, player.Character.CurrentSummon.transform.position) > settings.KeepCloseDistance)
                 {
-                    //OLogger.Log("moving AI to position");
+                    //Debug.Log("moving AI to position");
                     player.Character.CurrentSummon.transform.position = player.Character.transform.position + new Vector3(1, 1, 1);
                 }
             }
@@ -180,7 +180,7 @@ namespace BetterSummonedGhost
 
                     if (player.Ally.transform.FindInAllChildren(entry.Value.SlotObjectName) is Transform origSlot)
                     {
-                        //OLogger.Log("Setting up custom slot " + entry.Value.CustomName);
+                        //Debug.Log("Setting up custom slot " + entry.Value.CustomName);
 
                         GameObject newObj = new GameObject("Custom_" + entry.Value.CustomName);
 

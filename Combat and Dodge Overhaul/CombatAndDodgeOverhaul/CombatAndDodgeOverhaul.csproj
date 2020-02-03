@@ -14,10 +14,10 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\Steam\steamapps\common\Outward\Mods\</OutputPath>
+    <OutputPath>..\Release\Mods\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -60,8 +60,8 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="SinAPI">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\SinAPI.dll</HintPath>
+    <Reference Include="Sideloader">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -88,6 +88,7 @@
     <Compile Include="RPCManager.cs" />
     <Compile Include="StabilityManager.cs" />
     <Compile Include="util\CustomKeybindings.cs" />
+    <Compile Include="util\SinAPI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

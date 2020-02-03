@@ -51,7 +51,7 @@ namespace PvP
             {
                 if (self.GetComponentInParent<DeployableTrap>() is DeployableTrap trap)
                 {
-                    //OLogger.Log("setting trap factions");
+                    //Debug.Log("setting trap factions");
                     At.SetValue(AllFactions.ToArray(), typeof(DeployableTrap), trap, "m_targetFactions");
                 }
 

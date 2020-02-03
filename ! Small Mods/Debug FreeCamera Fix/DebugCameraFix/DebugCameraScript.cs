@@ -25,7 +25,7 @@ namespace DebugCameraFix
             {
                 if (!m_active)
                 {
-                    if (MouseOwnerID == -1) { MouseOwnerID = ControlsInput.GetMouseOwner()); }
+                    if (MouseOwnerID == -1) { MouseOwnerID = ControlsInput.GetMouseOwner(); }
 
                     if (CameraWasFree)
                     {

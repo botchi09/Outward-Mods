@@ -27,13 +27,13 @@ namespace CombatHUD
         {
             if (global.sceneChangeFlag || global.LocalPlayers.Count != PlayerLockInfos.Count)
             {
-                // OLogger.Log("resetting target info");
+                // Debug.Log("resetting target info");
 
                 PlayerLockInfos.Clear();
 
                 foreach (PlayerInfo c in global.LocalPlayers)
                 {
-                    //OLogger.Log("adding target info for " + c.character.Name);
+                    //Debug.Log("adding target info for " + c.character.Name);
                     PlayerLockInfos.Add(new TargetInfo { playerInfo = c });
                 }
             }

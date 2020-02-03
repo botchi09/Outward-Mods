@@ -17,17 +17,18 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>.\</OutputPath>
+    <OutputPath>..\Release\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
+    <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -48,10 +49,6 @@
       <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="OModAPI">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\OModAPI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Partiality">
       <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
       <Private>False</Private>
@@ -66,10 +63,6 @@
     </Reference>
     <Reference Include="Sideloader">
       <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SinAPI">
-      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\SinAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System">

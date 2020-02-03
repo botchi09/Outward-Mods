@@ -61,7 +61,7 @@ namespace PvP
             
             if (ForceNoSaves && global.CurrentGame == PvPGlobal.GameModes.NONE && !MenuManager.Instance.IsReturningToMainMenu)
             {
-                //OLogger.Log("[BR] Update turning off ForceNoSaves");
+                //Debug.Log("[BR] Update turning off ForceNoSaves");
                 ForceNoSaves = false;
             }
             if (WasCheatsEnabled && !IsGameplayStarting && global.CurrentGame == PvPGlobal.GameModes.NONE)
@@ -242,7 +242,7 @@ namespace PvP
             EnemyCharacters.Clear();
             foreach (Character c in CharacterManager.Instance.Characters.Values.Where(x => x.IsAI && x.Faction != Character.Factions.Player))
             {
-                //OLogger.Log("adding " + c.Name + " to enemycharacters dict!");
+                //Debug.Log("adding " + c.Name + " to enemycharacters dict!");
                 EnemyCharacters.Add(c);
                 c.gameObject.SetActive(false);
             }
@@ -363,7 +363,7 @@ namespace PvP
 
         private void SetupStarterPack(Character _char)
         {
-            //OLogger.Log("SetupStarterPack");
+            //Debug.Log("SetupStarterPack");
             // give bag
             Item bag = ItemManager.Instance.GenerateItemNetwork(5300000); // adventurer bag
             if (bag != null)
@@ -545,9 +545,9 @@ namespace PvP
             IsGameplayEnding = true;
             yield return null;
 
-            //OLogger.Log("waiting 5 seconds...");
+            //Debug.Log("waiting 5 seconds...");
             //yield return new WaitForSeconds(5);
-            //OLogger.Log("returning to menu");
+            //Debug.Log("returning to menu");
 
             //string previousScene = At.GetValue(typeof(NetworkLevelLoader), NetworkLevelLoader.Instance, "m_previousScene") as string;
             
@@ -558,13 +558,13 @@ namespace PvP
         public void AddItemsToContainer(List<int> _itemList, int _amountToAdd, Transform _container, bool _removeWhenAdded = true)
         {
             List<int> list2 = _itemList.ToList();
-            //OLogger.Log("Generating " + _amountToAdd + " drops from a list size of " + list2.Count());
+            //Debug.Log("Generating " + _amountToAdd + " drops from a list size of " + list2.Count());
             for (int i = 0; i < _amountToAdd; i++)
             {
                 if (list2.Count() == 0) { return; }
 
                 int random = UnityEngine.Random.Range(0, list2.Count());
-                //OLogger.Log("Rolled a " + random);
+                //Debug.Log("Rolled a " + random);
                 Item item = ItemManager.Instance.GenerateItemNetwork(list2[random]);
                 item.ChangeParent(_container);
 
@@ -635,13 +635,13 @@ namespace PvP
                 int numOfDrops = (int)Math.Ceiling(global.playerManager.GetRemainingPlayers().Count() * 0.5f);
                 numOfDrops = (int)Mathf.Clamp(numOfDrops, 2, locations.Count());
 
-                //OLogger.Log("Generating " + numOfDrops + " supply drops from a locations list size of " + locations.Count());
+                //Debug.Log("Generating " + numOfDrops + " supply drops from a locations list size of " + locations.Count());
                 for (int i = 0; i < numOfDrops; i++)
                 {
                     if (locations.Count == 0) { break; }
 
                     int random = UnityEngine.Random.Range(0, locations.Count());
-                    //OLogger.Log("Rolled location index " + random);
+                    //Debug.Log("Rolled location index " + random);
                     GenerateChestSingle(locations[random]);
                     locations.RemoveAt(random);
                 }

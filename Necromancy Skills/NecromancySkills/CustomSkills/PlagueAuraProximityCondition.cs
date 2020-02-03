@@ -38,7 +38,7 @@ namespace NecromancerSkills
             {
                 if (charInRange.GetComponentInChildren<Ephemeral>())
                 {
-                    // OLogger.Log("Found ephemeral");
+                    // Debug.Log("Found ephemeral");
                     return true;
                 }
 
@@ -46,7 +46,7 @@ namespace NecromancerSkills
 
                 //if (charInRange.GetComponentInChildren<Item>() is Item item && item.ItemID == itemID)
                 //{
-                //    // OLogger.Log("found plague aura in range of position, returning true");
+                //    // Debug.Log("found plague aura in range of position, returning true");
                 //    return true;
                 //}
             }

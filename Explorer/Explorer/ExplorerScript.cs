@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
+using OutwardExplorer;
 
 /*
  * THIS MOD DESPERATELY NEEDS A REWORK / CLEANUP. VERY OLD. 
@@ -46,7 +47,10 @@ namespace OutwardExplorer
         // init
         public void Initialise()
         {
-            asm = Assembly.LoadFile(@"Outward_Data\Managed\Assembly-CSharp.dll");
+            var m_window = new Vector2(600, 260);
+            OLogger.CreateLog(new Rect(Screen.width - m_window.x - 5, Screen.height - m_window.y - 5, m_window.x, m_window.y));
+
+            asm = Assembly.GetExecutingAssembly();
 
             // explorer
             explorerPath = new List<Transform>();
@@ -72,7 +76,7 @@ namespace OutwardExplorer
             //PatchHooks();
             On.QuestEventDictionary.Load += new On.QuestEventDictionary.hook_Load(QuestLoad);
 
-            Debug.LogWarning("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
+            OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
         }
 
         private void QuestLoad(On.QuestEventDictionary.orig_Load orig)

@@ -49,7 +49,7 @@ namespace PvP
             {
                 if (!self.IsAI)
                 {
-                    //OLogger.Log("Dropping player stuff!");
+                    //Debug.Log("Dropping player stuff!");
                     // custom player death (drop items)
 
                     if (!PhotonNetwork.isNonMasterClientInRoom && At.GetValue(typeof(Character), self, "m_lastDealers") is List<Pair<UID, float>> lastDealers)
@@ -240,7 +240,7 @@ namespace PvP
             }
             else
             {
-                //OLogger.Log("Savemanager tried to LocalCharStarted (load save), but we stopped it.");
+                //Debug.Log("Savemanager tried to LocalCharStarted (load save), but we stopped it.");
             }
         }
 
@@ -252,7 +252,7 @@ namespace PvP
             }
             else
             {
-                //OLogger.Log("NetworkLevelSaveHook tried to save, but we stopped it.");
+                //Debug.Log("NetworkLevelSaveHook tried to save, but we stopped it.");
             }
         }
 
@@ -264,7 +264,7 @@ namespace PvP
             }
             else
             {
-                //OLogger.Log("NetworkLevelSaveHook_1 tried to save, but we stopped it.");
+                //Debug.Log("NetworkLevelSaveHook_1 tried to save, but we stopped it.");
             }
         }
 

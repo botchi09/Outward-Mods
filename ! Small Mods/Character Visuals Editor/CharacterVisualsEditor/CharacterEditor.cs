@@ -393,7 +393,7 @@ namespace CharacterEditor
             {
                 settings = new Settings()
                 {
-                    AddBeards = false,
+                    //AddBeards = false,
                     AlwaysRenderHair = false,
                     ShowMenuOnStartup = true,
                 };

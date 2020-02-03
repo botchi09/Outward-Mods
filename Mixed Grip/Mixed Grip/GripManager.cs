@@ -72,7 +72,7 @@ namespace MixedGrip
 
             foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.Initialized))
             {
-                //OLogger.Log("[MG]" + Time.time + " | InternalUpdate :: Added " + ps.ControlledCharacter.Name + " to CurrentPlayers");
+                //Debug.Log("[MG]" + Time.time + " | InternalUpdate :: Added " + ps.ControlledCharacter.Name + " to CurrentPlayers");
 
                 CharacterInfo charInfo = new CharacterInfo() { CharacterUID = ps.ControlledCharacter.UID };
                 if (ps.ControlledCharacter.LeftHandEquipment)
@@ -315,7 +315,7 @@ namespace MixedGrip
                 JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(origWeapon.Stats), newStats);
 
                 float adjustedSpeed = GetWeaponBalance(origWeapon, newWeapon);
-                float damageMultiplier = 1.07f * adjustedSpeed;
+                float damageMultiplier = 1.04f * adjustedSpeed;
 
                 // set visible damage
                 for (int i = 0; i < newStats.BaseDamage.List.Count; i++)

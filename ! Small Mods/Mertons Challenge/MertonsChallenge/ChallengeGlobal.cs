@@ -81,7 +81,7 @@ namespace MertonsChallenge
             AddGlobalComponent(typeof(StatHelpers), "statUtil");
             enemies.Init();
 
-            // OLogger.Log("Endless Horde init");
+            // Debug.Log("Endless Horde init");
         }
 
         internal void Update()
@@ -452,7 +452,7 @@ namespace MertonsChallenge
             }
             catch //(Exception ex)
             {
-                //OLogger.Log("Trying to add " + FieldName + " :: " + ex.Message + "\r\n" + ex.StackTrace);
+                //Debug.Log("Trying to add " + FieldName + " :: " + ex.Message + "\r\n" + ex.StackTrace);
             }
         }
 

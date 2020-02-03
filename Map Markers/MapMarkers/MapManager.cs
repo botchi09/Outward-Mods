@@ -65,55 +65,57 @@ namespace MapMarkers
 
             m_mapID = (int)At.GetValue(typeof(MapDisplay), self, "m_currentMapSceneID");
 
-            if ((bool)At.GetValue(typeof(MapDisplay), self, "m_currentAreaHasMap"))
+            if (!(bool)At.GetValue(typeof(MapDisplay), self, "m_currentAreaHasMap"))
             {
-                if (MapConfigs.ContainsKey(m_mapID))
-                {
-                    self.CurrentMapScene.MarkerOffset = MapConfigs[m_mapID].MarkerOffset;
-                    self.CurrentMapScene.Rotation = MapConfigs[m_mapID].Rotation;
-                    self.CurrentMapScene.MarkerScale = MapConfigs[m_mapID].MarkerScale;
-                }         
-                
-                var list = CharacterManager.Instance.Characters.Values
-                    .Where(x => 
-                        !x.GetComponentInChildren<MapWorldMarker>() 
-                        && !x.IsDead 
-                        && x.gameObject.activeSelf);
+                return;
+            }
 
-                foreach (Character c in list)
+            if (MapConfigs.ContainsKey(m_mapID))
+            {
+                self.CurrentMapScene.MarkerOffset = MapConfigs[m_mapID].MarkerOffset;
+                self.CurrentMapScene.Rotation = MapConfigs[m_mapID].Rotation;
+                self.CurrentMapScene.MarkerScale = MapConfigs[m_mapID].MarkerScale;
+            }
+
+            var list = CharacterManager.Instance.Characters.Values
+                .Where(x =>
+                    !x.GetComponentInChildren<MapWorldMarker>()
+                    && !x.IsDead
+                    && x.gameObject.activeSelf);
+
+            foreach (Character c in list)
+            {
+                // player markers
+                if (ModBase.settings.Show_PlayerMarkers && !c.IsAI)
                 {
-                    // player markers
-                    if (ModBase.settings.Show_PlayerMarkers && !c.IsAI)
-                    {
-                        AddWorldMarker(c.gameObject, c.Name);
-                    }
-                    // enemy markers
-                    if (ModBase.settings.Show_EnemyMarkers && c.IsAI)
-                    {
-                        AddEnemyWorldMarker(c.gameObject, c.Name);
-                    }
+                    AddWorldMarker(c.gameObject, c.Name);
                 }
-                // caravanner
-                if (ModBase.settings.Show_SoroboreanCaravanner)
+                // enemy markers
+                if (ModBase.settings.Show_EnemyMarkers && c.IsAI)
                 {
-                    if (GameObject.Find("HumanSNPC_CaravanTrader") is GameObject merchant && !merchant.GetComponentInChildren<MapWorldMarker>())
-                    {
-                        AddWorldMarker(merchant, "Soroborean Caravanner");
-                    }
+                    AddEnemyWorldMarker(c.gameObject, c.Name);
                 }
-                // player bags
-                if (ModBase.settings.Show_PlayerBagMarker)
+            }
+            // caravanner
+            if (ModBase.settings.Show_SoroboreanCaravanner)
+            {
+                if (GameObject.Find("HumanSNPC_CaravanTrader") is GameObject merchant && !merchant.GetComponentInChildren<MapWorldMarker>())
                 {
-                    foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
+                    AddWorldMarker(merchant, "Soroborean Caravanner");
+                }
+            }
+            // player bags
+            if (ModBase.settings.Show_PlayerBagMarker)
+            {
+                foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
+                {
+                    var c = ps.ControlledCharacter;
+                    if (c.Inventory.Equipment.LastOwnedBag != null && c.Inventory.Equipment.LastOwnedBag.OwnerCharacter == null)
                     {
-                        var c = ps.ControlledCharacter;
-                        if (c.Inventory.Equipment.LastOwnedBag != null && c.Inventory.Equipment.LastOwnedBag.OwnerCharacter == null)
-                        {
-                            var tempObject = new GameObject("TempBagHolder");
-                            tempObject.transform.position = c.Inventory.Equipment.LastOwnedBag.transform.position;
-                            var marker = AddWorldMarker(tempObject, c.Name + "'s Bag");
-                            m_bagMarkers.Add(marker);
-                        }
+                        var tempObject = new GameObject("TempBagHolder");
+                        tempObject.transform.position = c.Inventory.Equipment.LastOwnedBag.transform.position;
+                        var marker = AddWorldMarker(tempObject, c.Name + "'s Bag");
+                        m_bagMarkers.Add(marker);
                     }
                 }
             }
@@ -190,6 +192,15 @@ namespace MapMarkers
         private void CharDieHook(On.Character.orig_Die orig, Character self, Vector3 _hitVec, bool _loadedDead = false)
         {
             orig(self, _hitVec, _loadedDead);
+
+            if (self.GetComponentInChildren<EnemyMarker>() is EnemyMarker enemymarker)
+            {
+                if (EnemyMarkers.Contains(enemymarker))
+                {
+                    EnemyMarkers.Remove(enemymarker);
+                }
+                Destroy(enemymarker.gameObject);
+            }
 
             if (self.GetComponentInChildren<MapWorldMarker>() is MapWorldMarker marker)
             {
@@ -347,64 +358,55 @@ namespace MapMarkers
             }
         };
 
+        ///*
+        // * TEMP DEBUG
+        // * I used this to align the map offsets for the exterior regions more accurately. 
+        // * F5 (-) and F6 (+) adjust the scale.
+        // * F8 (-) and F9 (+) adjust the Y offsets.
+        // * F10 (-) and F11 (+) adjust the X offsets.
+        // * It will print the value (after changes) with Debug.Log()
+        //*/
 
+        //internal void Update()
+        //{
+        //    // adjust scale
+        //    if (Input.GetKey(KeyCode.F5))
+        //    {
+        //        AdjustConfig(Vector2.zero, Vector2.one * -0.001f);
+        //    }
+        //    if (Input.GetKey(KeyCode.F6))
+        //    {
+        //        AdjustConfig(Vector2.zero, Vector2.one * 0.001f);
+        //    }
+        //
+        //    // adjust offsets
+        //    if (Input.GetKey(KeyCode.F8))
+        //    {
+        //        AdjustConfig(new Vector2(0, -1), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F9))
+        //    {
+        //        AdjustConfig(new Vector2(0, 1), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F10))
+        //    {
+        //        AdjustConfig(new Vector2(1, 0), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F11))
+        //    {
+        //        AdjustConfig(new Vector2(-1, 0), Vector2.zero);
+        //    }
+        //}
 
-
-        /*
-         * TEMP DEBUG
-         * I used this to align the map offsets for the exterior regions more accurately. 
-         * F5 (-) and F6 (+) adjust the scale.
-         * F8 (-) and F9 (+) adjust the Y offsets.
-         * F10 (-) and F11 (+) adjust the X offsets.
-         * It will print the value (after changes) with Debug.Log()
-        */
-
-        internal void Update()
-        {
-            // very temp - instantiate text holder transforms
-            if (Input.GetKeyDown(KeyCode.ScrollLock))
-            {
-                Instantiate(MapDisplay.Instance.WorldMapMarkers.gameObject);
-                Instantiate(m_customMarkerHolder.gameObject);
-            }
-
-            // adjust scale
-            if (Input.GetKey(KeyCode.F5))
-            {
-                AdjustConfig(Vector2.zero, Vector2.one * -0.001f);
-            }
-            if (Input.GetKey(KeyCode.F6))
-            {
-                AdjustConfig(Vector2.zero, Vector2.one * 0.001f);
-            }
-            // adjust offsets
-            if (Input.GetKey(KeyCode.F8))
-            {
-                AdjustConfig(new Vector2(0, -1), Vector2.zero);
-            }
-            if (Input.GetKey(KeyCode.F9))
-            {
-                AdjustConfig(new Vector2(0, 1), Vector2.zero);
-            }
-            if (Input.GetKey(KeyCode.F10))
-            {
-                AdjustConfig(new Vector2(1, 0), Vector2.zero);
-            }
-            if (Input.GetKey(KeyCode.F11))
-            {
-                AdjustConfig(new Vector2(-1, 0), Vector2.zero);
-            }
-        }
-
-        private void AdjustConfig(Vector2 offset, Vector2 scale)
-        {
-            //var offset = m_currentMap.CurrentMapScene.MarkerOffset;
-            MapDisplay.Instance.CurrentMapScene.MarkerOffset += offset;
-            MapDisplay.Instance.CurrentMapScene.MarkerScale += scale;
-            MapConfigs[m_mapID].MarkerOffset = MapDisplay.Instance.CurrentMapScene.MarkerOffset;
-            MapConfigs[m_mapID].MarkerScale = MapDisplay.Instance.CurrentMapScene.MarkerScale;
-            Debug.Log("Offset: " + MapDisplay.Instance.CurrentMapScene.MarkerOffset + ", Scale: " + MapDisplay.Instance.CurrentMapScene.MarkerScale.ToString("0.000"));
-        }
+        //private void AdjustConfig(Vector2 offset, Vector2 scale)
+        //{
+        //    //var offset = m_currentMap.CurrentMapScene.MarkerOffset;
+        //    MapDisplay.Instance.CurrentMapScene.MarkerOffset += offset;
+        //    MapDisplay.Instance.CurrentMapScene.MarkerScale += scale;
+        //    MapConfigs[m_mapID].MarkerOffset = MapDisplay.Instance.CurrentMapScene.MarkerOffset;
+        //    MapConfigs[m_mapID].MarkerScale = MapDisplay.Instance.CurrentMapScene.MarkerScale;
+        //    Debug.Log("Offset: " + MapDisplay.Instance.CurrentMapScene.MarkerOffset + ", Scale: " + MapDisplay.Instance.CurrentMapScene.MarkerScale.ToString("0.000"));
+        //}
     }
 
     public class MapConfig

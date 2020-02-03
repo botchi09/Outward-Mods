@@ -89,7 +89,7 @@ namespace CombatHUD
             }
             catch
             {
-                // OLogger.Log("Couldn't add components");
+                // Debug.Log("Couldn't add components");
             }
 
             if (!settings.Show_On_Load)
@@ -99,7 +99,7 @@ namespace CombatHUD
 
             AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5);
 
-            //OLogger.Log("Combat HUD " + _base.version + " enabled!");
+            //Debug.Log("Combat HUD " + _base.version + " enabled!");
         }
 
         private void AddGlobalComponent(Type t, string FieldName)

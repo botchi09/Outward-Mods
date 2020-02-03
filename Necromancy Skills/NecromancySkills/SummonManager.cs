@@ -105,7 +105,7 @@ namespace NecromancerSkills
 
 		public GameObject SummonSpawn(Character caster, string summonUID, int sceneViewID, bool insidePlagueAura)
 		{
-			//OLogger.Log("Create base character: " + summonUID + ", scene view: " + sceneViewID);
+			//Debug.Log("Create base character: " + summonUID + ", scene view: " + sceneViewID);
 
 			Vector3 castPos = caster.transform.position + (Vector3.forward * 0.5f);
 
@@ -147,7 +147,7 @@ namespace NecromancerSkills
 			At.Call(_char.Inventory.Equipment, "EquipWithoutAssociating", new object[] { blade as Equipment, false });
 			_char.SheatheInput(); //unsheathe
 
-			//OLogger.Log("(Host) Summoned Skeleton with UID: " + _char.UID + ", photon view ID: " + _char.GetComponent<PhotonView>().viewID);
+			//Debug.Log("(Host) Summoned Skeleton with UID: " + _char.UID + ", photon view ID: " + _char.GetComponent<PhotonView>().viewID);
 
 			playerPrefab.SetActive(true);
 
@@ -201,7 +201,7 @@ namespace NecromancerSkills
 				SummonedCharacters.Add(ownerUID, new List<string> { summonUID });
 			}
 
-			//OLogger.Log("added local summon: " + summonUID);
+			//Debug.Log("added local summon: " + summonUID);
 		}
 	}
 }

@@ -73,7 +73,7 @@ namespace MixedGrip
             AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5);
             AddAction(ToggleKey, KeybindingsCategory.Actions, ControlType.Both, 5);
 
-            // OLogger.Log("Initialised mixed grip");
+            // Debug.Log("Initialised mixed grip");
         }
 
         private void LoadSettings()

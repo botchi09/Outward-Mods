@@ -89,12 +89,12 @@ namespace CustomCameraShake
             {
                 if (Input.GetKeyDown(KeyCode.F5))
                 {
-                    //OLogger.Log("Reducing shake. Current: " + settings.CameraShakeModifier + ", new: " + (settings.CameraShakeModifier - 0.1f));
+                    //Debug.Log("Reducing shake. Current: " + settings.CameraShakeModifier + ", new: " + (settings.CameraShakeModifier - 0.1f));
                     settings.CameraShakeModifier -= 0.1f;
                 }
                 if (Input.GetKeyDown(KeyCode.F6))
                 {
-                    //OLogger.Log("Increasing shake. Current: " + settings.CameraShakeModifier + ", new: " + (settings.CameraShakeModifier + 0.1f));
+                    //Debug.Log("Increasing shake. Current: " + settings.CameraShakeModifier + ", new: " + (settings.CameraShakeModifier + 0.1f));
                     settings.CameraShakeModifier += 0.1f;
                 }
 
@@ -113,7 +113,7 @@ namespace CustomCameraShake
 
                     if (shaker.AmplitudeMultiplier != settings.CameraShakeModifier)
                     {
-                        //OLogger.Log("actual shaker is not set to our setting! updating...");
+                        //Debug.Log("actual shaker is not set to our setting! updating...");
                         shaker.AmplitudeMultiplier = settings.CameraShakeModifier;
                         shaker.SingleShakeAmplitude = settings.CameraShakeModifier * 0.01f;
                         shaker.SlowShakeAmplitude = settings.CameraShakeModifier * 0.0005f;

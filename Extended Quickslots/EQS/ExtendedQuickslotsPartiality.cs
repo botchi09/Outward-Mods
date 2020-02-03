@@ -198,7 +198,7 @@ namespace ExtendedQuickslotsPartiality
         {
             if ((_base.PlayerID == 0 && fixedPositions[0] == false) || (_base.PlayerID == 1 && fixedPositions[1] == false))
             {
-                //OLogger.Log("Fixing position for " + _base.LocalCharacter.Name + " (Player " + _base.PlayerID + ")");
+                //Debug.Log("Fixing position for " + _base.LocalCharacter.Name + " (Player " + _base.PlayerID + ")");
 
                 // original mod doesn't seem to check if the stability bar belongs to the right character. I added a check here just in case.
                 var stabilityDisplay = Resources.FindObjectsOfTypeAll<StabilityDisplay_Simple>()

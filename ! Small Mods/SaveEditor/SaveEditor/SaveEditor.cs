@@ -155,7 +155,7 @@ namespace SaveEditor
                 && NetworkLevelLoader.Instance.GetCharacterSave(c.UID) is CharacterSave charSave
                 && SaveManager.Instance.WorldSave is WorldSave worldSave)
             {
-                //OLogger.Log(" Saving CharSave for " + c.Name + " to XML...");
+                //Debug.Log(" Saving CharSave for " + c.Name + " to XML...");
 
                 SaveChar(charSave);
                 SaveWorld(worldSave, c.Name + "_" + c.UID);

@@ -74,7 +74,7 @@ namespace CombatHUD
                 ranY = UnityEngine.Random.Range(-global.settings.labelRandomY, global.settings.labelRandomY)
             };
 
-            //OLogger.Log("Added label. Damage: " + damages + ", creation time: " + Time.time + ", target: " + target.Name);
+            //Debug.Log("Added label. Damage: " + damages + ", creation time: " + Time.time + ", target: " + target.Name);
 
             ActiveLabels.Add(label);
         }
@@ -124,7 +124,7 @@ namespace CombatHUD
 
                     if (!self.Unblockable && target.OwnerChar.Blocking && num < (float)((!target.OwnerChar.ShieldEquipped) ? Weapon.BLOCK_ANGLE : Weapon.SHIELD_BLOCK_ANGLE))
                     {
-                        // OLogger.Log("Blocked!");
+                        // Debug.Log("Blocked!");
                     }
                     else
                     {
