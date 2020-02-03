@@ -4,7 +4,7 @@
  * Some mods may require [SideLoader](https://github.com/sinaioutlander/Outward-Sideloader/blob/master/README.md)
  
  To download an individual mod:
- - In the mod folder, go into the 'Releases' folder
+ - In the mod folder, go into the 'Release' folder
  - Click on the .zip file
  - You can download the zip directly from the file page
  
