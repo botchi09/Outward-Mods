@@ -1,0 +1,50 @@
+{
+    "New_ItemID": 2800900,
+    "CloneTarget_ItemID": 2200001,
+    "AssetBundle_Name": "",
+    "VisualPrefabName": "",
+    "ArmorVisualPrefabName": "",
+    "Visual_PosOffset": {
+        "x": -1,
+        "y": -1,
+        "z": -1
+    },
+    "Visual_RotOffset": {
+        "x": -1,
+        "y": -1,
+        "z": -1
+    },
+    "HelmetHideFace": false,
+    "HelmetHideHair": false,
+    "ItemIconName": "ManaBowIcon",
+    "Name": "Mana Bow",
+    "Description": "Ethereal bow which requires no arrows, but instead consumes Mana.",
+    "Durability": -1,
+    "BaseValue": 600,
+    "Weight": 0,
+    "DamageBonuses": [
+        0.0, 
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "ManaUseModifier": -10.0,
+    "AttackSpeed": 1.0,
+    "Impact": 30.0,
+    "BaseDamage": {
+        "m_list": [
+            {
+                "Type": 1,
+                "Damage": 20.0
+            }
+        ]
+    },
+    "hitEffects": [
+		""
+    ]
+}
