@@ -5,10 +5,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
-//using SinAPI;
-using System.Reflection;
 
-namespace MapMarkers
+namespace MoreMapDetails
 {
     public class MapManager : MonoBehaviour
     {
@@ -16,11 +14,17 @@ namespace MapMarkers
 
         private int m_mapID;
 
+        // enemy markers
         public List<EnemyMarker> EnemyMarkers = new List<EnemyMarker>();
-        private Transform m_customMarkerHolder;
+        private Transform m_enemyMarkerHolder;
         private List<EnemyMarkerDisplay> m_enemyTexts = new List<EnemyMarkerDisplay>();
 
+        // bag markers
         private List<MapWorldMarker> m_bagMarkers = new List<MapWorldMarker>();
+
+        // custom icon markers
+        private Transform m_iconHolder;
+        private List<MapMarkerIconDisplay> m_unmarkedDungeons = new List<MapMarkerIconDisplay>();
 
         internal void Awake()
         {
@@ -30,9 +34,6 @@ namespace MapMarkers
             On.MapDisplay.OnHide += HideMap;
             On.Character.Die += CharDieHook;
             On.MapDisplay.UpdateWorldMarkers += UpdateWorldMarkersHook;
-
-            m_customMarkerHolder = new GameObject("CustomMarkerHolder").transform;
-            DontDestroyOnLoad(m_customMarkerHolder.gameObject);
 
             StartCoroutine(SetupCoroutine());
         }
@@ -45,9 +46,19 @@ namespace MapMarkers
                 yield return new WaitForSeconds(0.1f);
             }
 
-            m_customMarkerHolder.transform.parent = MapDisplay.Instance.WorldMapMarkers.parent;
-            m_customMarkerHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
-            m_customMarkerHolder.transform.localScale = Vector3.one;
+            m_enemyMarkerHolder = new GameObject("CustomMarkerHolder").transform;
+            DontDestroyOnLoad(m_enemyMarkerHolder.gameObject);
+
+            m_enemyMarkerHolder.transform.parent = MapDisplay.Instance.WorldMapMarkers.parent;
+            m_enemyMarkerHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
+            m_enemyMarkerHolder.transform.localScale = Vector3.one;
+
+            m_iconHolder = new GameObject("CustomIconHolder").transform;
+            DontDestroyOnLoad(m_iconHolder);
+
+            m_iconHolder.transform.parent = MapDisplay.Instance.WorldMapMarkers.parent;
+            m_iconHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
+            m_iconHolder.transform.localScale = Vector3.one;
         }
 
         // ==================== HOOKS ==================== //
@@ -86,18 +97,18 @@ namespace MapMarkers
             foreach (Character c in list)
             {
                 // player markers
-                if (ModBase.settings.Show_PlayerMarkers && !c.IsAI)
+                if (ModBase.settings.Show_Player_Markers && !c.IsAI)
                 {
                     AddWorldMarker(c.gameObject, c.Name);
                 }
                 // enemy markers
-                if (ModBase.settings.Show_EnemyMarkers && c.IsAI)
+                if (ModBase.settings.Show_Enemy_Markers && c.IsAI)
                 {
                     AddEnemyWorldMarker(c.gameObject, c.Name);
                 }
             }
             // caravanner
-            if (ModBase.settings.Show_SoroboreanCaravanner)
+            if (ModBase.settings.Show_Soroborean_Caravanner)
             {
                 if (GameObject.Find("HumanSNPC_CaravanTrader") is GameObject merchant && !merchant.GetComponentInChildren<MapWorldMarker>())
                 {
@@ -105,7 +116,7 @@ namespace MapMarkers
                 }
             }
             // player bags
-            if (ModBase.settings.Show_PlayerBagMarker)
+            if (ModBase.settings.Show_Player_Bag_Markers)
             {
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
                 {
@@ -119,6 +130,19 @@ namespace MapMarkers
                     }
                 }
             }
+            ////unmarked dungeons
+            //if (ModBase.settings.Show_Unmarked_Dungeons && MapConfigs.ContainsKey(m_mapID))
+            //{
+            //    var disabledObjects = FindDisabledGameObjectsByName(MapConfigs[m_mapID].UnmarkedDungeonObjects.Keys.ToList());
+
+            //    for (int i = 0; i < MapConfigs[m_mapID].UnmarkedDungeonObjects.Count; i++)
+            //    {
+            //        var entry = MapConfigs[m_mapID].UnmarkedDungeonObjects.ElementAt(i);
+            //        var go = disabledObjects[i];
+
+            //        AddIconMarker(go, entry.Value);
+            //    }
+            //}
         }
 
         /* 
@@ -166,11 +190,13 @@ namespace MapMarkers
 
         /*
          * HOOK MapDisplay.OnHide
-         * This is only used to clean up bag markers. These are added and destroyed on show and hide.
+         * Cleanup bags and unmarked dungeon markers
         */
         protected void HideMap(On.MapDisplay.orig_OnHide orig, MapDisplay self)
         {
             orig(self);
+            
+            // bags
             if (m_bagMarkers.Count > 0)
             {
                 for (int i = 0; i < m_bagMarkers.Count; i++)
@@ -181,6 +207,17 @@ namespace MapMarkers
                         m_bagMarkers.RemoveAt(i);
                         i--;
                     }
+                }
+            }
+
+            // unmarked dungeons
+            for (int i = 0; i < m_unmarkedDungeons.Count; i++)
+            {
+                if (m_unmarkedDungeons[i] != null)
+                {
+                    Destroy(m_unmarkedDungeons[i].gameObject);
+                    m_unmarkedDungeons.RemoveAt(i);
+                    i--;
                 }
             }
         }
@@ -249,11 +286,11 @@ namespace MapMarkers
             var origCircle = origTextHolder.Circle;
             // copy the orig
             var newMarker = Instantiate(origTextHolder.gameObject).GetComponent<MapWorldMarkerDisplay>();
-            newMarker.transform.parent = MapDisplay.Instance.WorldMapMarkers;
+            newMarker.transform.SetParent(MapDisplay.Instance.WorldMapMarkers, false);
             newMarker.RectTransform.localScale = Vector3.one;
             // copy the circle
             newMarker.Circle = Instantiate(origCircle.gameObject).GetComponent<Image>();
-            newMarker.Circle.transform.parent = origCircle.transform.parent;
+            newMarker.Circle.transform.SetParent(origCircle.transform.parent, false);
             newMarker.Circle.transform.localScale = Vector3.one;
             // add to list
             var list = markerTexts.ToList();
@@ -288,7 +325,6 @@ namespace MapMarkers
             return marker;
         }
 
-
         /*
          * AddEnemyTextHolder
          * Same as AddTextHolder, but using our custom m_enemyTexts list, attached to our custom m_customMarkerHolder.
@@ -304,12 +340,106 @@ namespace MapMarkers
             var newMarker = tempMarker.gameObject.AddComponent<EnemyMarkerDisplay>();
             At.InheritBaseValues(newMarker as MapWorldMarkerDisplay, tempMarker);
             Destroy(tempMarker);
-            newMarker.transform.parent = m_customMarkerHolder;
+            //newMarker.transform.parent = m_enemyMarkerHolder;
+            newMarker.transform.SetParent(m_enemyMarkerHolder, false);
             newMarker.transform.localScale = Vector3.one;
             newMarker.Circle = null;
 
             m_enemyTexts.Add(newMarker);
         }
+
+        //public void AddIconMarker(GameObject MapPositioner, string name)
+        //{
+        //    var staticMarkers = At.GetValue(typeof(MapDisplay), MapDisplay.Instance, "m_staticMarkerHolder") as StaticMapMarkerHolder;
+        //    var origMarker = staticMarkers.GetComponentInChildren<MapMarkerSimpleDisplay>().gameObject;
+
+        //    var newMarker = Instantiate(origMarker).GetComponent<MapMarkerSimpleDisplay>();
+        //    newMarker.transform.SetParent(m_iconHolder, false);
+        //    newMarker.RectTransform.position = CalculateMapPosition(MapPositioner, MapConfigs[m_mapID]);
+        //    newMarker.transform.localScale = Vector3.one;
+
+        //    newMarker.Text.text = name;
+
+        //}
+
+        //private List<GameObject> FindDisabledGameObjectsByName(List<string> ObjectsToFind)
+        //{
+        //    var list = Resources.FindObjectsOfTypeAll<GameObject>()
+        //        .Where(x => ObjectsToFind.Contains(x.name))
+        //        .ToList();
+
+        //    return list;
+        //}
+
+        //private Vector2 CalculateMapPosition(GameObject worldObject, MapConfig _sceneSettings)
+        //{
+        //    Vector2 vector = worldObject.transform.position.xz();
+
+        //    vector.x = vector.x * _sceneSettings.MarkerScale.x + _sceneSettings.MarkerOffset.x;
+        //    vector.y = vector.y * _sceneSettings.MarkerScale.y + _sceneSettings.MarkerOffset.y;
+
+        //    float zoom = 1.0351562f * (float)At.GetValue(typeof(MapDisplay), MapDisplay.Instance, "m_zoomLevelSmooth");
+        //    vector *= zoom;
+
+        //    if (_sceneSettings.Rotation != 0f)
+        //    {
+        //        vector = (Quaternion.Euler(0f, _sceneSettings.Rotation, 0f) * new Vector3(vector.x, 0f, vector.y)).xz();
+        //    }
+
+        //    Debug.Log("Calculated map position: " + vector.ToString());
+
+        //    return vector;
+        //}
+
+        ///*
+        // * TEMP DEBUG
+        // * I used this to align the map offsets for the exterior regions more accurately. 
+        // * F5 (-) and F6 (+) adjust the scale.
+        // * F8 (-) and F9 (+) adjust the Y offsets.
+        // * F10 (-) and F11 (+) adjust the X offsets.
+        // * It will print the value (after changes) with Debug.Log()
+        //*/
+
+        //internal void Update()
+        //{
+        //    // adjust scale
+        //    if (Input.GetKey(KeyCode.F5))
+        //    {
+        //        AdjustConfig(Vector2.zero, Vector2.one * -0.001f);
+        //    }
+        //    if (Input.GetKey(KeyCode.F6))
+        //    {
+        //        AdjustConfig(Vector2.zero, Vector2.one * 0.001f);
+        //    }
+
+        //    // adjust offsets
+        //    if (Input.GetKey(KeyCode.F8))
+        //    {
+        //        AdjustConfig(new Vector2(0, -1), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F9))
+        //    {
+        //        AdjustConfig(new Vector2(0, 1), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F10))
+        //    {
+        //        AdjustConfig(new Vector2(1, 0), Vector2.zero);
+        //    }
+        //    if (Input.GetKey(KeyCode.F11))
+        //    {
+        //        AdjustConfig(new Vector2(-1, 0), Vector2.zero);
+        //    }
+        //}
+
+        //private void AdjustConfig(Vector2 offset, Vector2 scale)
+        //{
+        //    var offset = m_currentMap.CurrentMapScene.MarkerOffset;
+        //    MapDisplay.Instance.CurrentMapScene.MarkerOffset += offset;
+        //    MapDisplay.Instance.CurrentMapScene.MarkerScale += scale;
+        //    MapConfigs[m_mapID].MarkerOffset = MapDisplay.Instance.CurrentMapScene.MarkerOffset;
+        //    MapConfigs[m_mapID].MarkerScale = MapDisplay.Instance.CurrentMapScene.MarkerScale;
+        //    Debug.Log("Offset: " + MapDisplay.Instance.CurrentMapScene.MarkerOffset + ", Scale: " + MapDisplay.Instance.CurrentMapScene.MarkerScale.ToString("0.000"));
+        //}
 
 
         // --- Map Config dictionary ---
@@ -352,59 +482,19 @@ namespace MapMarkers
                     MarkerOffset = new Vector2(-500f, -500f),
                     MarkerScale = new Vector2(0.5f, 0.5f),
                     Rotation = 0f
+                    //UnmarkedDungeonObjects = new Dictionary<string, string>
+                    //{
+                    //    { "Emercar_D1", "Royal Manticore's Lair" },
+                    //    { "Emercar_DS1-HunterCabin", "Damp Hunter's Cabin" },
+                    //    { "Emercar_DS2-HunterCabin", "Worn Hunter's Cabin" },
+                    //    { "Emercar_DS3-HunterCabin", "Old Hunter's Cabin" },
+                    //    { "Emercar_DS5-HiveTrap", "Hive's Trap" },
+                    //    { "Emercar_DS7-ImmaculateCamp", "Immaculate's Camp" },
+                    //    { "Emercar_DS8-TreeHusk", "Tree Husk" },
+                    //}
                 }
             }
         };
-
-        ///*
-        // * TEMP DEBUG
-        // * I used this to align the map offsets for the exterior regions more accurately. 
-        // * F5 (-) and F6 (+) adjust the scale.
-        // * F8 (-) and F9 (+) adjust the Y offsets.
-        // * F10 (-) and F11 (+) adjust the X offsets.
-        // * It will print the value (after changes) with Debug.Log()
-        //*/
-
-        //internal void Update()
-        //{
-        //    // adjust scale
-        //    if (Input.GetKey(KeyCode.F5))
-        //    {
-        //        AdjustConfig(Vector2.zero, Vector2.one * -0.001f);
-        //    }
-        //    if (Input.GetKey(KeyCode.F6))
-        //    {
-        //        AdjustConfig(Vector2.zero, Vector2.one * 0.001f);
-        //    }
-        //
-        //    // adjust offsets
-        //    if (Input.GetKey(KeyCode.F8))
-        //    {
-        //        AdjustConfig(new Vector2(0, -1), Vector2.zero);
-        //    }
-        //    if (Input.GetKey(KeyCode.F9))
-        //    {
-        //        AdjustConfig(new Vector2(0, 1), Vector2.zero);
-        //    }
-        //    if (Input.GetKey(KeyCode.F10))
-        //    {
-        //        AdjustConfig(new Vector2(1, 0), Vector2.zero);
-        //    }
-        //    if (Input.GetKey(KeyCode.F11))
-        //    {
-        //        AdjustConfig(new Vector2(-1, 0), Vector2.zero);
-        //    }
-        //}
-
-        //private void AdjustConfig(Vector2 offset, Vector2 scale)
-        //{
-        //    //var offset = m_currentMap.CurrentMapScene.MarkerOffset;
-        //    MapDisplay.Instance.CurrentMapScene.MarkerOffset += offset;
-        //    MapDisplay.Instance.CurrentMapScene.MarkerScale += scale;
-        //    MapConfigs[m_mapID].MarkerOffset = MapDisplay.Instance.CurrentMapScene.MarkerOffset;
-        //    MapConfigs[m_mapID].MarkerScale = MapDisplay.Instance.CurrentMapScene.MarkerScale;
-        //    Debug.Log("Offset: " + MapDisplay.Instance.CurrentMapScene.MarkerOffset + ", Scale: " + MapDisplay.Instance.CurrentMapScene.MarkerScale.ToString("0.000"));
-        //}
     }
 
     public class MapConfig

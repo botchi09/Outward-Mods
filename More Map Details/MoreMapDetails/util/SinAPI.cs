@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace MapMarkers
+namespace MoreMapDetails
 {
     public static class At // Access Tools
     {

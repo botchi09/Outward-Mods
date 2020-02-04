@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedQuickslotsPartiality", "Extended Quickslots\EQS\ExtendedQuickslotsPartiality.csproj", "{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapMarkers", "Map Markers\MapMarkers\MapMarkers.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreMapDetails", "Map Markers\MapMarkers\MoreMapDetails.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixedGrip", "Mixed Grip\Mixed Grip\MixedGrip.csproj", "{37023A33-A1C2-4260-834E-EF2ABDACB3C5}"
 EndProject

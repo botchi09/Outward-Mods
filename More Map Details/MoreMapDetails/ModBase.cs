@@ -6,16 +6,16 @@ using Partiality.Modloader;
 using UnityEngine;
 using System.IO;
 
-namespace MapMarkers
+namespace MoreMapDetails
 {
     public class ModBase : PartialityMod
     {
-        public static string ModName = "MapMarkers";
+        public static string ModName = "MoreMapDetails";
         public static double ModVersion = 1.0;
         public static string ModAuthor = "Sinai";
 
         public static Settings settings = new Settings();
-        private static readonly string savePath = @"Mods/MapMarkers.json";
+        private static readonly string savePath = @"Mods/" + ModName + ".json";
 
         public ModBase()
         {

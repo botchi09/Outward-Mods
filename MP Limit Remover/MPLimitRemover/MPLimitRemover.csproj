@@ -49,10 +49,6 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="OModAPI">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\OModAPI.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Partiality">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
       <Private>False</Private>

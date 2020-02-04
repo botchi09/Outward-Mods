@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace MapMarkers
+namespace MoreMapDetails
 {
 	// Custom class for enemy markers that you can hover over to reveal the name.
 	public class EnemyMarker : MapWorldMarker

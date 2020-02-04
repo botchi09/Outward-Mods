@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace MapMarkers
+namespace MoreMapDetails
 {
 	public class EnemyMarkerDisplay : MapWorldMarkerDisplay, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, IEventSystemHandler
 	{

@@ -7,8 +7,8 @@
     <ProjectGuid>{E7CA1639-E154-4FC6-83B8-F885CBA12594}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MapMarkers</RootNamespace>
-    <AssemblyName>MapMarkers</AssemblyName>
+    <RootNamespace>MoreMapDetails</RootNamespace>
+    <AssemblyName>MoreMapDetails</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
