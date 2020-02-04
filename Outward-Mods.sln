@@ -15,8 +15,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedQuickslotsPartiality", "Extended Quickslots\EQS\ExtendedQuickslotsPartiality.csproj", "{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreMapDetails", "Map Markers\MapMarkers\MoreMapDetails.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixedGrip", "Mixed Grip\Mixed Grip\MixedGrip.csproj", "{37023A33-A1C2-4260-834E-EF2ABDACB3C5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MPLimitRemover", "MP Limit Remover\MPLimitRemover\MPLimitRemover.csproj", "{E55ADC62-40AC-42A4-92FF-B21C06E71FDD}"
@@ -65,6 +63,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShowInvisibleWalls", "! Sma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mods\SpeedrunTimer\SpeedrunTimer\SpeedrunTimer.csproj", "{0078FDE4-B0C0-4DCA-B576-78D741436EFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreMapDetails", "More Map Details\MoreMapDetails\MoreMapDetails.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,10 +91,6 @@ Global
 		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.Build.0 = Release|Any CPU
 		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37023A33-A1C2-4260-834E-EF2ABDACB3C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -191,6 +187,10 @@ Global
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

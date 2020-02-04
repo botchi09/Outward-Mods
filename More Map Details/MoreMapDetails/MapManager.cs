@@ -22,9 +22,9 @@ namespace MoreMapDetails
         // bag markers
         private List<MapWorldMarker> m_bagMarkers = new List<MapWorldMarker>();
 
-        // custom icon markers
-        private Transform m_iconHolder;
-        private List<MapMarkerIconDisplay> m_unmarkedDungeons = new List<MapMarkerIconDisplay>();
+        //// custom icon markers
+        //private Transform m_iconHolder;
+        //private List<MapMarkerIconDisplay> m_unmarkedDungeons = new List<MapMarkerIconDisplay>();
 
         internal void Awake()
         {
@@ -53,12 +53,12 @@ namespace MoreMapDetails
             m_enemyMarkerHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
             m_enemyMarkerHolder.transform.localScale = Vector3.one;
 
-            m_iconHolder = new GameObject("CustomIconHolder").transform;
-            DontDestroyOnLoad(m_iconHolder);
+            //m_iconHolder = new GameObject("CustomIconHolder").transform;
+            //DontDestroyOnLoad(m_iconHolder);
 
-            m_iconHolder.transform.parent = MapDisplay.Instance.WorldMapMarkers.parent;
-            m_iconHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
-            m_iconHolder.transform.localScale = Vector3.one;
+            //m_iconHolder.transform.parent = MapDisplay.Instance.WorldMapMarkers.parent;
+            //m_iconHolder.transform.position = MapDisplay.Instance.WorldMapMarkers.position;
+            //m_iconHolder.transform.localScale = Vector3.one;
         }
 
         // ==================== HOOKS ==================== //
@@ -210,16 +210,16 @@ namespace MoreMapDetails
                 }
             }
 
-            // unmarked dungeons
-            for (int i = 0; i < m_unmarkedDungeons.Count; i++)
-            {
-                if (m_unmarkedDungeons[i] != null)
-                {
-                    Destroy(m_unmarkedDungeons[i].gameObject);
-                    m_unmarkedDungeons.RemoveAt(i);
-                    i--;
-                }
-            }
+            //// unmarked dungeons
+            //for (int i = 0; i < m_unmarkedDungeons.Count; i++)
+            //{
+            //    if (m_unmarkedDungeons[i] != null)
+            //    {
+            //        Destroy(m_unmarkedDungeons[i].gameObject);
+            //        m_unmarkedDungeons.RemoveAt(i);
+            //        i--;
+            //    }
+            //}
         }
 
         /*
