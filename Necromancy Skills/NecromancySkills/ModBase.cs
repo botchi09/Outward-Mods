@@ -14,7 +14,7 @@ namespace NecromancerSkills
     public class ModBase : PartialityMod
     {
         public GameObject _obj = null;
-        public double version = 1.2;
+        public double version = 1.3;
 
         public static Settings settings;
         private static readonly string savePath = @"Mods\NecromancySkills.json";

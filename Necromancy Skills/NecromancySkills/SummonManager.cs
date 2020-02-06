@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
@@ -110,11 +111,11 @@ namespace NecromancerSkills
 			Vector3 castPos = caster.transform.position + (Vector3.forward * 0.5f);
 
 			// use SideLoader's CustomCharacters to create a basic player prefab
-			var playerPrefab = SideLoader.CustomCharacters.InstantiatePlayerPrefab(castPos, summonUID, sceneViewID);
+			var playerPrefab = SideLoader.CustomCharacters.InstantiatePlayerPrefab(castPos, summonUID);
 
 			Character _char = playerPrefab.GetComponent<Character>();
 			_char.SetUID(summonUID);
-			_char.photonView.viewID = sceneViewID;
+			//_char.photonView.viewID = sceneViewID;
 
 			float healthLoss = insidePlagueAura ? -2.5f : -0.75f;
 			float maxHealth = insidePlagueAura ? 250f : 75f;
@@ -159,6 +160,8 @@ namespace NecromancerSkills
 
 		public void AddLocalSummon(Character summonChar, string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura = false)
 		{
+			var owner = CharacterManager.Instance.GetCharacter(ownerUID);
+
 			// setup parent transform
 			GameObject rootObject = new GameObject(summonChar.Name + "_" + summonUID);
 			rootObject.SetActive(false);
@@ -175,14 +178,33 @@ namespace NecromancerSkills
 			{
 				// get the Wander state, and set the FollowTransfer to our caster character
 				var wander = summonChar.GetComponent<CharacterAI>().AiStates[0] as AISWander;
-				wander.FollowTransform = CharacterManager.Instance.GetCharacter(ownerUID).transform;
+				wander.FollowTransform = owner.transform;
 
 				// add auto-teleport component
 				summonChar.gameObject.AddComponent(new SummonTeleport { m_character = summonChar, TargetCharacter = wander.FollowTransform });
 			}
 
-			// set photon view locally
-			summonChar.photonView.viewID = sceneViewID;
+			// setup photonview
+			if (summonChar.GetComponent<PhotonView>() is PhotonView view)
+			{
+				Debug.Log("Removing PhotonView");
+				DestroyImmediate(view);
+			}
+			summonChar.gameObject.AddComponent(new PhotonView
+			{
+				viewID = sceneViewID,
+				onSerializeTransformOption = OnSerializeTransform.PositionAndRotation,
+				onSerializeRigidBodyOption = OnSerializeRigidBody.All,
+				synchronization = ViewSynchronization.Unreliable
+			});
+			// add observed components after setting active?
+			if (summonChar.photonView.ObservedComponents == null)
+			{
+				summonChar.photonView.ObservedComponents = new List<Component>
+				{
+					summonChar
+				};
+			}
 
 			// restore stats locally
 			summonChar.Stats.FullHealth();
@@ -201,7 +223,26 @@ namespace NecromancerSkills
 				SummonedCharacters.Add(ownerUID, new List<string> { summonUID });
 			}
 
+			StartCoroutine(FixPhotonCoroutine(summonChar));
+
 			//Debug.Log("added local summon: " + summonUID);
+		}
+
+		private IEnumerator FixPhotonCoroutine(Character summonChar)
+		{
+			yield return new WaitForSeconds(2f);
+
+			Debug.Log("Fixing observed components");
+
+			// add observed components after setting active?
+			if (summonChar.photonView.ObservedComponents == null)
+			{
+				Debug.Log("Observed components is null, adding again...");
+				summonChar.photonView.ObservedComponents = new List<Component>
+				{
+					summonChar
+				};
+			}
 		}
 	}
 }

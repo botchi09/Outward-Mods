@@ -316,6 +316,11 @@ namespace MixedGrip
 
                 float adjustedSpeed = GetWeaponBalance(origWeapon, newWeapon);
                 float damageMultiplier = 1.04f * adjustedSpeed;
+                if (newWeapon.Type == Weapon.WeaponType.Spear_2H || newWeapon.Type == Weapon.WeaponType.Halberd_2H)
+                {
+                    damageMultiplier = 0.90f;
+                }
+
 
                 // set visible damage
                 for (int i = 0; i < newStats.BaseDamage.List.Count; i++)

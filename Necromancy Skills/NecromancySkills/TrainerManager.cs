@@ -88,7 +88,7 @@ namespace NecromancerSkills
             var uid = UID.Generate().ToString();
             var viewID = PhotonNetwork.AllocateSceneViewID();
 
-            trainer = CustomCharacters.InstantiatePlayerPrefab(pos, uid, viewID);
+            trainer = CustomCharacters.InstantiatePlayerPrefab(pos, uid);
 
             // setup Equipment
             Character c = trainer.GetComponent<Character>();
@@ -116,7 +116,16 @@ namespace NecromancerSkills
 
             trainer.transform.parent = obj.transform;
             trainer.transform.position = obj.transform.position;
-            trainer.GetPhotonView().viewID = trainerViewID;
+
+            if (trainer.GetPhotonView() is PhotonView view)
+            {
+                Destroy(view);
+            }
+            trainer.AddComponent(new PhotonView
+            {
+                viewID = trainerViewID,
+                onSerializeTransformOption = OnSerializeTransform.All
+            });
 
             // remove unwanted components
             DestroyImmediate(trainer.GetComponent<PlayerCharacterStats>());

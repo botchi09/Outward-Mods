@@ -65,6 +65,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreMapDetails", "More Map Details\MoreMapDetails\MoreMapDetails.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD 2", "CombatHUD 2\CombatHUD 2\CombatHUD 2.csproj", "{71E14120-7A04-4156-B846-941C2CA1B31A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,10 @@ Global
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71E14120-7A04-4156-B846-941C2CA1B31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71E14120-7A04-4156-B846-941C2CA1B31A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71E14120-7A04-4156-B846-941C2CA1B31A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71E14120-7A04-4156-B846-941C2CA1B31A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
