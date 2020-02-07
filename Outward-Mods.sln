@@ -7,8 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "! Small Mods", "! Small Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatAndDodgeOverhaul", "Combat and Dodge Overhaul\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul.csproj", "{2B6018A4-7387-45B9-9FA0-7C7709BD2917}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD", "Combat HUD\CombatHUD\CombatHUD.csproj", "{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataminer", "Dataminer\Dataminer\Dataminer.csproj", "{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explorer\Explorer.csproj", "{77E56333-6F32-40D5-813C-BC9ABE688B2B}"
@@ -22,8 +20,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NecromancerSkills", "Necromancy Skills\NecromancySkills\NecromancerSkills.csproj", "{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutSouls", "OutSouls\OutSouls\OutSouls.csproj", "{DD097E34-DDEB-4486-974B-FC5899308931}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrefabEditor", "Prefab Editor\Prefab Editor\PrefabEditor.csproj", "{A368963B-DD41-46FD-AEB5-C9C5175504F6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PvP", "PvP\PvP\PvP.csproj", "{8654B1DB-7A3B-411B-9891-C0078B5DDA2F}"
 EndProject
@@ -65,7 +61,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoreMapDetails", "More Map Details\MoreMapDetails\MoreMapDetails.csproj", "{E7CA1639-E154-4FC6-83B8-F885CBA12594}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD 2", "CombatHUD 2\CombatHUD 2\CombatHUD 2.csproj", "{71E14120-7A04-4156-B846-941C2CA1B31A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedModConfig", "Shared Mod Config\SharedModConfig\SharedModConfig.csproj", "{0F04A722-D68F-46D8-BCBE-B3A828AB2365}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD", "CombatHUD\CombatHUD 2\CombatHUD.csproj", "{71E14120-7A04-4156-B846-941C2CA1B31A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,10 +75,6 @@ Global
 		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B6018A4-7387-45B9-9FA0-7C7709BD2917}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C27EA630-DFCA-4F20-9669-6648DE5CAEE3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44B239B5-EBE0-4F3E-A7DD-A158F871BE70}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -109,10 +103,6 @@ Global
 		{DD097E34-DDEB-4486-974B-FC5899308931}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DD097E34-DDEB-4486-974B-FC5899308931}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DD097E34-DDEB-4486-974B-FC5899308931}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A368963B-DD41-46FD-AEB5-C9C5175504F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A368963B-DD41-46FD-AEB5-C9C5175504F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A368963B-DD41-46FD-AEB5-C9C5175504F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A368963B-DD41-46FD-AEB5-C9C5175504F6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8654B1DB-7A3B-411B-9891-C0078B5DDA2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8654B1DB-7A3B-411B-9891-C0078B5DDA2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8654B1DB-7A3B-411B-9891-C0078B5DDA2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -193,6 +183,10 @@ Global
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E7CA1639-E154-4FC6-83B8-F885CBA12594}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F04A722-D68F-46D8-BCBE-B3A828AB2365}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F04A722-D68F-46D8-BCBE-B3A828AB2365}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F04A722-D68F-46D8-BCBE-B3A828AB2365}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F04A722-D68F-46D8-BCBE-B3A828AB2365}.Release|Any CPU.Build.0 = Release|Any CPU
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Release|Any CPU.ActiveCfg = Release|Any CPU
