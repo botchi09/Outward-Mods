@@ -2,12 +2,23 @@ If you have not installed Partiality, you will need to do that first:
 
 - https://outward.gamepedia.com/Installing_Mods#Partiality
 
+If you already had Partiality installed from a previous version of Outward:
+- press "Uninstall Partiality" and "Clear Mod Metadata" in Partiality
+- Validate files for Outward in Steam
+- Setup Partiality again
+
 Installing the mod:
 
 - Copy+Paste "SpeedrunTimer.dll" and "SpeedrunTimer.json" to "Outward/Mods/"
 - Press "Refresh Mods" in Partiality, then "Apply Mods"
 
-Changing the keybinding:
+Stop Conditions:
+
+- Currently the timer supports two stop conditions: Well-Earned Rest, and Blood Price.
+- You can cycle through the stop conditions with a keybind, by default it is F10.
+- The timer will automatically stop itself when the condition is met.
+
+Changing the keybindings:
 
 - Edit the "Outward/Mods/SpeedrunTimer.json" file in any text editor
 - https://docs.unity3d.com/ScriptReference/KeyCode.html

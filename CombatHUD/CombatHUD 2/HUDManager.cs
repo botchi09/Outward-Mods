@@ -19,7 +19,10 @@ namespace CombatHUD
         internal void Awake()
         {
             Instance = this;
+        }
 
+        internal void Start()
+        {
             config = SetupConfig();
 
             StartCoroutine(SetupCoroutine());
@@ -34,12 +37,51 @@ namespace CombatHUD
 
             SetupCanvas();
 
-            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+            while (!ConfigManager.Instance.IsInitDone())
             {
                 yield return new WaitForSeconds(0.1f);
             }
 
             config.Register();
+        }
+
+        internal void Update()
+        {
+            if (HUDCanvas == null || Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)
+            {
+                return;
+            }
+
+            bool disable = false;
+            if (MenuManager.Instance.IsMapDisplayed)
+            {
+                disable = true;
+            }
+            else
+            {
+                foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
+                {
+                    if (player.AssignedCharacter == null)
+                    {
+                        continue;
+                    }
+
+                    if (player.AssignedCharacter.CharacterUI.GetCurrentMenu() is MenuPanel panel && panel.IsDisplayed)
+                    {
+                        disable = true;
+                        break;
+                    }
+                }
+            }
+
+            if (disable && HUDCanvas.activeSelf)
+            {
+                HUDCanvas.SetActive(false);
+            }
+            else if (!disable && !HUDCanvas.activeSelf)
+            {
+                HUDCanvas.SetActive(true);
+            }
         }
 
         private void SetupCanvas()
@@ -91,7 +133,7 @@ namespace CombatHUD
             config = new ModConfig
             {
                 ModName = "CombatHUD",
-                SettingsVersion = 1.0,
+                SettingsVersion = 1.1,
                 Settings = new List<BBSetting>()
                 {
                     new BoolSetting
@@ -159,6 +201,26 @@ namespace CombatHUD
                         Name = Settings.DisableColors,
                         Description = "White damage label text (otherwise color of highest damage)",
                         DefaultValue = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.MinFontSize,
+                        Description = "Minimum damage label font size (smallest end of scale)",
+                        DefaultValue = 15f,
+                        MaxValue = 40,
+                        MinValue = 8,
+                        RoundTo = 0,
+                        ShowPercent = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.MaxFontSize,
+                        Description = "Maximum damage label font size (highest end of scale)",
+                        DefaultValue = 30f,
+                        MaxValue = 40f,
+                        MinValue = 8f,
+                        RoundTo = 0,
+                        ShowPercent = false
                     },
                     new FloatSetting
                     {
@@ -246,9 +308,9 @@ namespace CombatHUD
             return config;
         }
 
-        public static float RelativeOffset(float offset, bool height = false) // false for width, true for height
+        public static float Rel(float offset, bool height = false) // false for width, true for height
         {
-            return offset * (height ? Screen.height : Screen.width) * 100f / (height ? 720f : 1280f) * 0.01f;
+            return offset * (height ? Screen.height : Screen.width) * 100f / (height ? 1080f : 1920f) * 0.01f;
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace BetterCustomWeight
+namespace CustomWeight
 {
     public static class At // Access Tools
     {

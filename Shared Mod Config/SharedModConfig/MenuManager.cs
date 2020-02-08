@@ -1,13 +1,10 @@
-﻿using System;
+﻿using SideLoader;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using SideLoader;
 using UnityEngine.EventSystems;
-using static CustomKeybindings;
+using UnityEngine.UI;
 
 namespace SharedModConfig
 {
@@ -15,7 +12,7 @@ namespace SharedModConfig
     {
         public static MenuManager Instance;
 
-        private string MenuKey = "Shared Mod Config Menu";
+        private readonly string MenuKey = "Shared Mod Config Menu";
 
         // UI canvas
         private GameObject m_ConfigCanvas;
@@ -41,14 +38,14 @@ namespace SharedModConfig
             Instance = this;
             StartCoroutine(SetupCoroutine());
 
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
+            CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
         }
 
         internal void Update()
         {
             foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
             {
-                if (m_playerInputManager[player.RewiredID].GetButtonDown(MenuKey))
+                if (CustomKeybindings.m_playerInputManager[player.RewiredID].GetButtonDown(MenuKey))
                 {
                     bool active = m_ConfigCanvas.activeSelf;
                     m_ConfigCanvas.SetActive(!active);
@@ -116,7 +113,7 @@ namespace SharedModConfig
         private void ModListButton()
         {
             var buttontext = EventSystem.current.currentSelectedGameObject.GetComponentInChildren<Text>().text;
-            Debug.Log(buttontext);
+            //Debug.Log(buttontext);
             if (m_SettingsPrefab.transform.parent.Find(buttontext) is Transform t)
             {
                 if (m_currentActiveSettings)

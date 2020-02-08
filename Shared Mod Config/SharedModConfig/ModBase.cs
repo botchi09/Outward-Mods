@@ -11,7 +11,7 @@ namespace SharedModConfig
     public class ModBase : PartialityMod
     {
         public static string ModName = "SharedModConfig";
-        public static string ModVersion = "1.0";
+        public static string ModVersion = "1.1";
         public static string ModAuthor = "Sinai";
 
         public ModBase()

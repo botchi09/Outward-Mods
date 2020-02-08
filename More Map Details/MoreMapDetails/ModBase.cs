@@ -14,9 +14,6 @@ namespace MoreMapDetails
         public static double ModVersion = 1.0;
         public static string ModAuthor = "Sinai";
 
-        public static Settings settings = new Settings();
-        private static readonly string savePath = @"Mods/" + ModName + ".json";
-
         public ModBase()
         {
             this.ModID = ModName;
@@ -32,30 +29,7 @@ namespace MoreMapDetails
             GameObject.DontDestroyOnLoad(obj);
             obj.AddComponent<MapManager>();
 
-            // settings
-            LoadSettings();
-        }
 
-        private void LoadSettings()
-        {
-            settings = new Settings();
-            if (!Directory.Exists("Mods"))
-            {
-                Directory.CreateDirectory("Mods");
-            }
-
-            if (!File.Exists(savePath))
-            {
-                File.WriteAllText(savePath, JsonUtility.ToJson(settings, true));
-            }
-            else
-            {
-                var temp_settings = JsonUtility.FromJson<Settings>(File.ReadAllText(savePath));
-                if (temp_settings != null)
-                {
-                    settings = temp_settings;
-                }
-            }
         }
     }
 }

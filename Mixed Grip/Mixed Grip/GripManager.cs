@@ -10,7 +10,6 @@ using static CustomKeybindings;
 
 namespace MixedGrip
 {
-    [Serializable]
     public class CharacterInfo
     {
         public string CharacterUID = "";
@@ -19,11 +18,9 @@ namespace MixedGrip
 
     public class GripManager : Photon.MonoBehaviour
     {
-        public MixedGripGlobal global;
-
         public List<CharacterInfo> CurrentPlayers = new List<CharacterInfo>();
 
-        public void Init()
+        internal void Awake()
         {
             // equip item hook for MixedGrip logic
             On.CharacterEquipment.EquipItem_1 += EquipItemHook;
@@ -85,14 +82,8 @@ namespace MixedGrip
 
         private void UpdatePlayerInput(CharacterInfo charInfo, Character c)
         {
-            // menu toggle
-            if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(global.MenuKey))
-            {
-                global.gui.showGui = !global.gui.showGui;
-            }
-
             // grip hotkey
-            else if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(global.ToggleKey))
+            if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(MixedGrip.Instance.ToggleKey))
             {
                 ToggleGripHotkey(charInfo, c);
             }
@@ -123,7 +114,7 @@ namespace MixedGrip
                 }
 
                 // automatic swap to 2H if we have no off-hand item.
-                if (global.settings.Swap_On_Equip_And_Unequip && c.CurrentWeapon != null && c.CurrentWeapon.TwoHand == Equipment.TwoHandedType.None)
+                if ((bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip) && c.CurrentWeapon != null && c.CurrentWeapon.TwoHand == Equipment.TwoHandedType.None)
                 {
                     SwapGrip(c, c.CurrentWeapon);
                 }
@@ -152,10 +143,10 @@ namespace MixedGrip
         private void SwapGrip(Character c, Weapon weapon)
         {
             bool setTwoHanded = weapon.TwoHand == Equipment.TwoHandedType.None;
-            int newWeaponType = global.settings.Swap_Animations ? (int)GetSwappedType(weapon.Type) : (int)weapon.Type;
+            int newWeaponType = (bool)MixedGrip.config.GetValue(Settings.Swap_Animations) ? (int)GetSwappedType(weapon.Type) : (int)weapon.Type;
 
             // == send RPC swap grip ==
-            photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] { weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, global.settings.Balance_Weapons });
+            photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] { weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, (bool)MixedGrip.config.GetValue(Settings.Balance_Weapons) });
             //if (!PhotonNetwork.offlineMode)
             //{
             //    photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] { weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, global.settings.Balance_Weapons });
@@ -236,7 +227,7 @@ namespace MixedGrip
         // hook for swapping 2H weapons to 1H on equip item, if the logic calls for it.
         private void EquipItemHook(On.CharacterEquipment.orig_EquipItem_1 orig, CharacterEquipment self, Equipment _itemToEquip, bool _playAnim = false)
         {
-            if (!global.settings.Swap_On_Equip_And_Unequip) { orig(self, _itemToEquip, _playAnim); return; }
+            if (!(bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip)) { orig(self, _itemToEquip, _playAnim); return; }
 
             Character c = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
 

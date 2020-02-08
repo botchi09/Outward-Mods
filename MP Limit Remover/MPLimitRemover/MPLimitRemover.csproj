@@ -62,6 +62,10 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SharedModConfig">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\SharedModConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -80,7 +84,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlayerLimitGUI.cs" />
     <Compile Include="PlayerLimitRemover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="util\CustomKeybindings.cs" />

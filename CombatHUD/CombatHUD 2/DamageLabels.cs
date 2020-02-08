@@ -43,6 +43,13 @@ namespace CombatHUD
                 }
             }
 
+            float ceiling = (float)HUDManager.config.GetValue(Settings.DamageCeiling);
+            int minsize = (int)(float)HUDManager.config.GetValue(Settings.MinFontSize);
+            int maxsize = (int)(float)HUDManager.config.GetValue(Settings.MaxFontSize);
+
+            if (maxsize < minsize)
+                maxsize = minsize;
+
             for (int i = 0; i < SplitScreenManager.Instance.LocalPlayerCount; i++)
             {
                 var splitplayer = SplitScreenManager.Instance.LocalPlayers[i];
@@ -53,11 +60,11 @@ namespace CombatHUD
                 }
 
                 var camera = splitplayer.CameraScript;
-                var charUI = splitplayer.CharUI;
+                int offset = i * 30;
 
-                for (int j = 0; j < LabelHolders.Count; j++)
+                for (int j = 0 + offset; j < LabelHolders.Count; j++)
                 {
-                    if (j >= ActiveLabels.Count)
+                    if (j - offset >= ActiveLabels.Count)
                     {
                         if (LabelHolders[j].activeSelf)
                         {
@@ -66,12 +73,11 @@ namespace CombatHUD
                     }
                     else
                     {
-                        var labelInfo = ActiveLabels[j];
+                        var labelInfo = ActiveLabels[j - offset];
                         var labelHolder = LabelHolders[j];
 
                         var pos = (bool)HUDManager.config.GetValue(Settings.LabelsStayAtHitPos) ? labelInfo.HitWorldPos : labelInfo.Target.CenterPosition;
 
-                        float ceiling = (float)HUDManager.config.GetValue(Settings.DamageCeiling);
                         float damageStrength = (float)((decimal)labelInfo.Damage / (decimal)ceiling); // set damage "strength"
                         float time = Time.time - labelInfo.CreationTime;
                         var timeOffset = Mathf.Lerp(0.3f, 0.07f, damageStrength) * time;
@@ -79,18 +85,19 @@ namespace CombatHUD
                         var screenPos = camera.WorldToViewportPoint(pos + new Vector3(0, timeOffset));
                         float distance = Vector3.Distance(splitplayer.AssignedCharacter.transform.position, pos);
 
-                        if (charUI.ViewportPosToSplitScreenPos(ref screenPos) && distance < (float)HUDManager.config.GetValue(Settings.MaxDistance))
+                        if (IsScreenPosVisible(ref screenPos, i) && distance < (float)HUDManager.config.GetValue(Settings.MaxDistance))
                         {
                             screenPos += new Vector3
                             (
-                                HUDManager.RelativeOffset(45f + labelInfo.ranXpos),
-                                HUDManager.RelativeOffset(labelInfo.ranYpos, true)
+                                HUDManager.Rel(labelInfo.ranXpos),
+                                HUDManager.Rel(labelInfo.ranYpos, true)
                             );
+
                             labelHolder.GetComponent<RectTransform>().position = screenPos;
 
                             var text = labelHolder.GetComponent<Text>();
                             text.text = Math.Round(labelInfo.Damage).ToString();
-                            text.fontSize = (int)Mathf.Lerp(10, 18, damageStrength);
+                            text.fontSize = (int)Mathf.Lerp(minsize, maxsize, damageStrength);
                             text.color = labelInfo.TextColor;
 
                             if (!LabelHolders[j].activeSelf)
@@ -103,6 +110,50 @@ namespace CombatHUD
                             LabelHolders[j].SetActive(false);
                         }
                     }
+                }
+            }
+
+
+        }
+
+        private bool IsScreenPosVisible(ref Vector3 screenPos, int splitID)
+        {
+            //var rect = HUDManager.Instance.HUDCanvas.GetComponent<RectTransform>().rect;
+
+            float y1 = 0f;
+            float y2 = 1080f;
+
+            // x is always the same (1920)
+            screenPos.x *= HUDManager.Rel(1920f);
+
+            if (SplitScreenManager.Instance.LocalPlayerCount == 1)
+            {
+                // single player height is 1080
+                screenPos.y *= HUDManager.Rel(1080f, true);
+
+                bool flag = screenPos.z > 0f && screenPos.x >= 0f && screenPos.x <= 1920f && screenPos.y >= y1 && screenPos.y <= y2;
+
+                return flag;
+            }
+            else
+            {
+                // split height is 540
+                screenPos.y *= HUDManager.Rel(540f, true);
+
+                if (splitID == 0)
+                {
+                    y1 = HUDManager.Rel(540f, true);
+                    screenPos.y += y1;
+
+                    bool flag = screenPos.z > 0f && screenPos.x >= 0f && screenPos.x <= HUDManager.Rel(1920f) && screenPos.y >= y1 && screenPos.y <= y2;
+                    return flag;
+                }
+                else
+                {
+                    y2 = HUDManager.Rel(540f, true);
+
+                    bool flag = screenPos.z > 0f && screenPos.x >= 0f && screenPos.x <= HUDManager.Rel(1920f) && screenPos.y >= y1 && screenPos.y <= y2;
+                    return flag;
                 }
             }
         }
@@ -138,8 +189,8 @@ namespace CombatHUD
                 }
             }
 
-            var x = HUDManager.RelativeOffset(20f);
-            var y = HUDManager.RelativeOffset(10f, true);
+            var x = HUDManager.Rel(30f);
+            var y = HUDManager.Rel(15f, true);
 
             DamageLabel label = new DamageLabel
             {

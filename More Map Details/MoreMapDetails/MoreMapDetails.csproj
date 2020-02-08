@@ -60,6 +60,10 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="SharedModConfig">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\SharedModConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Sideloader">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
       <Private>False</Private>
@@ -85,7 +89,6 @@
     <Compile Include="EnemyMarkerDisplay.cs" />
     <Compile Include="ModBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings.cs" />
     <Compile Include="util\SinAPI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

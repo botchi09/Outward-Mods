@@ -54,14 +54,14 @@ namespace CombatAndDodgeOverhaul
                 //Debug.Log("Sending settings to all clients. View id: " + this.photonView.viewID);
                 this.photonView.RPC("SendSettingsRPC", PhotonTargets.All, new object[]
                 {
-                    OverhaulGlobal.settings.Enable_Enemy_Mods,
-                    OverhaulGlobal.settings.All_Enemies_Allied,
-                    OverhaulGlobal.settings.Enemy_Balancing,
-                    OverhaulGlobal.settings.Enemy_Health,
-                    OverhaulGlobal.settings.Enemy_Damages,
-                    OverhaulGlobal.settings.Enemy_ImpactRes,
-                    OverhaulGlobal.settings.Enemy_Resistances,
-                    OverhaulGlobal.settings.Enemy_ImpactDmg
+                    true,
+                    (bool)OverhaulGlobal.config.GetValue(Settings.All_Enemies_Allied),
+                    (bool)OverhaulGlobal.config.GetValue(Settings.Enemy_Balancing),
+                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Health),
+                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Damages),
+                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_ImpactRes),
+                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Resistances),
+                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_ImpactDmg)
                 });
             }
         }

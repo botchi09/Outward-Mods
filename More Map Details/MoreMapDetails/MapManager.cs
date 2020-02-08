@@ -5,12 +5,15 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using SharedModConfig;
 
 namespace MoreMapDetails
 {
     public class MapManager : MonoBehaviour
     {
         public static MapManager Instance;
+
+        public static ModConfig config;
 
         private int m_mapID;
 
@@ -35,12 +38,21 @@ namespace MoreMapDetails
             On.Character.Die += CharDieHook;
             On.MapDisplay.UpdateWorldMarkers += UpdateWorldMarkersHook;
 
+            SetupConfig();
+
             StartCoroutine(SetupCoroutine());
         }
 
         // wait for MapDisplay Instance to start up
         private IEnumerator SetupCoroutine()
         {
+            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            config.Register();
+
             while (MapDisplay.Instance == null || MapDisplay.Instance.WorldMapMarkers == null)
             {
                 yield return new WaitForSeconds(0.1f);
@@ -97,18 +109,18 @@ namespace MoreMapDetails
             foreach (Character c in list)
             {
                 // player markers
-                if (ModBase.settings.Show_Player_Markers && !c.IsAI)
+                if ((bool)config.GetValue("ShowPlayerMarkers") && !c.IsAI)
                 {
                     AddWorldMarker(c.gameObject, c.Name);
                 }
                 // enemy markers
-                if (ModBase.settings.Show_Enemy_Markers && c.IsAI)
+                if ((bool)config.GetValue("ShowEnemyMarkers") && c.IsAI)
                 {
                     AddEnemyWorldMarker(c.gameObject, c.Name);
                 }
             }
             // caravanner
-            if (ModBase.settings.Show_Soroborean_Caravanner)
+            if ((bool)config.GetValue("ShowSoroboreanCaravanner"))
             {
                 if (GameObject.Find("HumanSNPC_CaravanTrader") is GameObject merchant && !merchant.GetComponentInChildren<MapWorldMarker>())
                 {
@@ -116,7 +128,7 @@ namespace MoreMapDetails
                 }
             }
             // player bags
-            if (ModBase.settings.Show_Player_Bag_Markers)
+            if ((bool)config.GetValue("ShowPlayerBagMarkers"))
             {
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
                 {
@@ -348,6 +360,44 @@ namespace MoreMapDetails
             m_enemyTexts.Add(newMarker);
         }
 
+        // =====================  CONFIG  ===================== //
+
+        private void SetupConfig()
+        {
+            config = new ModConfig
+            {
+                ModName = "More Map Details",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>()
+                {
+                    new BoolSetting
+                    {
+                        Name = "ShowPlayerMarkers",
+                        Description = "Show map markers for Players",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = "ShowPlayerBagMarkers",
+                        Description = "Show map markers for Player Bags (when unequipped)",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = "ShowEnemyMarkers",
+                        Description = "Show map markers for Enemies (will only show an 'x' until you hover over them)",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = "ShowSoroboreanCaravanner",
+                        Description = "Show map markers for the Soroborean Caravanner",
+                        DefaultValue = true
+                    },
+                }
+            };
+        }
+
         //public void AddIconMarker(GameObject MapPositioner, string name)
         //{
         //    var staticMarkers = At.GetValue(typeof(MapDisplay), MapDisplay.Instance, "m_staticMarkerHolder") as StaticMapMarkerHolder;
@@ -440,7 +490,6 @@ namespace MoreMapDetails
         //    MapConfigs[m_mapID].MarkerScale = MapDisplay.Instance.CurrentMapScene.MarkerScale;
         //    Debug.Log("Offset: " + MapDisplay.Instance.CurrentMapScene.MarkerOffset + ", Scale: " + MapDisplay.Instance.CurrentMapScene.MarkerScale.ToString("0.000"));
         //}
-
 
         // --- Map Config dictionary ---
         // Key: MapID (as per MapDisplay class)

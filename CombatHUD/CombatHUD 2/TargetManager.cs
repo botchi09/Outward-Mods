@@ -178,7 +178,7 @@ namespace CombatHUD
                 }
                 m_targetHealthText.text = Math.Round(target.Stats.CurrentHealth) + " / " + Math.Round(target.Stats.ActiveMaxHealth);
                 m_targetHealthText.rectTransform.position = RectTransformUtility.WorldToScreenPoint(m_LinkedCharacter.CharacterCamera.CameraScript, target.UIBarPosition);
-                m_targetHealthText.rectTransform.position += Vector3.up * HUDManager.RelativeOffset(5f, true);
+                m_targetHealthText.rectTransform.position += Vector3.up * HUDManager.Rel(10f, true);
             }
             else if (m_targetHealthText.gameObject.activeSelf)
             {
@@ -203,8 +203,11 @@ namespace CombatHUD
         {
             // update status icons
             float offset = 0f;
+            float offsetInterval = HUDManager.Rel(30f, true);
+
             var barPos = RectTransformUtility.WorldToScreenPoint(m_LinkedCharacter.CharacterCamera.CameraScript, target.UIBarPosition);
-            var pos = barPos + new Vector2(HUDManager.RelativeOffset(175f), 0);
+            var pos = barPos + new Vector2(HUDManager.Rel(225f), 0);
+
             for (int i = 0; i < m_StatusHolder.transform.childCount; i++)
             {
                 var obj = m_StatusHolder.transform.GetChild(i).gameObject;
@@ -238,7 +241,7 @@ namespace CombatHUD
                             obj.SetActive(true);
                         }
 
-                        offset -= HUDManager.RelativeOffset(20f, true);
+                        offset -= offsetInterval;
                     }
                     else if (text.gameObject.activeSelf)
                     {
@@ -272,7 +275,7 @@ namespace CombatHUD
                         {
                             var parentRect = holder.GetComponent<RectTransform>();
                             parentRect.position = new Vector3(pos.x, pos.y + offset);
-                            offset -= HUDManager.RelativeOffset(20f, true);
+                            offset -= offsetInterval;
 
                             var text = holder.GetComponentInChildren<Text>();
                             text.text = Math.Round(value) + "%";
@@ -312,13 +315,13 @@ namespace CombatHUD
             {
                 m_infoboxNoImmuneText.gameObject.SetActive(false);
                 float offset = 0f;
-                var pos = m_infoboxNoImmuneText.rectTransform.transform.position;
+                var pos = m_infoboxNoImmuneText.rectTransform.position;
 
                 if (immunityTags.Contains("Bleeding"))
                 {
                     m_infoboxBleedingSprite.gameObject.SetActive(true);
                     m_infoboxBleedingSprite.rectTransform.position = new Vector3(pos.x, pos.y - 2f, 0);
-                    offset += HUDManager.RelativeOffset(22f);
+                    offset += HUDManager.Rel(22f);
                 }
                 else
                 {
@@ -328,7 +331,7 @@ namespace CombatHUD
                 {
                     m_infoboxBurningSprite.gameObject.SetActive(true);
                     m_infoboxBurningSprite.rectTransform.position = new Vector3(pos.x + offset, pos.y - 2f, 0);
-                    offset += HUDManager.RelativeOffset(22f);
+                    offset += HUDManager.Rel(22f);
                 }
                 else
                 {

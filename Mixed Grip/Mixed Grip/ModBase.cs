@@ -7,16 +7,15 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 //using SinAPI;
-using static CustomKeybindings;
+using SharedModConfig;
 using Partiality.Modloader;
+using static CustomKeybindings;
 
 namespace MixedGrip
 {
     public class ModBase : PartialityMod
     {
-        public GameObject _obj = null;
-        public MixedGripGlobal script;
-        public double version = 2.5;
+        public double version = 2.6;
 
         public ModBase()
         {
@@ -29,15 +28,9 @@ namespace MixedGrip
         {
             base.OnEnable();
 
-            if (_obj == null)
-            {
-                _obj = new GameObject("MixedGrip");
-                GameObject.DontDestroyOnLoad(_obj);
-            }
-
-            script = _obj.AddComponent<MixedGripGlobal>();
-            script._base = this;
-            script.Init();
+            var _obj = new GameObject("MixedGrip");
+            GameObject.DontDestroyOnLoad(_obj);
+            _obj.AddComponent<MixedGrip>();
         }
 
         public override void OnDisable()
@@ -46,86 +39,75 @@ namespace MixedGrip
         }
     }    
 
-    public class MixedGripGlobal : MonoBehaviour
+    public class MixedGrip : MonoBehaviour
     {
-        public ModBase _base;
-        public ModGUI gui;
-        public Settings settings;
+        public static MixedGrip Instance;
 
-        public GripManager gripManager;
+        public static ModConfig config;
 
-        public string MenuKey = "Mixed Grip Menu";
         public string ToggleKey = "Toggle Weapon Grip";
 
-        public void Init()
+        internal void Awake()
         {
-            // OLogger.CreateLog(new Rect(Screen.width - 465, Screen.height - 175, 465, 155), "Default", true, true);
+            Instance = this;
 
-            settings = new Settings();
-            LoadSettings();
+            config = SetupConfig();
 
-            // setup components
-            gui = _base._obj.AddComponent(new ModGUI() { global = this });
-            gripManager = _base._obj.AddComponent(new GripManager() { global = this });
-            gripManager.Init();
+            StartCoroutine(SetupCoroutine());
+
+            this.gameObject.AddComponent<GripManager>();
 
             // custom keybindings
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5);
             AddAction(ToggleKey, KeybindingsCategory.Actions, ControlType.Both, 5);
-
-            // Debug.Log("Initialised mixed grip");
         }
 
-        private void LoadSettings()
+        private IEnumerator SetupCoroutine()
         {
-            settings = new Settings();
-            try
+            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
             {
-                Settings loadsettings = new Settings();
-                loadsettings = JsonUtility.FromJson<Settings>(File.ReadAllText(@"Mods\MixedGrip.json"));
-                if (loadsettings != null)
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            config.Register();
+        }
+
+        private ModConfig SetupConfig()
+        {
+            var newConfig = new ModConfig
+            {
+                ModName = "Mixed Grip",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
                 {
-                    settings = loadsettings;
+                    new BoolSetting
+                    {
+                        Name = Settings.Swap_Animations,
+                        Description = "Swap animations when swapping grip (for Swords, Axes and Maces)",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Swap_On_Equip_And_Unequip,
+                        Description = "Automatically adjust grip when equipping or un-equipping gear",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Balance_Weapons,
+                        Description = "Balance weapons when swapping grip (nerf if becoming 1H, buff if becoming 2H)",
+                        DefaultValue = true
+                    },
                 }
-            }
-            catch
-            {
-                settings = new Settings();
-            }
-        }
+            };
 
-        internal void OnDisable()
-        {
-            SaveSettings();
-        }
-
-        private void SaveSettings()
-        {
-            if (!Directory.Exists(@"Mods"))
-            {
-                Directory.CreateDirectory(@"Mods");
-            }
-
-            string path = @"Mods\MixedGrip.json";
-
-            if (File.Exists(path)) { File.Delete(path); }
-
-            File.WriteAllText(path, JsonUtility.ToJson(settings, true));
+            return newConfig;
         }
     }
 
     public class Settings
     {
-        // mixed grip settings
-        //public bool Remember_Lantern = false;
-        public bool Swap_Animations = true;
-        //public bool Unequip_Offhand_To_Pouch;
-        //public bool Drop_Offhand = false;
-        public bool Swap_On_Equip_And_Unequip = true;
-
-        // balance settings
-        public bool Balance_Weapons = true;
-        //public float Weapon_Speed_Balance = 0.15f;
-        //public float Weapon_Damage_Balance = 1.2f;
+        public static string Swap_Animations = "Swap_Animations";
+        public static string Swap_On_Equip_And_Unequip = "Swap_On_Equip_And_Unequip";
+        public static string Balance_Weapons = "Balance_Weapons";
     }
 }

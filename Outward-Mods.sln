@@ -25,8 +25,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PvP", "PvP\PvP\PvP.csproj",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoFollow", "! Small Mods\AutoFollowCoopPartners\AutoFollow\AutoFollow.csproj", "{31136EC0-0CBB-4503-8C82-FE1421CBD7E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterCustomWeight", "! Small Mods\Better Custom Weight\BetterCustomWeight\BetterCustomWeight.csproj", "{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BetterSummonedGhost", "! Small Mods\Better Summoned Ghost\BetterSummonedGhost\BetterSummonedGhost.csproj", "{31F34F06-EC29-46E1-8921-DEEDF344566C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlacksmithsToolbox", "! Small Mods\BlacksmithsToolbox\BlacksmithsToolbox\BlacksmithsToolbox.csproj", "{7756F730-2CC1-4E21-BF46-D833536F6BCD}"
@@ -64,6 +62,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedModConfig", "Shared Mod Config\SharedModConfig\SharedModConfig.csproj", "{0F04A722-D68F-46D8-BCBE-B3A828AB2365}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD", "CombatHUD\CombatHUD 2\CombatHUD.csproj", "{71E14120-7A04-4156-B846-941C2CA1B31A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomWeight", "! Small Mods\CustomWeight\CustomWeight\CustomWeight\CustomWeight.csproj", "{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,10 +111,6 @@ Global
 		{31136EC0-0CBB-4503-8C82-FE1421CBD7E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31136EC0-0CBB-4503-8C82-FE1421CBD7E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31136EC0-0CBB-4503-8C82-FE1421CBD7E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{31F34F06-EC29-46E1-8921-DEEDF344566C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{31F34F06-EC29-46E1-8921-DEEDF344566C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31F34F06-EC29-46E1-8921-DEEDF344566C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -191,13 +187,16 @@ Global
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71E14120-7A04-4156-B846-941C2CA1B31A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{31136EC0-0CBB-4503-8C82-FE1421CBD7E9} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
-		{F0FF50E7-DEA3-4F01-B31F-5FFE2A4A17F5} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{31F34F06-EC29-46E1-8921-DEEDF344566C} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{7756F730-2CC1-4E21-BF46-D833536F6BCD} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{30DF9A25-9817-4AED-BC69-415B83A93153} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
@@ -214,6 +213,7 @@ Global
 		{7A47E79E-EDDB-4D72-88C7-6AC493DC9070} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{D5F48211-9790-443F-A2F6-2430F1CDF1E1} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
+		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E61EA2C4-5D64-4828-A24A-47E3EB51A10C}

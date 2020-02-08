@@ -70,7 +70,7 @@ namespace CombatHUD
                     var text = m_labelHolders[i].GetComponent<Text>();
 
                     var iconRect = statusInfos[i].LinkedIcon.RectTransform;
-                    var posOffset = new Vector3(0, HUDManager.RelativeOffset(20f, true), 0);
+                    var posOffset = new Vector3(0, HUDManager.Rel(25f, true), 0);
                     text.GetComponent<RectTransform>().position = iconRect.position + posOffset;
 
                     TimeSpan t = TimeSpan.FromSeconds(statusInfos[i].TimeRemaining);
@@ -105,9 +105,9 @@ namespace CombatHUD
                 && At.GetValue(typeof(CharacterBarListener), manager, "m_staminaBar") is Bar stamBar
                 && At.GetValue(typeof(Bar), stamBar, "m_lblValue") is Text stamText)
             {
-                healthText.fontSize = 13;
-                manaText.fontSize = 13;
-                stamText.fontSize = 13;
+                healthText.fontSize = 14;
+                manaText.fontSize = 14;
+                stamText.fontSize = 14;
 
                 healthBar.TextValueDisplayed = (bool)HUDManager.config.GetValue(Settings.PlayerVitals);
                 manaBar.TextValueDisplayed = (bool)HUDManager.config.GetValue(Settings.PlayerVitals);

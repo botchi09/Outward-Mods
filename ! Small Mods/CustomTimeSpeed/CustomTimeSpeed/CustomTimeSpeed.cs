@@ -5,6 +5,8 @@ using System.Text;
 using Partiality.Modloader;
 using UnityEngine;
 using System.IO;
+using SharedModConfig;
+using System.Collections;
 
 namespace SlowerTime
 {
@@ -42,52 +44,59 @@ namespace SlowerTime
 
     public class Settings
     {
-        public float Time_Multiplier;
+        public static string Time_Multiplier = "Time_Multiplier";
     }
 
     public class TimeScript : MonoBehaviour
     {
-        public Settings settings;
-        private static readonly string savePath = @"Mods\CustomTime.json";
+        public ModConfig config;
 
         public void Init()
         {
-            LoadSettings();
-            if (settings.Time_Multiplier < 0) { settings.Time_Multiplier = 0; }
+            config = SetupConfig();
+
+            StartCoroutine(SetupCoroutine());
 
             On.TOD_Time.AddSeconds += TOD_Time_AddSeconds;
         }
 
         private void TOD_Time_AddSeconds(On.TOD_Time.orig_AddSeconds orig, TOD_Time self, float seconds, bool adjust = true)
         {
-            orig(self, seconds * settings.Time_Multiplier, adjust);
+            orig(self, seconds * (float)config.GetValue(Settings.Time_Multiplier), adjust);
         }
 
-        private void LoadSettings()
+        private ModConfig SetupConfig()
         {
-            settings = new Settings { Time_Multiplier = 1.0f, };
-
-            if (File.Exists(savePath))
+            var newConfig = new ModConfig
             {
-                var s2 = JsonUtility.FromJson<Settings>(File.ReadAllText(savePath));
-                if (s2 != null)
+                ModName = "Custom Time Speed",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
                 {
-                    settings = s2;
+                    new FloatSetting
+                    {
+                        Name = Settings.Time_Multiplier,
+                        Description = "Time Multiplier (1.0x = normal time, 0.5x = half speed, 2.0x = double)",
+                        DefaultValue = 1.0f,
+                        MinValue = 0f,
+                        MaxValue = 10f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    }
                 }
+            };
+
+            return newConfig;
+        }
+
+        private IEnumerator SetupCoroutine()
+        {
+            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
             }
 
-            SaveSettings();
-        }
-
-        private void SaveSettings()
-        {
-            if (File.Exists(savePath)) { File.Delete(savePath); }
-            File.WriteAllText(savePath, JsonUtility.ToJson(settings, true));
-        }
-
-        internal void OnDisable()
-        {
-            SaveSettings();
+            config.Register();
         }
     }
 }

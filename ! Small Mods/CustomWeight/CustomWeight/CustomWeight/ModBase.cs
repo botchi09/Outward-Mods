@@ -1,41 +1,30 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Partiality.Modloader;
 using UnityEngine;
-//using SinAPI;
-using System.IO;
-using static CustomKeybindings;
+using SharedModConfig;
 
-namespace BetterCustomWeight
+namespace CustomWeight
 {
-    // PARTIALITY LOADER
-    public class BetterCustomWeight : PartialityMod
+    public class ModBase : PartialityMod
     {
-        public GameObject obj;
-        public string ID = "BetterCustomWeight";
-        public double version = 1.0;
-
-        public static BetterWeightScript Instance;
-
-        public BetterCustomWeight()
+        public ModBase()
         {
             this.author = "Sinai";
-            this.ModID = ID;
-            this.Version = version.ToString("0.00");
+            this.ModID = "CustomWeight";
+            this.Version = "1.00";
         }
 
         public override void OnEnable()
         {
             base.OnEnable();
 
-            obj = new GameObject(ID);
+            var obj = new GameObject("CustomWeight");
             GameObject.DontDestroyOnLoad(obj);
-
-            Instance = obj.AddComponent<BetterWeightScript>();
-            Instance._base = this;
-            Instance.Init();
+            obj.AddComponent<WeightManager>();
         }
 
         public override void OnDisable()
@@ -44,42 +33,42 @@ namespace BetterCustomWeight
         }
     }
 
-    // ACTUAL MOD
-    public class BetterWeightScript : MonoBehaviour
+    public class WeightManager : MonoBehaviour
     {
-        public BetterCustomWeight _base;
+        public static WeightManager Instance;
+        public ModConfig config;
 
-        public BetterWeightGUI gui;
-        public Settings settings;
-
-        // keep track of what we've done, and what we need to do
         public bool PatchedRPM = false;
         public int PatchedCharacters = 0;
         public Dictionary<int, float> OrigCapacities = new Dictionary<int, float>(); // dictionary containing original weight limits on bags (ID : Weight)
 
-        // custom keybinding
-        public string MenuKey = "Custom Weight Menu";
-
-        public void Init()
+        internal void Start()
         {
+            Instance = this;
             // set up and load settings
-            LoadSettings();
-
-            // add GUI component
-            gui = _base.obj.AddComponent(new BetterWeightGUI() { script = this });
-
-            if (!settings.ShowMenuOnStartup) { gui.ShowMenu = false; }
+            config = SetupConfig();
+            StartCoroutine(SetupCoroutine());
 
             // hooks
             On.PlayerCharacterStats.UpdateWeight += CharacterWeightHook;
+        }
 
-            // custom keybinding
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
-        }        
+        private IEnumerator SetupCoroutine()
+        {
+            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+            {
+                Debug.Log("waiting for isinitdone");
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            config.Register();
+
+            Debug.Log("Registered betterCustomWeight");
+        }
 
         internal void Update()
         {
-            if (!PatchedRPM && ResourcesPrefabManager.Instance.Loaded)
+            if (!PatchedRPM && ResourcesPrefabManager.Instance.Loaded && ConfigManager.Instance.IsInitDone())
             {
                 PatchRPM();
 
@@ -101,23 +90,13 @@ namespace BetterCustomWeight
                 }
                 PatchedCharacters = Global.Lobby.PlayersInLobbyCount;
             }
-
-            // check for menu input
-            foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
-            {
-                int id = ps.PlayerID;
-                if (m_playerInputManager[id].GetButtonDown(MenuKey))
-                {
-                    gui.ShowMenu = !gui.ShowMenu;
-                }
-            }
         }
 
         private void PatchPlayer(Character c)
         {
-            float newValue = 10.0f + settings.PouchBonus;
+            float newValue = 10.0f + (float)config.GetValue(Settings.PouchBonus);
 
-            if (settings.NoContainerLimit) { newValue = -1; }
+            if ((bool)config.GetValue(Settings.NoContainerLimit)) { newValue = -1; }
 
             At.SetValue(newValue, typeof(ItemContainer), c.Inventory.Pouch, "m_baseContainerCapacity");
         }
@@ -139,7 +118,7 @@ namespace BetterCustomWeight
 
                         At.SetValue(cap, typeof(ItemContainer), container, "m_baseContainerCapacity");
 
-                        string s = ", GetValue: " + At.GetValue(typeof(ItemContainer), container, "m_baseContainerCapacity").ToString();
+                        //string s = ", GetValue: " + At.GetValue(typeof(ItemContainer), container, "m_baseContainerCapacity").ToString();
                         break;
                     }
                 }
@@ -175,16 +154,16 @@ namespace BetterCustomWeight
             }
 
             // set new limit based on settings
-            cap *= settings.BagBonusMulti;
-            cap += settings.BagBonusFlat;
+            cap *= (float)config.GetValue(Settings.BagBonusMulti);
+            cap += (float)config.GetValue(Settings.BagBonusFlat);
 
-            if (settings.NoContainerLimit) { cap = -1; }
+            if ((bool)config.GetValue(Settings.NoContainerLimit)) { cap = -1; }
             return cap;
         }
 
         private void CharacterWeightHook(On.PlayerCharacterStats.orig_UpdateWeight orig, PlayerCharacterStats self)
         {
-            if (settings.DisableAllBurdens)
+            if ((bool)config.GetValue(Settings.DisableAllBurdens))
             {
                 CharacterStats cStats = self as CharacterStats;
 
@@ -216,61 +195,69 @@ namespace BetterCustomWeight
             }
         }
 
-        private Settings NewSettings()
+        private ModConfig SetupConfig()
         {
-            Settings newSets = new Settings()
+            var newConfig = new ModConfig
             {
-                ShowMenuOnStartup = true,
-                DisableAllBurdens = false,
-                NoContainerLimit = false,
-                PouchBonus = 10,
-                BagBonusFlat = 20,
-                BagBonusMulti = 1.0f,
+                ModName = "Better Custom Weight",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
+                {
+                    new BoolSetting
+                    {
+                        Name = Settings.NoContainerLimit,
+                        Description = "Disable limits on all containers",
+                        DefaultValue = false,
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.DisableAllBurdens,
+                        Description = "Disable all burdens from weight",
+                        DefaultValue = false,
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.PouchBonus,
+                        Description = "Extra Pouch capacity",
+                        MinValue = 0f,
+                        MaxValue = 1000f,
+                        DefaultValue = 0f,
+                        RoundTo = 0,
+                        ShowPercent = false,
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.BagBonusFlat,
+                        Description = "Extra Bag capacity (flat bonus)",
+                        MinValue = 0f,
+                        MaxValue = 1000f,
+                        DefaultValue = 0f,
+                        RoundTo = 0,
+                        ShowPercent = false,
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.BagBonusMulti,
+                        Description = "Extra Bag capacity (multiplier)",
+                        MinValue = 0f,
+                        MaxValue = 10f,
+                        DefaultValue = 1.0f,
+                        RoundTo = 2,
+                        ShowPercent = false,
+                    },
+                }
             };
 
-            return newSets;
-        }
-
-        private void LoadSettings()
-        {
-            settings = NewSettings();
-
-            string path = @"Mods\BetterCustomWeight.json";
-            if (File.Exists(path))
-            {
-                string json = File.ReadAllText(path);
-                if (JsonUtility.FromJson<Settings>(json) is Settings newSettings)
-                {
-                    settings = newSettings;
-                }
-            }
-        }
-
-        private void SaveSettings()
-        {
-            string dir = "Mods";
-            string path = dir + @"\BetterCustomWeight.json";
-
-            if (!Directory.Exists(dir)) { Directory.CreateDirectory(dir); }
-
-            Jt.SaveJsonOverwrite(path, settings);
-        }
-
-        internal void OnDisable()
-        {
-            SaveSettings();
+            return newConfig;
         }
     }
 
-    public class Settings
+    public static class Settings
     {
-        public bool ShowMenuOnStartup;
-
-        public bool NoContainerLimit;
-        public bool DisableAllBurdens;
-
-        public int PouchBonus;
-        public int BagBonusFlat;
-        public float BagBonusMulti;
+        public static string NoContainerLimit = "NoContainerLimit";
+        public static string DisableAllBurdens = "DisableAllBurdens";
+        public static string PouchBonus = "PouchBonus";
+        public static string BagBonusFlat = "BagBonusFlat";
+        public static string BagBonusMulti = "BagBonusMulti";
     }
 }

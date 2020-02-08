@@ -1,35 +1,20 @@
-﻿using Partiality.Modloader;
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 using System.Reflection;
 using UnityEngine.UI;
-using static CustomKeybindings;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
-// ************************************************************ //
-
-    // ALL CREDIT TO FAEDAR (Skully250) AND ASHNAL FOR THE ORIGINAL MOD
-
-    // FIXED BY SINAI FOR OCTOBER 2019 PATCH
-
-// ************************************************************ //
+using SharedModConfig;
+using Partiality.Modloader;
 
 namespace MPLimitRemover
 {
-    public class Settings
-    {
-        public int PlayerLimit = 4;
-
-        public bool Show_Menu_On_Startup = true;
-        public bool Enable_Menu_Scaling = false;
-    }
-
     public class ModBase : PartialityMod
     {
         public string ID = "MP Limit Remover";
-        public double version = 2.0;
+        public double version = 2.2;
 
         public ModBase()
         {
@@ -46,31 +31,42 @@ namespace MPLimitRemover
 
             GameObject obj = new GameObject();
             GameObject.DontDestroyOnLoad(obj);
-            limitRemover = obj.AddComponent(new PlayerLimitRemover() { _base = this });
-            limitRemover.Initialise();
+            limitRemover = obj.AddComponent<PlayerLimitRemover>();
         }
+    }
+
+    public class Settings
+    {
+        public static string PlayerLimit = "PlayerLimit";
     }
 
     public class PlayerLimitRemover : MonoBehaviour
     {
-        public ModBase _base;
-        public PlayerLimitGUI gui;
-        public Settings settings = new Settings();
-        public static string savePath = @"Mods\MPLimitRemover.json";
+        public ModConfig config;
 
-        public string MenuKey = "MP Limit Menu";
-
-        public void Initialise()
+        internal void Awake()
         {
-            LoadSettings();
-
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
-
-            gui = gameObject.AddComponent(new PlayerLimitGUI() { global = this, showGui = settings.Show_Menu_On_Startup });
-
             // fix pause menu
-            On.PauseMenu.Show += new On.PauseMenu.hook_Show(ShowPatch);
-            On.PauseMenu.Update += new On.PauseMenu.hook_Update(UpdatePatch);
+            On.PauseMenu.Show += ShowPatch;
+            On.PauseMenu.Update +=UpdatePatch;
+            On.RestingMenu.UpdatePanel += RestingPanelPatch;
+        }
+
+        internal void Start()
+        {
+            config = SetupConfig();
+
+            StartCoroutine(SetupCoroutine());
+        }
+
+        private IEnumerator SetupCoroutine()
+        {
+            while (!ConfigManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            config.Register();
         }
 
         internal void Update()
@@ -80,38 +76,144 @@ namespace MPLimitRemover
                 return;
             }
 
-            // handle player input 
-            foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
-            {
-                if (m_playerInputManager[ps.PlayerID].GetButtonDown(MenuKey))
-                {
-                    gui.showGui = !gui.showGui;
-                }
-            }
+            var limitInt = (int)(float)config.GetValue(Settings.PlayerLimit);
 
             // handle custom multiplayer limit 
-            if (!PhotonNetwork.offlineMode && PhotonNetwork.isMasterClient)
+            if (PhotonNetwork.inRoom && PhotonNetwork.isMasterClient)
             {
                 // if the room limit is not set to our custom value, do that.
-                if (PhotonNetwork.room.maxPlayers != settings.PlayerLimit)
+                if (PhotonNetwork.room.maxPlayers != limitInt)
                 {
-                    //OLogger.Warning("Room is set to " + PhotonNetwork.room.maxPlayers + "! Setting to " + settings.Multiplayer_Limit);
-                    PhotonNetwork.room.maxPlayers = settings.PlayerLimit;
+                    PhotonNetwork.room.maxPlayers = limitInt;
                 }
 
                 // handle logic for opening / closing room based on custom limit.
-                if (!PhotonNetwork.room.open && PhotonNetwork.room.playerCount < settings.PlayerLimit)
+                if (!PhotonNetwork.room.open && PhotonNetwork.room.playerCount < limitInt)
                 {
-                    //OLogger.Warning("Room is closed, but it should be open! Opening room.");
                     PhotonNetwork.room.open = true;
                 }
-                else if (PhotonNetwork.room.open && PhotonNetwork.room.playerCount >= settings.PlayerLimit)
+                else if (PhotonNetwork.room.open && PhotonNetwork.room.playerCount >= limitInt)
                 {
-                    //OLogger.Warning("Room is open, but it should be closed! Closing room.");
                     PhotonNetwork.room.open = false;
                 }
             }
         }
+
+        // resting panel fix
+        private void RestingPanelPatch(On.RestingMenu.orig_UpdatePanel orig, RestingMenu self)
+        {
+            At.Call(self, "RefreshSkylinePosition", new object[0]);
+
+            int num = 0;
+            bool flag = true;
+            bool flag2 = true;
+
+            var m_otherPlayerUIDs = At.GetValue(typeof(RestingMenu), self, "m_otherPlayerUIDs") as List<UID>;
+
+            if (Global.Lobby.PlayersInLobbyCount - 1 != m_otherPlayerUIDs.Count)
+            {
+                self.InitPlayerCursors();
+                flag = false;
+                flag2 = false;
+            }
+            else
+            {
+                for (int i = 0; i < m_otherPlayerUIDs.Count; i++)
+                {
+                    Character characterFromPlayer = CharacterManager.Instance.GetCharacterFromPlayer(m_otherPlayerUIDs[i]);
+                    if (characterFromPlayer != null)
+                    {
+                        if (CharacterManager.Instance.RestingPlayerUIDs.Contains(characterFromPlayer.UID))
+                        {
+                            flag2 &= characterFromPlayer.CharacterResting.DonePreparingRest;
+                        }
+                        else
+                        {
+                            flag = false;
+                        }
+
+                        var m_sldOtherPlayerCursors = At.GetValue(typeof(RestingMenu), self, "m_sldOtherPlayerCursors") as Slider[];
+
+                        if (m_sldOtherPlayerCursors.Length - 1 <= i)
+                        {
+                            m_sldOtherPlayerCursors[i].value = (float)characterFromPlayer.CharacterResting.TotalRestTime;
+                        }
+                    }
+                    else
+                    {
+                        flag = false;
+                    }
+                }
+            }
+
+            for (int j = 0; j < SplitScreenManager.Instance.LocalPlayerCount; j++)
+            {
+                flag &= (SplitScreenManager.Instance.LocalPlayers[j].AssignedCharacter != null);
+            }
+            flag2 = (flag2 && flag);
+
+            var m_restingCanvasGroup = At.GetValue(typeof(RestingMenu), self, "m_restingCanvasGroup") as CanvasGroup;
+            var m_waitingForOthers = At.GetValue(typeof(RestingMenu), self, "m_waitingForOthers") as Transform;
+            var m_waitingText = At.GetValue(typeof(RestingMenu), self, "m_waitingText") as Text;
+
+            m_restingCanvasGroup.interactable = (flag && !(self as UIElement).LocalCharacter.CharacterResting.DonePreparingRest);
+            if (m_waitingForOthers)
+            {
+                if (m_waitingForOthers.gameObject.activeSelf == m_restingCanvasGroup.interactable)
+                {
+                    m_waitingForOthers.gameObject.SetActive(!m_restingCanvasGroup.interactable);
+                }
+                if (m_waitingText && m_waitingForOthers.gameObject.activeSelf)
+                {
+                    m_waitingText.text = LocalizationManager.Instance.GetLoc((!flag2) ? "Sleep_Title_Waiting" : "Rest_Title_Resting");
+                }
+            }
+
+            var m_restingActivityDisplays = At.GetValue(typeof(RestingMenu), self, "m_restingActivityDisplays") as RestingActivityDisplay[];
+            var ActiveActivities = At.GetValue(typeof(RestingMenu), self, "ActiveActivities") as RestingActivity.ActivityTypes[];
+
+            for (int k = 0; k < m_restingActivityDisplays.Length; k++)
+            {
+                num += m_restingActivityDisplays[k].AssignedTime;
+            }
+            for (int l = 0; l < m_restingActivityDisplays.Length; l++)
+            {
+                if (ActiveActivities[l] != RestingActivity.ActivityTypes.Guard || CharacterManager.Instance.BaseAmbushProbability > 0)
+                {
+                    m_restingActivityDisplays[l].MaxValue = 24 - (num - m_restingActivityDisplays[l].AssignedTime);
+                }
+                else
+                {
+                    m_restingActivityDisplays[l].MaxValue = 0;
+                }
+            }
+
+            var m_sldLocalPlayerCursor = At.GetValue(typeof(RestingMenu), self, "m_sldLocalPlayerCursor") as Slider;
+
+            if (m_sldLocalPlayerCursor)
+            {
+                m_sldLocalPlayerCursor.value = (float)num;
+            }
+
+            var m_lastTotalRestTime = (int)At.GetValue(typeof(RestingMenu), self, "m_lastTotalRestTime");
+
+            bool flag3 = false;
+            if (m_lastTotalRestTime != num)
+            {
+                flag3 = true;
+                m_lastTotalRestTime = num;
+                At.SetValue(m_lastTotalRestTime, typeof(RestingMenu), self, "m_lastTotalRestTime");
+                self.OnConfirmTimeSelection(num);
+            }
+
+            var m_tryRest = (bool)At.GetValue(typeof(RestingMenu), self, "m_tryRest");
+
+            At.Call(self, "RefreshOverviews", new object[] { (flag3 && !m_tryRest) });
+        }
+
+        /*
+         * -------- PAUSE MENU HOOKS CREDIT TO ASHNAL AND FAEDAR --------
+        */
 
         // fix pause menu 1
         public static void ShowPatch(On.PauseMenu.orig_Show orig, PauseMenu self)
@@ -152,35 +254,28 @@ namespace MPLimitRemover
 
         // =========== settings =============
 
-        private void LoadSettings()
+        private ModConfig SetupConfig()
         {
-            if (!Directory.Exists(@"Mods")) { Directory.CreateDirectory("Mods"); }
-
-            bool newSettings = true;
-            if (File.Exists(savePath))
+            var newConfig = new ModConfig
             {
-                string json = File.ReadAllText(savePath);
-                if (JsonUtility.FromJson<Settings>(json) is Settings s2)
+                ModName = "MP Limit Remover",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
                 {
-                    settings = s2;
-                    newSettings = false;
+                    new FloatSetting
+                    {
+                        Name = Settings.PlayerLimit,
+                        Description = "Max number of Players in room (when you are host)",
+                        DefaultValue = 4.0f,
+                        RoundTo = 0,
+                        MinValue = 1f,
+                        MaxValue = 20f,
+                        ShowPercent = false
+                    }
                 }
-            }
-            if (newSettings)
-            {
-                SaveSettings();
-            }
-        }
+            };
 
-        private void SaveSettings()
-        {
-            if (File.Exists(savePath)) { File.Delete(savePath); }
-            File.WriteAllText(savePath, JsonUtility.ToJson(settings, true));
-        }
-
-        internal void OnDisable()
-        {
-            SaveSettings();
+            return newConfig;
         }
     }
 }

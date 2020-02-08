@@ -34,11 +34,11 @@ namespace CombatAndDodgeOverhaul
         {
             var _base = self as Photon.MonoBehaviour;
 
-            if (!OverhaulGlobal.settings.Enable_StabilityMods)
-            {
-                orig(self, _knockValue, _angle, _block, _dealerChar);
-                return;
-            }
+            //if (!(bool)OverhaulGlobal.config.GetValue(Settings.Enable_StabilityMods))
+            //{
+            //    orig(self, _knockValue, _angle, _block, _dealerChar);
+            //    return;
+            //}
 
             if (At.GetValue(typeof(Character), self, "m_impactImmune") is bool m_impactImmune
                 && At.GetValue(typeof(Character), self, "m_shieldStability") is float m_shieldStability
@@ -67,7 +67,7 @@ namespace CombatAndDodgeOverhaul
                     // if you run out of stamina and get hit, you will always get staggered. (unchanged, except to reflect custom stagger threshold)
                     if (self.Stats.CurrentStamina < 1f)
                     {
-                        float hitToStagger = m_shieldStability + m_stability - (100 - OverhaulGlobal.settings.Stagger_Threshold);
+                        float hitToStagger = m_shieldStability + m_stability - (100 - (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Threshold));
                         if (hit < hitToStagger)
                         {
                             hit = hitToStagger;
@@ -104,7 +104,8 @@ namespace CombatAndDodgeOverhaul
                         m_stability = num2;
                     }
                     // if hit takes us below knockdown threshold, or if AI auto-knockdown stagger count was reached...
-                    if (m_stability <= OverhaulGlobal.settings.Knockdown_Threshold || m_knockbackCount >= OverhaulGlobal.settings.Enemy_AutoKD_Count)
+                    if (m_stability <= (float)OverhaulGlobal.config.GetValue(Settings.Knockdown_Threshold) 
+                        || (self.IsAI && m_knockbackCount >= (float)OverhaulGlobal.config.GetValue(Settings.Enemy_AutoKD_Count)))
                     {
                         //OLogger.Error("Knockdown! Hit Value: " + _knockValue + ", current stability: " + m_stability);
 
@@ -131,7 +132,7 @@ namespace CombatAndDodgeOverhaul
                         }
                     }
                     // else if hit is a stagger...
-                    else if (m_stability <= OverhaulGlobal.settings.Stagger_Threshold && (Time.time - lastStagger > OverhaulGlobal.settings.Stagger_Immunity_Period))
+                    else if (m_stability <= (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Threshold) && (Time.time - lastStagger > (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Immunity_Period)))
                     {
                         // OLogger.Warning("Stagger! Hit Value: " + _knockValue + ", current stability: " + m_stability);
 
@@ -186,7 +187,7 @@ namespace CombatAndDodgeOverhaul
                             _base.StartCoroutine(_knockEnum);
                         }
 
-                        if (m_stability <= OverhaulGlobal.settings.Stagger_Immunity_Period)
+                        if (m_stability <= (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Immunity_Period))
                         {
                             // OLogger.Error(self.Name + " would have staggered. Current delta: " + (Time.time - lastStagger));
                         }
@@ -214,7 +215,7 @@ namespace CombatAndDodgeOverhaul
                 m_animator.SetTrigger("BlockHit");
             }
 
-            if (OverhaulGlobal.settings.Enable_StabilityMods && OverhaulGlobal.settings.Blocking_Staggers_Attacker)
+            if ((bool)OverhaulGlobal.config.GetValue(Settings.Blocking_Staggers_Attacker))
             {
                 // Debug.Log("autoknocking " + _dealerChar.Name);
                 if (_dealerChar.CurrentWeapon.Type != Weapon.WeaponType.Bow)
@@ -227,28 +228,21 @@ namespace CombatAndDodgeOverhaul
         // The update stability function, for regenerating stability and the AI auto-knockdown count
         private void UpdateStabilityHook(On.Character.orig_UpdateStability orig, Character self)
         {
-            if (!OverhaulGlobal.settings.Enable_StabilityMods)
-            {
-                orig(self);
-                return;
-            }
-
             if (At.GetValue(typeof(Character), self, "m_stability") is float m_stability
                 && At.GetValue(typeof(Character), self, "m_timeOfLastStabilityHit") is float m_timeOfLastStabilityHit
                 && At.GetValue(typeof(Character), self, "m_shieldStability") is float m_shieldStability
                 && At.GetValue(typeof(Character), self, "m_knockbackCount") is float m_knockbackCount)
             {
                 // ----------- original method, unchanged other than to reflect custom values -------------
-
-                if (OverhaulGlobal.settings.No_Stability_Regen_When_Blocking && self.Blocking) // no stability regen while blocking! otherwise too op
+                if ((bool)OverhaulGlobal.config.GetValue(Settings.No_Stability_Regen_When_Blocking) && self.Blocking) // no stability regen while blocking! otherwise too op
                     return;
 
                 float num = Time.time - m_timeOfLastStabilityHit;
-                if (num > OverhaulGlobal.settings.Stability_Regen_Delay)
+                if (num > (float)OverhaulGlobal.config.GetValue(Settings.Stability_Regen_Delay))
                 {
                     if (m_stability < 100f)
                     {
-                        var num2 = Mathf.Clamp(m_stability + (self.StabilityRegen * OverhaulGlobal.settings.Stability_Regen_Speed) * Time.deltaTime, 0f, 100f);
+                        var num2 = Mathf.Clamp(m_stability + (self.StabilityRegen * (float)OverhaulGlobal.config.GetValue(Settings.Stability_Regen_Speed)) * Time.deltaTime, 0f, 100f);
                         At.SetValue(num2, typeof(Character), self, "m_stability");
 
                     }
@@ -257,7 +251,7 @@ namespace CombatAndDodgeOverhaul
                         var num2 = Mathf.Clamp(m_shieldStability + self.StabilityRegen * Time.deltaTime, 0f, 50f);
                         At.SetValue(num2, typeof(Character), self, "m_shieldStability");
                     }
-                    if (num > OverhaulGlobal.settings.Enemy_AutoKD_Reset_Time)
+                    if (num > (float)OverhaulGlobal.config.GetValue(Settings.Enemy_AutoKD_Reset_Time))
                     {
                         bool flag = m_knockbackCount > 0;
                         var num2 = Mathf.Clamp(m_knockbackCount - Time.deltaTime, 0f, 4f);
@@ -274,13 +268,13 @@ namespace CombatAndDodgeOverhaul
         // This function is how the game sends the 'slow down' effect to the attacker and receiver when weapons hit. Basically it gives the feeling that your weapon has collided.
         private void SlowHook(On.Character.orig_SlowDown orig, Character self, float _slowVal, float _timeTo, float _timeStay, float _timeFrom)
         {
-            if (!OverhaulGlobal.settings.Enable_StabilityMods)
-            {
-                orig(self, _slowVal, _timeTo, _timeStay, _timeFrom);
-                return;
-            }
+            //if (!OverhaulGlobal.settings.Enable_StabilityMods)
+            //{
+            //    orig(self, _slowVal, _timeTo, _timeStay, _timeFrom);
+            //    return;
+            //}
 
-            var num = OverhaulGlobal.settings.SlowDown_Modifier;
+            var num = (float)OverhaulGlobal.config.GetValue(Settings.SlowDown_Modifier);
 
             _slowVal = Mathf.Clamp(num * num, 0.1f, 2) * _slowVal;  // apply the custom modifier MORE to the "slowVal" value, seems to get better results. Clamp above 0.1 otherwise the attack can last like 30+ seconds
             _timeTo = ((4 + num) / 5) * _timeTo; // apply MUCH LESS to "timeTo", for same reason.
@@ -293,11 +287,11 @@ namespace CombatAndDodgeOverhaul
         // autoknock is used by things like Brace, just instantly staggers enemy
         private void AutoKnockHook(On.Character.orig_AutoKnock orig, Character self, bool _down, Vector3 _dir)
         {
-            if (!OverhaulGlobal.settings.Enable_StabilityMods)
-            {
-                orig(self, _down, _dir);
-                return;
-            }
+            //if (!OverhaulGlobal.settings.Enable_StabilityMods)
+            //{
+            //    orig(self, _down, _dir);
+            //    return;
+            //}
 
             var _base = self as Photon.MonoBehaviour;
             if (At.GetValue(typeof(Character), self, "m_stability") is float m_stability)
@@ -305,7 +299,7 @@ namespace CombatAndDodgeOverhaul
                 //OLogger.Error("Autoknock, m_stability: " + m_stability);
 
                 At.Call(self, "StabilityHit", new object[] {
-                    (!_down) ? Mathf.Clamp(m_stability - OverhaulGlobal.settings.Stagger_Threshold, 1f, 100 - OverhaulGlobal.settings.Stagger_Threshold) : m_stability,
+                    (!_down) ? Mathf.Clamp(m_stability - (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Threshold), 1f, 100 - (float)OverhaulGlobal.config.GetValue(Settings.Stagger_Threshold)) : m_stability,
                     Vector3.Angle(_base.transform.forward, -_dir),
                     _down,
                     null

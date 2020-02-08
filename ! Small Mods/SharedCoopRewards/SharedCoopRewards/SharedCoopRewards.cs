@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using NodeCanvas.Framework;
 using NodeCanvas.Tasks;
 using NodeCanvas.Tasks.Actions;
 using System.IO;
+using SharedModConfig;
 
 namespace SharedCoopRewards
 {
@@ -46,8 +48,8 @@ namespace SharedCoopRewards
 
     public class Settings
     {
-        public bool Shared_Quest_Rewards = true;
-        public bool Shared_World_Drops = true;
+        public static readonly string Shared_Quest_Rewards = "Shared_Quest_Rewards";
+        public static readonly string Shared_World_Drops = "Shared_World_Drops";
         //public bool Shared_Quest_Progression_BETA = false;
     }
 
@@ -55,18 +57,30 @@ namespace SharedCoopRewards
     {
         public ModBase _base;
 
-        public Settings settings = new Settings();
-        private static readonly string savePath = @"Mods\SharedCoopRewards.json";
+        public ModConfig config;
 
         public void Init()
         {
-            LoadSettings();
+            // LoadSettings();
+            config = SetupConfig();
+
+            StartCoroutine(SetupCoroutine());
 
             // Quest reward hook
             On.NodeCanvas.Framework.ActionList.OnExecute += ListExecuteHook;
             
             // drop table hook
             On.Dropable.GenerateContents_1 += GenerateContentsHook;
+        }
+
+        private IEnumerator SetupCoroutine()
+        {
+            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
+            config.Register();
         }
 
         // list reward hook - check if silver cost is one of the actions. if so, dont share this reward.
@@ -84,7 +98,7 @@ namespace SharedCoopRewards
                 return;
             }
 
-            if (settings.Shared_Quest_Rewards)
+            if ((bool)config.GetValue(Settings.Shared_Quest_Rewards))
             {
                 bool HasSilverCost = false;
 
@@ -117,7 +131,7 @@ namespace SharedCoopRewards
         // Dropable.GenerateContents affects enemy and loot container contents
         private void GenerateContentsHook(On.Dropable.orig_GenerateContents_1 orig, Dropable self, ItemContainer _container)
         {
-            int count = settings.Shared_World_Drops ? Global.Lobby.PlayersInLobbyCount : 1;
+            int count = (bool)config.GetValue(Settings.Shared_World_Drops) ? Global.Lobby.PlayersInLobbyCount : 1;
 
             for (int i = 0; i < count; i++)
             {
@@ -125,44 +139,30 @@ namespace SharedCoopRewards
             }
         }
 
-        // settings
-        private void LoadSettings()
+        private ModConfig SetupConfig()
         {
-            if (File.Exists(savePath))
+            var newConfig = new ModConfig
             {
-                bool failsafe = false;
-                try
+                ModName = "SharedCoopRewards",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
                 {
-                    string json = File.ReadAllText(savePath);
-                    if (JsonUtility.FromJson<Settings>(json) is Settings s2)
+                    new BoolSetting
                     {
-                        settings = s2;
+                        Name = Settings.Shared_Quest_Rewards,
+                        Description = "Share Items and Skills from Quest Rewards",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Shared_World_Drops,
+                        Description = "Generate extra loot from Enemies and Loot Containers for each player",
+                        DefaultValue = true
                     }
-                    else { failsafe = true; }
                 }
-                catch { failsafe = true; }
+            };
 
-                if (failsafe)
-                {
-                    File.Delete(savePath);
-                    settings = new Settings();
-                    SaveSettings();
-                }
-                //Log("Loaded settings!\r\n" + json);
-            }
-            else
-            {
-                SaveSettings();
-            }
-        }
-
-        private void SaveSettings()
-        {
-            if (!Directory.Exists(@"Mods")) { Directory.CreateDirectory("Mods"); }
-
-            if (File.Exists(savePath)) { File.Delete(savePath); }
-
-            File.WriteAllText(savePath, JsonUtility.ToJson(settings, true));
+            return newConfig;
         }
     }
 }

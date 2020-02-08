@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
+using SharedModConfig;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -16,7 +17,7 @@ namespace CombatAndDodgeOverhaul
         private string CurrentScene = "";
         private bool SceneChanged = false;
 
-        private Settings m_currentSyncInfos;
+        private ModConfig m_currentSyncInfos;
         private string m_currentHostUID = "";
         public float TimeOfLastSyncSend = -1f; // host set this when sends info
         private float m_timeOfLastSyncRequest = -5f; // non-host set this when receive info
@@ -57,6 +58,14 @@ namespace CombatAndDodgeOverhaul
             var character = self.GetComponent<Character>();
             if (!character.IsAI)
             {
+                self.RemoveStatStack(TagSourceManager.Instance.GetTag("81"), "CombatOverhaul", true);
+                self.AddStatStack(
+                    TagSourceManager.Instance.GetTag("81"),
+                    new StatStack(
+                        "CombatOverhaul", 
+                        0.01f * (float)OverhaulGlobal.config.GetValue(Settings.Stamina_Cost_Stat)), 
+                    true);
+
                 orig(self);
                 return;
             }
@@ -64,14 +73,14 @@ namespace CombatAndDodgeOverhaul
             if (!PhotonNetwork.isNonMasterClientInRoom)
             {
                 // if we are world host....
-                if (!OverhaulGlobal.settings.Enable_Enemy_Mods)
+                if (!(bool)OverhaulGlobal.config.GetValue(Settings.Enemy_Balancing))
                 {
                     orig(self);
                     return;
                 }
                 else
                 {
-                    SetEnemyMods(OverhaulGlobal.settings, self, character);
+                    SetEnemyMods(OverhaulGlobal.config, self, character);
                 }
             }
             else // else we are not host
@@ -84,12 +93,12 @@ namespace CombatAndDodgeOverhaul
                 }
                 else
                 {
-                    if (m_currentSyncInfos != null && m_currentSyncInfos.Enable_Enemy_Mods)
+                    if (m_currentSyncInfos != null && (bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
                     {
                         //Debug.Log("No sync required, setting up stats from current cache");
                         SetEnemyMods(m_currentSyncInfos, self, character); 
                     }
-                    if (m_currentSyncInfos == null || !m_currentSyncInfos.Enable_Enemy_Mods || !m_currentSyncInfos.Enemy_Balancing)
+                    if (m_currentSyncInfos == null || !(bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
                     {
                         orig(self);
                         return;
@@ -110,7 +119,7 @@ namespace CombatAndDodgeOverhaul
                 }
                 yield return new WaitForSeconds(1.0f);
             }
-            if (m_currentSyncInfos == null || !m_currentSyncInfos.Enemy_Balancing || !m_currentSyncInfos.Enable_Enemy_Mods)
+            if (m_currentSyncInfos == null || !(bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
             {
                 try 
                 { 
@@ -138,7 +147,7 @@ namespace CombatAndDodgeOverhaul
                     else
                     {
                         m_currentHostUID = host.UID;
-                        m_currentSyncInfos = OverhaulGlobal.settings;
+                        m_currentSyncInfos = OverhaulGlobal.config;
                     }
                     return true;
                 }
@@ -150,35 +159,9 @@ namespace CombatAndDodgeOverhaul
             else
             {
                 Debug.Log("CombatOverhaul: Could not find host!");
-                //if (_FindHostCoroutine == null)
-                //{
-                    
-                //    _FindHostCoroutine = StartCoroutine(FindHostCoroutine());
-                //}
                 return true;
             }
         }
-
-        //private IEnumerator FindHostCoroutine()
-        //{
-        //    var host = CharacterManager.Instance.GetWorldHostCharacter();
-        //    float start = Time.time;
-
-        //    while (Time.time - start < 10f && host == null)
-        //    {
-        //        yield return new WaitForSeconds(0.1f);
-        //        Debug.Log(Time.time + " | Searching for host...");
-        //        host = CharacterManager.Instance.GetWorldHostCharacter();
-        //    }
-        //    if (host != null)
-        //    {
-        //        UpdateSyncStats();
-        //    }
-        //    else
-        //    {
-        //        Debug.LogError("Timeout! Could not find host!");
-        //    }
-        //}
 
         // called from RPC manager
         public void SetSyncInfo(bool modsEnabled, bool enemiesAllied, bool customStats, float healthModifier, float damageModifier, float impactRes, float damageRes, float impactDmg)
@@ -186,16 +169,46 @@ namespace CombatAndDodgeOverhaul
             m_currentHostUID = CharacterManager.Instance.GetWorldHostCharacter()?.UID;
             //Debug.Log("Received sync from host uid: " + m_currentHostUID);
 
-            this.m_currentSyncInfos = new Settings
+            this.m_currentSyncInfos = new ModConfig
             {
-                Enable_Enemy_Mods = modsEnabled,
-                All_Enemies_Allied = enemiesAllied,
-                Enemy_Balancing = customStats,
-                Enemy_Health = healthModifier,
-                Enemy_Damages = damageModifier,
-                Enemy_Resistances = damageRes,
-                Enemy_ImpactRes = impactRes,
-                Enemy_ImpactDmg = impactDmg
+                Settings = new List<BBSetting> 
+                {
+                    new BoolSetting
+                    {
+                        Name = Settings.All_Enemies_Allied,
+                        m_value = enemiesAllied
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Enemy_Balancing,
+                        m_value = customStats
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Enemy_Health,
+                        m_value = healthModifier
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Enemy_Damages,
+                        m_value = damageModifier
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Enemy_Resistances,
+                        m_value = damageRes
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Enemy_ImpactRes,
+                        m_value = impactRes
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Enemy_ImpactDmg,
+                        m_value = impactDmg
+                    },
+                }
             };
 
             if (modsEnabled)
@@ -209,7 +222,7 @@ namespace CombatAndDodgeOverhaul
         }
 
         // actual function to set an enemy's stats
-        private void SetEnemyMods(Settings _settings, CharacterStats _stats, Character m_character)
+        private void SetEnemyMods(ModConfig _config, CharacterStats _stats, Character m_character)
         {
             if (m_character == null || !m_character.IsAI || m_character.Faction == Character.Factions.Player)
             {
@@ -223,7 +236,7 @@ namespace CombatAndDodgeOverhaul
                 return;
             }
 
-            if (_settings.Enemy_Balancing)
+            if ((bool)_config.GetValue(Settings.Enemy_Balancing))
             {
                 string stackSource = "CombatOverhaul";
 
@@ -231,28 +244,28 @@ namespace CombatAndDodgeOverhaul
                 {
                     // set health modifier
                     var healthTag = TagSourceManager.Instance.GetTag("77");  // 77 = max health
-                    var healthStack = new StatStack(stackSource, _settings.Enemy_Health - 1);
+                    var healthStack = new StatStack(stackSource, (float)_config.GetValue(Settings.Enemy_Health) - 1);
                     _stats.RemoveStatStack(healthTag, stackSource, true);
                     _stats.AddStatStack(healthTag, healthStack, true);
-                    At.SetValue(_stats.CurrentHealth * _settings.Enemy_Health, typeof(CharacterStats), _stats, "m_health");
+                    At.SetValue(_stats.CurrentHealth * (float)_config.GetValue(Settings.Enemy_Health), typeof(CharacterStats), _stats, "m_health");
                 }
 
                 // set impact resistance
                 var impactTag = TagSourceManager.Instance.GetTag("84"); // 84 = impact res
                 _stats.RemoveStatStack(impactTag, stackSource, false);
-                var impactStack = new StatStack(stackSource, _settings.Enemy_ImpactRes);
+                var impactStack = new StatStack(stackSource, (float)_config.GetValue(Settings.Enemy_ImpactRes));
                 _stats.AddStatStack(impactTag, impactStack, false); 
 
                 // damage bonus
                 var damageTag = TagSourceManager.Instance.GetTag("96"); // 96 = all damage bonus
                 _stats.RemoveStatStack(damageTag, stackSource, true);
-                var damageStack = new StatStack(stackSource, _settings.Enemy_Damages * 0.01f);
+                var damageStack = new StatStack(stackSource, (float)_config.GetValue(Settings.Enemy_Damages) * 0.01f);
                 _stats.AddStatStack(damageTag, damageStack, true);
 
                 // impact modifier
                 var impactModifier = At.GetValue(typeof(CharacterStats), _stats, "m_impactModifier") as Stat;
                 impactModifier.RemoveStack(stackSource, true);
-                impactModifier.AddStack(new StatStack(stackSource, _settings.Enemy_ImpactDmg * 0.01f), true);
+                impactModifier.AddStack(new StatStack(stackSource, (float)_config.GetValue(Settings.Enemy_ImpactDmg) * 0.01f), true);
 
                 for (int i = 0; i < 6; i++)
                 {
@@ -260,7 +273,7 @@ namespace CombatAndDodgeOverhaul
                     float currentRes = m_character.Stats.GetDamageResistance((DamageType.Types)i);
                     if (currentRes < 100)
                     {
-                        var valueToSet = _settings.Enemy_Resistances;
+                        var valueToSet = (float)_config.GetValue(Settings.Enemy_Resistances);
 
                         if (currentRes + valueToSet >= 99)
                         {
@@ -276,7 +289,7 @@ namespace CombatAndDodgeOverhaul
                 }
             }
 
-            if (_settings.All_Enemies_Allied)
+            if ((bool)_config.GetValue(Settings.All_Enemies_Allied))
             {
                 m_character.ChangeFaction(Character.Factions.Bandits);
                 m_character.TargetingSystem.AlliedToSameFaction = true;

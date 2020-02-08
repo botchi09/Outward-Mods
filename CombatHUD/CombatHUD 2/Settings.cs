@@ -18,6 +18,8 @@ namespace CombatHUD
         public static string EnemyInfobox = "EnemyInfobox";
         public static string LabelsStayAtHitPos = "LabelsStayAtHitPos";
         public static string DisableColors = "LabelColors";
+        public static string MinFontSize = "MinFontSize";
+        public static string MaxFontSize = "MaxFontSize";
         public static string MaxDistance = "MaxDistance";
         public static string DamageCeiling = "DamageCeiling";
         public static string MinimumDamage = "MinimumDamage";
