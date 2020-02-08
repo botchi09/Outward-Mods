@@ -6,16 +6,13 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-//using SinAPI;
-using static CustomKeybindings;
 using Partiality.Modloader;
+using SharedModConfig;
 
 namespace OutSoulsMod
 {
     public class ModBase : PartialityMod
     {
-        public GameObject _obj = null;
-
         public ModBase()
         {
             this.ModID = "OutSouls";
@@ -27,11 +24,8 @@ namespace OutSoulsMod
         {
             base.OnEnable();
 
-            if (_obj == null)
-            {
-                _obj = new GameObject(this.ModID);
-                GameObject.DontDestroyOnLoad(_obj);
-            }
+            var _obj = new GameObject(this.ModID);
+            GameObject.DontDestroyOnLoad(_obj);
 
             _obj.AddComponent<OutSouls>();
         }
@@ -47,103 +41,85 @@ namespace OutSoulsMod
         public static OutSouls Instance;
         public static double version = 2.0;
 
-        public static Settings settings;
-        public static readonly string settingsPath = @"Mods\OutSouls\OutSouls.json";
-
-        public string MenuKey = "OutSouls Menu";
+        public static ModConfig config;
 
         internal void Awake()
         {
             Instance = this;
 
-            settings = new Settings();
-            LoadSettings();
-
-            this.gameObject.AddComponent<OutSoulsGUI>();
             this.gameObject.AddComponent<BonfireManager>();
             this.gameObject.AddComponent<BonfireGUI>();
             this.gameObject.AddComponent<RPCManager>();
-
-            // custom keybindings
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5);
         }
 
-        internal void Update()
+        internal void Start()
         {
-            //if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)
-            //{
-            //    return;
-            //}
+            config = SetupConfig();
 
-            foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
+            StartCoroutine(SetupCoroutine());
+        }
+
+        private ModConfig SetupConfig()
+        {
+            var newConfig = new ModConfig
             {
-                if (m_playerInputManager[ps.PlayerID].GetButtonDown(MenuKey))
+                ModName = "OutSouls",
+                SettingsVersion = 1.0,
+                Settings = new List<BBSetting>
                 {
-                    OutSoulsGUI.Instance.showGui = !OutSoulsGUI.Instance.showGui;
+                    new BoolSetting
+                    {
+                        Name = Settings.Enable_Bonfire_System,
+                        DefaultValue = true,
+                        Description = "Enable Bonfires (requires scene reload)",
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Bonfires_Heal_Enemies,
+                        DefaultValue = false,
+                        Description = "Bonfires heal and resurrect enemies",
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Disable_Bonfire_Costs,
+                        DefaultValue = false,
+                        Description = "Disable all Bonfire costs",
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Cant_Use_Bonfires_In_Combat,
+                        DefaultValue = true,
+                        Description = "Can't use Bonfires in combat",
+                    },
                 }
+            };
+
+            return newConfig;
+        }
+
+        private IEnumerator SetupCoroutine()
+        {
+            while (!ConfigManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
             }
+
+            config.Register();
         }
 
         public bool CanInteract(Character c)
         {
             return (bool)At.Call(c, "CanInteract", null);
         }
-
-        // =============== settings =====================
-
-
-        private void LoadSettings()
-        {
-            settings = new Settings();
-
-            try
-            {
-                Settings loadsettings = new Settings();
-                loadsettings = JsonUtility.FromJson<Settings>(File.ReadAllText(settingsPath));
-                if (loadsettings != null)
-                {
-                    settings = loadsettings;
-                }
-            }
-            catch
-            {
-                settings = new Settings();
-            }
-        }
-
-        internal void OnDisable()
-        {
-            SaveSettings();
-        }
-
-        private void SaveSettings()
-        {
-            if (!Directory.Exists(@"Mods"))
-            {
-                Directory.CreateDirectory(@"Mods");
-            }
-            if (!Directory.Exists(@"Mods\OutSouls"))
-            {
-                Directory.CreateDirectory(@"Mods\OutSouls");
-            }
-
-            if (File.Exists(settingsPath))
-            {
-                File.Delete(settingsPath);
-            }
-            File.WriteAllText(settingsPath, JsonUtility.ToJson(settings, true));
-        }
+        
     }
 
     public class Settings
     {
-        // global enable/disable
-        public bool Disable_Scaling = false;
-
-        // bonfire settings
-        public bool Enable_Bonfire_System = true;
-        public bool Bonfires_Heal_Enemies = false;
-        public bool Disable_Bonfire_Costs = false;
-        public bool Cant_Use_Bonfires_In_Combat = true;
+        public static string Enable_Bonfire_System = "Enable_Bonfire_System";
+        public static string Bonfires_Heal_Enemies = "Bonfires_Heal_Enemies";
+        public static string Disable_Bonfire_Costs = "Disable_Bonfire_Costs";
+        public static string Cant_Use_Bonfires_In_Combat = "Cant_Use_Bonfires_In_Combat";
+        //public static string Disable_Scaling = "Disable_Scaling";
     }
 }

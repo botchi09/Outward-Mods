@@ -4,9 +4,9 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System.Reflection;
-//using SinAPI;
 using System.IO;
 using UnityEngine.Events;
+using SharedModConfig;
 
 namespace OutSoulsMod
 {
@@ -61,7 +61,7 @@ namespace OutSoulsMod
             // if scene has changed since last unpause, run the LoadScene()
             if (SceneChangeFlag)
             {
-                if (OutSouls.settings.Enable_Bonfire_System && bonfirePositions.ContainsKey(currentScene))
+                if ((bool)OutSouls.config.GetValue(Settings.Enable_Bonfire_System) && bonfirePositions.ContainsKey(currentScene))
                 {
                     LoadScene();
                 }
@@ -70,7 +70,7 @@ namespace OutSoulsMod
             }
 
             // handle some bonfire menu show/hide logic
-            if (IsBonfireInteracting && OutSouls.settings.Enable_Bonfire_System && OutSouls.settings.Cant_Use_Bonfires_In_Combat)
+            if (IsBonfireInteracting && (bool)OutSouls.config.GetValue(Settings.Enable_Bonfire_System) && (bool)OutSouls.config.GetValue(Settings.Cant_Use_Bonfires_In_Combat))
             {
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
                 {
@@ -220,13 +220,16 @@ namespace OutSoulsMod
             }
 
             // cannot use bonfires in combat
-            if (OutSouls.settings.Cant_Use_Bonfires_In_Combat)
+            if ((bool)OutSouls.config.GetValue(Settings.Cant_Use_Bonfires_In_Combat))
             {
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
                 {
                     if (ps.ControlledCharacter.InCombat)
                     {
-                        StartCoroutine(OutSoulsGUI.Instance.SetMessage("You cannot use Bonfires while players are in combat!", 3));
+                        if (ps.IsLocalPlayer)
+                        {
+                            ps.ControlledCharacter.CharacterUI.ShowInfoNotification("You cannot use Bonfires while players in combat!");
+                        }
                         return;
                     }
                 }
@@ -263,7 +266,7 @@ namespace OutSoulsMod
             {
                 if (c.IsAI)
                 {
-                    if (OutSouls.settings.Bonfires_Heal_Enemies)
+                    if ((bool)OutSouls.config.GetValue(Settings.Bonfires_Heal_Enemies))
                     {
                         if (c.Health <= 0)
                         {
@@ -290,9 +293,13 @@ namespace OutSoulsMod
                 }
             }
 
-            if (OutSouls.settings.Bonfires_Heal_Enemies)
+            if ((bool)OutSouls.config.GetValue(Settings.Bonfires_Heal_Enemies))
             {
-                StartCoroutine(OutSoulsGUI.Instance.SetMessage("Nearby foes have been resurrected...", 3));
+                foreach(SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
+                {
+                    player.CharUI.ShowInfoNotification("Nearby enemies have been resurrected...");
+                }
+                //StartCoroutine(OutSoulsGUI.Instance.SetMessage("Nearby foes have been resurrected...", 3));
             }
         }
 
@@ -348,9 +355,9 @@ namespace OutSoulsMod
         {
             if (GUILayout.Button(label))
             {
-                if (!OutSouls.settings.Disable_Bonfire_Costs)
+                if (!(bool)OutSouls.config.GetValue(Settings.Disable_Bonfire_Costs))
                 {
-                    Character c = CharacterManager.Instance.GetFirstLocalCharacter();
+                    Character c = CharacterManager.Instance.GetWorldHostCharacter();
                     if (c.Inventory.OwnsItem(6500010))
                     {
                         c.Inventory.RemoveItem(6500010, 1);
@@ -358,7 +365,7 @@ namespace OutSoulsMod
                     }
                     else
                     {
-                        StartCoroutine(OutSoulsGUI.Instance.SetMessage("World Host " + c.Name + " does not own a Fire Stone", 4));
+                        CharacterManager.Instance.GetFirstLocalCharacter().CharacterUI.ShowInfoNotification("Host does not own a Fire Stone!");
                     }
                 }
                 else

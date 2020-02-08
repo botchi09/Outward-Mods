@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-//using SinAPI;
 using System.IO;
+using SharedModConfig;
 
 namespace OutSoulsMod
 {
@@ -14,6 +14,7 @@ namespace OutSoulsMod
         public static BonfireGUI Instance;
 
         public Texture2D bonfireTex;
+        public Font PhilosopherFont;
 
         public Vector2 guiSize = new Vector2(250, 194);
         public Vector2 scroll = Vector2.zero;
@@ -24,6 +25,11 @@ namespace OutSoulsMod
         internal void Awake()
         {
             Instance = this;
+        }
+
+        internal void Update()
+        {
+            MenuMouseFix();
         }
 
         internal void OnGUI()
@@ -68,10 +74,22 @@ namespace OutSoulsMod
             GUILayout.BeginVertical();
 
             int origSize = GUI.skin.button.fontSize;
-            if (OutSoulsGUI.Instance.Philosopher_Font != null)
+            if (PhilosopherFont == null)
             {
-                GUI.skin.label.font = OutSoulsGUI.Instance.Philosopher_Font;
-                GUI.skin.button.font = OutSoulsGUI.Instance.Philosopher_Font;
+                var fonts = Resources.FindObjectsOfTypeAll<Font>();
+                foreach (Font f in fonts)
+                {
+                    if (f.name.ToLower().Contains("philosopher-regular"))
+                    {
+                        PhilosopherFont = f;
+                        break;
+                    }
+                }
+            }
+            else 
+            {
+                GUI.skin.label.font = PhilosopherFont;
+                GUI.skin.button.font = PhilosopherFont;
                 GUI.skin.button.fontSize = 15;
             }
 
@@ -83,10 +101,10 @@ namespace OutSoulsMod
             {
                 TeleportsPage();
             }
-            else if (cur_Main_Page == 2)
-            {
-                SettingsPage();
-            }
+            //else if (cur_Main_Page == 2)
+            //{
+            //    SettingsPage();
+            //}
             else { cur_Main_Page = 0; }
 
             GUI.skin.button.fontSize = origSize;
@@ -106,7 +124,7 @@ namespace OutSoulsMod
             GUI.color = Color.white;
 
             string cost = "";
-            if (!OutSouls.settings.Disable_Bonfire_Costs) { cost = " (1 Fire Stone)"; }
+            if (!(bool)OutSouls.config.GetValue(Settings.Disable_Bonfire_Costs)) { cost = " (1 Fire Stone)"; }
             GUILayout.Space(5);
             if (GUILayout.Button("Teleport" + cost))
             {
@@ -117,11 +135,11 @@ namespace OutSoulsMod
 
             SilverPriceButton("Reset Area", 100, "Resetting Area...", RPCManager.Instance.BonfireReset(), false);
 
-            GUILayout.Space(5);
-            if (GUILayout.Button("Settings"))
-            {
-                cur_Main_Page = 2;
-            }
+            //GUILayout.Space(5);
+            //if (GUILayout.Button("Settings"))
+            //{
+            //    cur_Main_Page = 2;
+            //}
 
             GUILayout.Space(5);
             GUI.color = Color.red;
@@ -147,7 +165,7 @@ namespace OutSoulsMod
         public void SilverPriceButton(string label, int cost, string successMessage, IEnumerator successAction, bool everyonePays)
         {
             string costString = "";
-            if (!OutSouls.settings.Disable_Bonfire_Costs) { costString += " (" + cost + ") Silver"; }
+            if (!(bool)OutSouls.config.GetValue(Settings.Disable_Bonfire_Costs)) { costString += " (" + cost + ") Silver"; }
 
             if (GUILayout.Button(label + costString))
             {
@@ -155,7 +173,7 @@ namespace OutSoulsMod
                 string costNames = "";
                 List<Character> toPay = new List<Character>();
 
-                if (!OutSouls.settings.Disable_Bonfire_Costs)
+                if (!(bool)OutSouls.config.GetValue(Settings.Disable_Bonfire_Costs))
                 {
                     if (everyonePays)
                     {
@@ -181,16 +199,22 @@ namespace OutSoulsMod
                 {
                     if (everyonePays)
                     {
-                        StartCoroutine(OutSoulsGUI.Instance.SetMessage(costNames + " does not have enough silver to " + label + " (" + cost + ")", 4));
+                        foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
+                        {
+                            player.CharUI.ShowInfoNotification(costNames + " does not have enough silver to " + label + " (" + cost + ")");
+                        }
                     }
                     else
                     {
-                        StartCoroutine(OutSoulsGUI.Instance.SetMessage("You do not have enough silver to " + label + " (" + cost + ")", 4));
+                        foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
+                        {
+                            player.CharUI.ShowInfoNotification("You do not have enough silver to " + label + " (" + cost + ")");
+                        }
                     }
                 }
                 else
                 {
-                    if (!OutSouls.settings.Disable_Bonfire_Costs)
+                    if (!(bool)OutSouls.config.GetValue(Settings.Disable_Bonfire_Costs))
                     {
                         foreach (Character c in toPay)
                         {
@@ -199,7 +223,10 @@ namespace OutSoulsMod
                     }
 
                     StartCoroutine(successAction);
-                    StartCoroutine(OutSoulsGUI.Instance.SetMessage(successMessage, 2));
+                    foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
+                    {
+                        player.CharUI.ShowInfoNotification(successMessage);
+                    }
                 }
             }
         }
@@ -339,22 +366,53 @@ namespace OutSoulsMod
             }
         }
 
-        public void SettingsPage()
+        private bool m_lastMenuFix;
+
+        private void MenuMouseFix()
         {
-            if (GUILayout.Button("< Main Menu"))
+            var flag = BonfireManager.Instance.IsBonfireInteracting;
+            if (m_lastMenuFix != flag)
             {
-                cur_Main_Page = 0;
+                m_lastMenuFix = flag;
+
+                Character c = CharacterManager.Instance.GetFirstLocalCharacter();
+
+                if (c.CharacterUI.PendingDemoCharSelectionScreen is Panel panel)
+                {
+                    if (m_lastMenuFix)
+                        panel.Show();
+                    else
+                        panel.Hide();
+                }
+                else if (m_lastMenuFix)
+                {
+                    GameObject obj = new GameObject();
+                    obj.transform.parent = c.transform;
+                    obj.SetActive(true);
+
+                    Panel newPanel = obj.AddComponent<Panel>();
+                    At.SetValue(newPanel, typeof(CharacterUI), c.CharacterUI, "PendingDemoCharSelectionScreen");
+                    newPanel.Show();
+                }
             }
-            GUILayout.Space(15);
-
-            OutSouls.settings.Bonfires_Heal_Enemies = GUILayout.Toggle(OutSouls.settings.Bonfires_Heal_Enemies, "Bonfires Resurrect Enemies");
-            OutSouls.settings.Disable_Bonfire_Costs = GUILayout.Toggle(OutSouls.settings.Disable_Bonfire_Costs, "Disable Bonfire Costs");
-            OutSouls.settings.Cant_Use_Bonfires_In_Combat = GUILayout.Toggle(OutSouls.settings.Cant_Use_Bonfires_In_Combat, "Can't Use Bonfires In Combat");
-
-            GUILayout.Space(20);
-
-            GUILayout.Label("These settings can also be accessed from the main OutSouls menu");
         }
+
+        //public void SettingsPage()
+        //{
+        //    if (GUILayout.Button("< Main Menu"))
+        //    {
+        //        cur_Main_Page = 0;
+        //    }
+        //    GUILayout.Space(15);
+
+        //    OutSouls.settings.Bonfires_Heal_Enemies = GUILayout.Toggle(OutSouls.settings.Bonfires_Heal_Enemies, "Bonfires Resurrect Enemies");
+        //    OutSouls.settings.Disable_Bonfire_Costs = GUILayout.Toggle(OutSouls.settings.Disable_Bonfire_Costs, "Disable Bonfire Costs");
+        //    OutSouls.settings.Cant_Use_Bonfires_In_Combat = GUILayout.Toggle(OutSouls.settings.Cant_Use_Bonfires_In_Combat, "Can't Use Bonfires In Combat");
+
+        //    GUILayout.Space(20);
+
+        //    GUILayout.Label("These settings can also be accessed from the main OutSouls menu");
+        //}
 
         // ===== misc gui =====
 

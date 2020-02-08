@@ -93,9 +93,9 @@ namespace PvP
 
             AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
 
-            // Multiplayer hooks
-            On.PauseMenu.Show += ShowPatch;
-            On.PauseMenu.Update += UpdatePatch;
+            //// Multiplayer hooks
+            //On.PauseMenu.Show += ShowPatch;
+            //On.PauseMenu.Update += UpdatePatch;
 
             // Custom Gameplay hooks
             On.InteractionRevive.OnActivate += DisableReviveInteractionHook;
@@ -524,46 +524,6 @@ namespace PvP
             if (File.Exists(savePath)) { File.Delete(savePath); }
 
             File.WriteAllText(savePath, JsonUtility.ToJson(settings, true));
-        }
-
-
-        // some hooks from MP Limit Remover. If both mods are running this will do nothing, and in Partiality it wont even be called twice.
-
-        // fix pause menu 1
-        public static void ShowPatch(On.PauseMenu.orig_Show orig, PauseMenu self)
-        {
-            orig(self);
-            Button onlineButton = typeof(PauseMenu).GetField("m_btnToggleNetwork", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(self) as Button;
-
-            //Due to spawning bugs, only allow disconnect if you are the master, or if you are a client with no splitscreen, force splitscreen to quit before disconnect
-            if (PhotonNetwork.isMasterClient || SplitScreenManager.Instance.LocalPlayerCount == 1)
-            {
-                onlineButton.interactable = true;
-            }
-
-            SetSplitButtonInteractable(self);
-
-            //If this is used with a second splitscreen player both players load in missing inventory. Very BAD. Disabled for now.
-            //Button findMatchButton = typeof(PauseMenu).GetField("m_btnFindMatch", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(instance) as Button;
-            //findMatchButton.interactable = PhotonNetwork.offlineMode;
-        }
-
-        // fix pause menu 2
-        //for some reason the update function also forces the split button interactable, so we have to override it here too
-        public static void UpdatePatch(On.PauseMenu.orig_Update orignal, PauseMenu instance)
-        {
-            orignal(instance);
-            SetSplitButtonInteractable(instance);
-        }
-
-        public static void SetSplitButtonInteractable(PauseMenu instance)
-        {
-            //Debug.Log("isMasterClient: " + PhotonNetwork.isMasterClient);
-            Button splitButton = typeof(PauseMenu).GetField("m_btnSplit", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(instance) as Button;
-            if (!PhotonNetwork.isMasterClient || !PhotonNetwork.isNonMasterClientInRoom)
-            {
-                splitButton.interactable = true;
-            }
         }
     }
 }

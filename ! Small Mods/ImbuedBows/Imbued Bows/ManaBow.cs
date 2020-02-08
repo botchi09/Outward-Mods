@@ -10,9 +10,9 @@ namespace ImbuedBows
 {
     public class ManaBow : MonoBehaviour
     {
-        private static readonly int ManaBowID = 2800900;
-        private static readonly int ManaArrowID = 2800901;
-        private static readonly float ManaBowCost = 5f;
+        public static readonly int ManaBowID = 2800900;
+        public static readonly int ManaArrowID = 2800901;
+        public static readonly float ManaBowCost = 5f;
 
         internal void Awake()
         {
@@ -26,6 +26,49 @@ namespace ImbuedBows
             // ammo sound hook
             On.CharacterInventory.PlayEquipSFX += EquipSoundHook;
             On.CharacterInventory.PlayUnequipSFX += UnequipSoundHook;
+
+            // bow skills
+            On.UseLoadoutAmunition.TryTriggerConditions += TryUseAmmoHook;
+            On.UseLoadoutAmunition.ActivateLocally += ActivateAmmoHook;
+            On.AttackSkill.OwnerHasAllRequiredItems += OwnerHasItemsHook;
+        }
+
+        private bool OwnerHasItemsHook(On.AttackSkill.orig_OwnerHasAllRequiredItems orig, AttackSkill self, bool _tryingToActivate)
+        {
+            if (self.OwnerCharacter && self.OwnerCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            {
+                return true;
+            }
+            else
+            {
+                return orig(self, _tryingToActivate);
+            }
+        }
+
+        private bool TryUseAmmoHook(On.UseLoadoutAmunition.orig_TryTriggerConditions orig, UseLoadoutAmunition self)
+        {
+            var affectedChar = At.GetValue(typeof(Effect), self as Effect, "m_affectedCharacter") as Character;
+
+            if (self.MainHand && affectedChar.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            {
+                return true;
+            }
+            else
+            {
+                return orig(self);
+            }
+        }
+
+        private void ActivateAmmoHook(On.UseLoadoutAmunition.orig_ActivateLocally orig, UseLoadoutAmunition self, Character _affectedCharacter, object[] _infos)
+        {
+            if (self.MainHand && _affectedCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBow.ManaBowID)
+            {
+                // do nothing.
+            }
+            else
+            {
+                orig(self, _affectedCharacter, _infos);
+            }
         }
 
         private void EquipSoundHook(On.CharacterInventory.orig_PlayEquipSFX orig, CharacterInventory self, Equipment _equipment)

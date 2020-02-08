@@ -53,6 +53,7 @@ namespace ImbuedBows
             On.ItemVisual.AddImbueFX += AddImbueFXHook;
         }
 
+
         private IEnumerator SetupCoroutine()
         {
             while (!ResourcesPrefabManager.Instance.Loaded)

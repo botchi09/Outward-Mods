@@ -240,18 +240,18 @@ namespace PvP
             global.settings.Enable_Menu_Scaling = GUILayout.Toggle(global.settings.Enable_Menu_Scaling, "Enable Menu Scaling");
             GUILayout.Space(15);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Online Multiplayer Limit:", GUILayout.Width(140));
+            //GUILayout.BeginHorizontal();
+            //GUILayout.Label("Online Multiplayer Limit:", GUILayout.Width(140));
 
-            string s = GUILayout.TextField(global.settings.Multiplayer_Limit.ToString(), GUILayout.Width(40));
-            if (int.TryParse(s, out int i))
-            {
-                global.settings.Multiplayer_Limit = i;
-            }
-            GUILayout.EndHorizontal();
-            GUILayout.Label("This will only apply when you are the host.");
-            GUILayout.Space(20);
-            GUILayout.Label("If you want to join a game in split mode, you should join the game first, then start split.");
+            //string s = GUILayout.TextField(global.settings.Multiplayer_Limit.ToString(), GUILayout.Width(40));
+            //if (int.TryParse(s, out int i))
+            //{
+            //    global.settings.Multiplayer_Limit = i;
+            //}
+            //GUILayout.EndHorizontal();
+            //GUILayout.Label("This will only apply when you are the host.");
+            //GUILayout.Space(20);
+            //GUILayout.Label("If you want to join a game in split mode, you should join the game first, then start split.");
             GUILayout.EndVertical();
         }
 
