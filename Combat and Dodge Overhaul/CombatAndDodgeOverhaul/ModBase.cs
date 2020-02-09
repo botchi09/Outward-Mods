@@ -129,12 +129,13 @@ namespace CombatAndDodgeOverhaul
             var newConfig = new ModConfig
             {
                 ModName = "Combat and Dodge Overhaul",
-                SettingsVersion = 1.1,
+                SettingsVersion = 1.2,
                 Settings = new List<BBSetting>
                 {
                     new BoolSetting
                     {
                         Name = Settings.Dodge_Cancelling,
+                        SectionTitle = "Player Animations",
                         Description = "Allow animation cancelling with dodge",
                         DefaultValue = true
                     },
@@ -146,9 +147,20 @@ namespace CombatAndDodgeOverhaul
                     },
                     new FloatSetting
                     {
+                        Name = Settings.SlowDown_Modifier,
+                        Description = "Stagger 'Slow-Down' animation speed multiplier (lower value = less slow-down)",
+                        DefaultValue = 0.75f,
+                        MinValue = 0.0f,
+                        MaxValue = 2.0f,
+                        ShowPercent = false,
+                        RoundTo = 2
+                    },
+                    new FloatSetting
+                    {
                         Name = Settings.Extra_Stamina_Regen,
+                        SectionTitle = "Player Stamina Settings",
                         Description = "Extra stamina regen per second",
-                        DefaultValue = 5f,
+                        DefaultValue = 0f,
                         MinValue = 0.0f,
                         MaxValue = 100.0f,
                         ShowPercent = false,
@@ -160,14 +172,14 @@ namespace CombatAndDodgeOverhaul
                         Description = "Delay (in seconds) after last stamina use before extra regen takes effect",
                         DefaultValue = 2f,
                         MinValue = 0.0f,
-                        MaxValue = 60.0f,
+                        MaxValue = 20.0f,
                         ShowPercent = false,
                         RoundTo = 1
                     },
                     new FloatSetting
                     {
                         Name = Settings.Stamina_Cost_Stat,
-                        Description = "Custom Stamina Cost stat (added to your Stamina Cost stat)",
+                        Description = "Custom Stamina Cost Modifier (added to your Stamina Cost stat)",
                         DefaultValue = 0f,
                         MinValue = -500.0f,
                         MaxValue = 500.0f,
@@ -187,6 +199,7 @@ namespace CombatAndDodgeOverhaul
                     new BoolSetting
                     {
                         Name = Settings.Custom_Bag_Burden,
+                        SectionTitle = "Backpack Dodge Burdens",
                         Description = "Enable custom bag dodge burdens",
                         DefaultValue = true
                     },
@@ -194,45 +207,36 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.min_burden_weight,
                         Description = "Minimum bag weight for dodge burdens to take effect",
-                        DefaultValue = 0.4f,
-                        MinValue = 0.0f,
-                        MaxValue = 1.0f,
+                        DefaultValue = 40f,
+                        MinValue = 0f,
+                        MaxValue = 100f,
                         ShowPercent = true,
-                        RoundTo = 2
+                        RoundTo = 0
                     },
                     new FloatSetting
                     {
                         Name = Settings.min_slow_effect,
                         Description = "Minimum dodge burden effect",
-                        DefaultValue = 0.2f,
-                        MinValue = 0.0f,
-                        MaxValue = 1.0f,
+                        DefaultValue = 20f,
+                        MinValue = 0f,
+                        MaxValue = 100f,
                         ShowPercent = true,
-                        RoundTo = 2
+                        RoundTo = 0
                     },
                     new FloatSetting
                     {
                         Name = Settings.max_slow_effect,
-                        Description = "Maximum dodge burden effect",
-                        DefaultValue = 1.0f,
-                        MinValue = 0.0f,
-                        MaxValue = 1.0f,
+                        Description = "Maximum dodge burden effect (multiplier)",
+                        DefaultValue = 100f,
+                        MinValue = 0f,
+                        MaxValue = 100f,
                         ShowPercent = true,
-                        RoundTo = 2
-                    },
-                    new FloatSetting
-                    {
-                        Name = Settings.SlowDown_Modifier,
-                        Description = "Stagger 'Slow-Down' animation speed multiplier (lower value = less slow-down)",
-                        DefaultValue = 0.75f,
-                        MinValue = 0.0f,
-                        MaxValue = 2.0f,
-                        ShowPercent = false,
-                        RoundTo = 2
+                        RoundTo = 0
                     },
                     new BoolSetting
                     {
                         Name = Settings.Blocking_Staggers_Attacker,
+                        SectionTitle = "Stability and Stagger",
                         Description = "A successful block will stagger the attacker (using melee weapons)",
                         DefaultValue = true
                     },
@@ -315,6 +319,7 @@ namespace CombatAndDodgeOverhaul
                     new BoolSetting
                     {
                         Name = Settings.All_Enemies_Allied,
+                        SectionTitle = "Enemy Settings",
                         Description = "All enemies are allied (requires scene reload to take effect)",
                         DefaultValue = false
                     },

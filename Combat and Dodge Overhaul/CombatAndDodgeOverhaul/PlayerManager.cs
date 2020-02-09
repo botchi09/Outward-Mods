@@ -202,13 +202,13 @@ namespace CombatAndDodgeOverhaul
             float weight = bag.Weight * 100;
             float ratio = (weight / bag.BagCapacity) * 0.01f;
 
-            if (ratio < (float)OverhaulGlobal.config.GetValue(Settings.min_burden_weight))
+            if (ratio < ((float)OverhaulGlobal.config.GetValue(Settings.min_burden_weight) * 0.01f))
             {
-                return (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect);
+                return (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect) * 0.01f;
             }
             else
             {
-                return Mathf.Clamp(ratio, (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect), (float)OverhaulGlobal.config.GetValue(Settings.max_slow_effect));
+                return Mathf.Clamp(ratio, (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect), (float)OverhaulGlobal.config.GetValue(Settings.max_slow_effect)) * 0.01f;
             }
         }
 

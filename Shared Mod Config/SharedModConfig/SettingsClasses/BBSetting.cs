@@ -15,6 +15,8 @@ namespace SharedModConfig
         public string Description { get; set; }
         [XmlIgnore]
         public abstract object DefaultValue { get; set; }
+        [XmlIgnore]
+        public string SectionTitle { get; set; }
 
         [XmlIgnore]
         public GameObject LinkedGameObject;

@@ -33,6 +33,7 @@ namespace SharedModConfig
             return m_initDone;
         }
 
+        #region Internal Setup
         internal void Awake()
         {
             Instance = this;
@@ -104,7 +105,10 @@ namespace SharedModConfig
                 m_ConfigCanvas.SetActive(false);
             }
         }
+        #endregion
 
+
+        #region UI Button Listener Functions
         private void CloseButton()
         {
             m_ConfigCanvas.SetActive(false);
@@ -129,13 +133,16 @@ namespace SharedModConfig
                 Debug.LogError("[SharedModConfig] Error! Could not find transform " + buttontext);
             }
         }
+        #endregion
 
+
+        #region Adding a Config to the UI Menu
         public void AddConfig(ModConfig config)
         {
             // add button to mod list
             var newButton = Instantiate(m_ModListButtonPrefab);
             newButton.name = config.ModName;
-            newButton.transform.SetParent(m_ModListButtonPrefab.transform.parent, false);
+            newButton.transform.SetParent(m_modListHolder.transform, false);
 
             var text = newButton.GetComponentInChildren<Text>();
             text.text = config.ModName;
@@ -145,6 +152,20 @@ namespace SharedModConfig
             button.onClick.AddListener(ModListButton);
 
             newButton.SetActive(true);
+
+            // Alphabetize the modlist
+            List<Transform> children = new List<Transform>();
+            for (int i = m_modListHolder.transform.childCount - 1; i >= 0; i--)
+            {
+                Transform child = m_modListHolder.transform.GetChild(i);
+                children.Add(child);
+                child.transform.SetParent(null, false);
+            }
+            children.Sort((Transform t1, Transform t2) => { return t1.name.CompareTo(t2.name); });
+            foreach (Transform child in children)
+            {
+                child.transform.SetParent(m_modListHolder.transform, false);
+            }
 
             // setup canvas
             var newCanvas = Instantiate(m_SettingsPrefab);
@@ -161,6 +182,7 @@ namespace SharedModConfig
             var boolPrefab = contentHolder.Find("Toggle_Holder").gameObject;
             var stringPrefab = contentHolder.Find("InputField_Holder").gameObject;
             var floatPrefab = contentHolder.Find("HSlider_Holder").gameObject;
+            var titlePrefab = contentHolder.Find("Title_Holder").gameObject;
 
             // setup settings
             foreach (BBSetting setting in config.Settings)
@@ -169,15 +191,15 @@ namespace SharedModConfig
                 {
                     case "BoolSetting":
                     case "SharedModConfig.BoolSetting":
-                        SetupBoolSetting(contentHolder, boolPrefab, setting as BoolSetting);
+                        SetupBoolSetting(contentHolder, boolPrefab, setting as BoolSetting, titlePrefab);
                         break;
                     case "StringSetting":
                     case "SharedModConfig.StringSetting":
-                        SetupStringSetting(contentHolder, stringPrefab, setting as StringSetting);
+                        SetupStringSetting(contentHolder, stringPrefab, setting as StringSetting, titlePrefab);
                         break;
                     case "FloatSetting":
                     case "SharedModConfig.FloatSetting":
-                        SetupFloatSetting(contentHolder, floatPrefab, setting as FloatSetting);
+                        SetupFloatSetting(contentHolder, floatPrefab, setting as FloatSetting, titlePrefab);
                         break;
                     default:
                         Debug.LogError("[SharedModConfig] Could not parse BBSetting of type " + setting.GetType().Name);
@@ -189,25 +211,45 @@ namespace SharedModConfig
             Destroy(boolPrefab);
             Destroy(stringPrefab);
             Destroy(floatPrefab);
+            Destroy(titlePrefab);
         }
 
-        private void SetupBoolSetting(Transform contentHolder, GameObject prefab, BoolSetting setting)
+        private GameObject SetupBasicSetting(Transform contentHolder, GameObject prefab, BBSetting setting, GameObject titlePrefab)
         {
-            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting);
+            if (!string.IsNullOrEmpty(setting.SectionTitle))
+            {
+                var newTitle = Instantiate(titlePrefab).gameObject;
+                newTitle.transform.SetParent(contentHolder.transform, false);
+                var text = newTitle.GetComponent<Text>();
+                text.text = setting.SectionTitle;
+                newTitle.SetActive(true);
+            }
+
+            var newPrefab = Instantiate(prefab);
+            newPrefab.transform.SetParent(contentHolder, false);
+            setting.LinkedGameObject = newPrefab;
+            newPrefab.SetActive(true);
+
+            return newPrefab;
+        }
+
+        private void SetupBoolSetting(Transform contentHolder, GameObject prefab, BoolSetting setting, GameObject titlePrefab)
+        {
+            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting, titlePrefab);
 
             var Toggle = newPrefab.GetComponentInChildren<Toggle>();
             var Label = newPrefab.GetComponentInChildren<Text>();
 
             Toggle.isOn = setting.m_value;
-            Label.text = setting.Description ?? setting.Name;
+            Label.text = string.IsNullOrEmpty(setting.Description) ? setting.Name : setting.Description;
         }
 
-        private void SetupFloatSetting(Transform contentHolder, GameObject prefab, FloatSetting setting)
+        private void SetupFloatSetting(Transform contentHolder, GameObject prefab, FloatSetting setting, GameObject titlePrefab)
         {
-            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting);
+            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting, titlePrefab);
 
             var label = newPrefab.transform.Find("Label").GetComponent<Text>();
-            label.text = setting.Description ?? setting.Name;
+            label.text = string.IsNullOrEmpty(setting.Description) ? setting.Name : setting.Description;
 
             var slider = newPrefab.GetComponentInChildren<Slider>();
             slider.minValue = setting.MinValue;
@@ -223,26 +265,20 @@ namespace SharedModConfig
             textvalue.text = s;
         }
 
-        private void SetupStringSetting(Transform contentHolder, GameObject prefab, StringSetting setting)
+        private void SetupStringSetting(Transform contentHolder, GameObject prefab, StringSetting setting, GameObject titlePrefab)
         {
-            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting);
+            var newPrefab = SetupBasicSetting(contentHolder, prefab, setting, titlePrefab);
 
             var Label = newPrefab.transform.Find("Label").GetComponent<Text>();
-            Label.text = setting.Description ?? setting.Name;
+            Label.text = string.IsNullOrEmpty(setting.Description) ? setting.Name : setting.Description;
 
             var inputField = newPrefab.GetComponentInChildren<InputField>();
             inputField.text = setting.m_value;
         }
+        #endregion
 
-        private GameObject SetupBasicSetting(Transform contentHolder, GameObject prefab, BBSetting setting)
-        {
-            var newPrefab = Instantiate(prefab);
-            newPrefab.transform.SetParent(contentHolder, false);
-            setting.LinkedGameObject = newPrefab;
-            newPrefab.SetActive(true);
-            return newPrefab;
-        }
 
+        #region Menu Mouse Fix
         private void MenuMouseFix()
         {
             if (m_lastCanvasState != m_ConfigCanvas.activeSelf)
@@ -270,5 +306,6 @@ namespace SharedModConfig
                 }
             }
         }
+        #endregion
     }
 }

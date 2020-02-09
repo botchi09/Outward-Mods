@@ -139,6 +139,7 @@ namespace CombatHUD
                     new BoolSetting
                     {
                         Name = Settings.PlayerVitals,
+                        SectionTitle = "Player Settings",
                         Description = "Show player vitals as numerical values",
                         DefaultValue = true
                     },
@@ -157,6 +158,7 @@ namespace CombatHUD
                     new BoolSetting
                     {
                         Name = Settings.EnemyHealth,
+                        SectionTitle = "Enemy Settings",
                         Description = "Show targeted enemy's health as numerical value",
                         DefaultValue = true
                     },
@@ -193,6 +195,7 @@ namespace CombatHUD
                     new BoolSetting
                     {
                         Name = Settings.LabelsStayAtHitPos,
+                        SectionTitle = "Damage Labels",
                         Description = "Damage labels stay at the position of the hit (otherwise track to the Character)",
                         DefaultValue = false
                     },
@@ -265,6 +268,7 @@ namespace CombatHUD
                     new FloatSetting
                     {
                         Name = Settings.Infobox_P1_X,
+                        SectionTitle = "Target Infobox Settings",
                         Description = "Player 1 Infobox: Horizontal offset",
                         DefaultValue = 0f,
                         MaxValue = 4000,
