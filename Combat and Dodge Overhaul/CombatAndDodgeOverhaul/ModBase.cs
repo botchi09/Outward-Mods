@@ -226,7 +226,7 @@ namespace CombatAndDodgeOverhaul
                     new FloatSetting
                     {
                         Name = Settings.max_slow_effect,
-                        Description = "Maximum dodge burden effect (multiplier)",
+                        Description = "Maximum dodge burden effect",
                         DefaultValue = 100f,
                         MinValue = 0f,
                         MaxValue = 100f,

@@ -112,7 +112,14 @@ namespace SharedModConfig
                             + "\r\nThe old file will be renamed to " + path + ".bak");
 
                         streamReader.Close();
-                        File.Move(path, path + ".bak");
+
+                        string bakPath = path + ".bak";
+                        if (File.Exists(bakPath))
+                        {
+                            File.Delete(bakPath);
+                        }
+
+                        File.Move(path, bakPath);
                         return false;
                     }
                     else

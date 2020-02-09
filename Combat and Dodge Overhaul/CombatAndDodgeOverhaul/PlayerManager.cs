@@ -208,7 +208,7 @@ namespace CombatAndDodgeOverhaul
             }
             else
             {
-                return Mathf.Clamp(ratio, (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect), (float)OverhaulGlobal.config.GetValue(Settings.max_slow_effect)) * 0.01f;
+                return Mathf.Clamp(ratio * 100f, (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect), (float)OverhaulGlobal.config.GetValue(Settings.max_slow_effect)) * 0.01f;
             }
         }
 
