@@ -182,7 +182,7 @@ namespace MoreMapDetails
             // update enemy marker texts
             for (int i = 0; i < m_enemyTexts.Count; i++)
             {
-                if (flag && i < EnemyMarkers.Count)
+                if (i < EnemyMarkers.Count)
                 {
                     if (!m_enemyTexts[i].gameObject.activeSelf)
                     {
