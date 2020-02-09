@@ -65,6 +65,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatHUD", "CombatHUD\Comb
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomWeight", "! Small Mods\CustomWeight\CustomWeight\CustomWeight\CustomWeight.csproj", "{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomAreaResetTime", "! Small Mods\Custom Area Reset Time\CustomAreaReset\CustomAreaResetTime.csproj", "{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,10 @@ Global
 		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -214,6 +220,7 @@ Global
 		{D5F48211-9790-443F-A2F6-2430F1CDF1E1} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{0BE76D50-D2D5-449F-934A-E0BE5C2F7BAE} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E61EA2C4-5D64-4828-A24A-47E3EB51A10C}
