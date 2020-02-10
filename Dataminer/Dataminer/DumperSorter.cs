@@ -150,7 +150,7 @@ namespace OutwardExplorer
             ref SortTemplates.SceneSummary sceneSummary,
             string scene)
         {
-            Templates._Enemy origTemplate = new Templates._Enemy();
+            Templates.EnemyTemplate origTemplate = new Templates.EnemyTemplate();
             JsonUtility.FromJsonOverwrite(File.ReadAllText(enemyPath), origTemplate);
 
             // regex and fix the gameobject name, remove the UID and the (count)
@@ -274,7 +274,7 @@ namespace OutwardExplorer
             //File.WriteAllLines(path2, simpleList.ToArray());
         }
 
-        public bool CompareEnemies(Templates._Enemy enemy1, Templates._Enemy enemy2)
+        public bool CompareEnemies(Templates.EnemyTemplate enemy1, Templates.EnemyTemplate enemy2)
         {
             bool flag = true;
 
@@ -360,7 +360,7 @@ namespace OutwardExplorer
             ref SortTemplates.SceneSummary sceneSummary,
             string scene)
         {
-            Templates._Merchant origTemplate = new Templates._Merchant();
+            Templates.Merchant origTemplate = new Templates.Merchant();
             JsonUtility.FromJsonOverwrite(File.ReadAllText(merchantPath), origTemplate);
 
             Debug.Log("Checking merchant " + origTemplate.Name);
@@ -405,7 +405,7 @@ namespace OutwardExplorer
             ref SortTemplates.SceneSummary sceneSummary,
             string scene)
         {
-            Templates._ItemContainer origTemplate = new Templates._ItemContainer();
+            Templates.ItemContainerTemplate origTemplate = new Templates.ItemContainerTemplate();
             JsonUtility.FromJsonOverwrite(File.ReadAllText(containerPath), origTemplate);
 
             Debug.Log("Checking loot " + origTemplate.Name);
@@ -512,7 +512,7 @@ namespace OutwardExplorer
 
                 Dictionary<string, string> tableJsons = new Dictionary<string, string>();
                 int i = 1;
-                foreach (Templates.DropTable table in entry.Value.DropTables)
+                foreach (Templates.DropTableTemplate table in entry.Value.DropTables)
                 {
                     tableJsons.Add("Droptable_" + i, JsonUtility.ToJson(table, true));
                     i++;
@@ -612,11 +612,11 @@ namespace OutwardExplorer
             dropTables.Add(tableName, new SortTemplates.DropTableSummary
             {
                 Name = tableName,
-                ContainerBase = new Templates._DropTableContainer { },
+                ContainerBase = new Templates.DropTableContainer { },
                 EnemySources = new List<string>(),
                 MerchantSources = new List<string>(),
                 ContainerSources = new List<string>(),
-                DropTables = new List<Templates.DropTable>(),
+                DropTables = new List<Templates.DropTableTemplate>(),
             });
 
             // load up the full saved json for this dropable
@@ -686,7 +686,7 @@ namespace OutwardExplorer
 
             foreach (string s in filePaths)
             {
-                Templates._Item item = new Templates._Item();
+                Templates.ItemTemplate item = new Templates.ItemTemplate();
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(s), item);
                 AllItems.Add(item.ItemID + "	" + item.Name + "	" + Path.GetFileNameWithoutExtension(s));
 
@@ -734,7 +734,7 @@ namespace OutwardExplorer
             SaveTable(EquipTable, Folders["Lists"] + "/" + "SHEETS EquipTable.txt");
         }
         
-        public void WeaponTableEntry(ref List<string>WeaponTable, Templates._Item item, string s)
+        public void WeaponTableEntry(ref List<string>WeaponTable, Templates.ItemTemplate item, string s)
         {
             // blacklist
             if (item.Name == "-"
@@ -757,7 +757,7 @@ namespace OutwardExplorer
                 return;
             }
 
-            Templates._Weapon weapon = new Templates._Weapon();
+            Templates.WeaponTemplate weapon = new Templates.WeaponTemplate();
             JsonUtility.FromJsonOverwrite(File.ReadAllText(s), weapon);
 
             List<string> toAdd = new List<string> { weapon.Name };
@@ -812,7 +812,7 @@ namespace OutwardExplorer
             WeaponTable.Add(entry);
         }
 
-        public void EquipmentTableEntry(ref List<string> EquipTable, Templates._Item item, string s)
+        public void EquipmentTableEntry(ref List<string> EquipTable, Templates.ItemTemplate item, string s)
         {
             // blacklist
             if (item.Name == "-"
@@ -828,7 +828,7 @@ namespace OutwardExplorer
                 return;
             }
 
-            Templates._Equipment equipment = new Templates._Equipment();
+            Templates.EquipmentTemplate equipment = new Templates.EquipmentTemplate();
             JsonUtility.FromJsonOverwrite(File.ReadAllText(s), equipment);
 
             if (equipment.DamageResistance == null) { return; } // will only be NULL if item has no item stats at all (eg cosmetic NPC armor)
@@ -882,7 +882,7 @@ namespace OutwardExplorer
             List<string> filePaths = Directory.GetFiles(Folders["Enemies"], "*.json").ToList();
             foreach (string s in filePaths)
             {
-                Templates._Enemy enemy = new Templates._Enemy();
+                Templates.EnemyTemplate enemy = new Templates.EnemyTemplate();
 
                 string json = File.ReadAllText(s);
                 enemy = EnemyJsonFix(ref json);
@@ -1073,7 +1073,7 @@ namespace OutwardExplorer
             {
                 List<string> toAdd = new List<string>();
 
-                Templates._Recipe recipe = new Templates._Recipe();
+                Templates.RecipeTemplate recipe = new Templates.RecipeTemplate();
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(s), recipe);
 
                 string uName = "";
@@ -1127,7 +1127,7 @@ namespace OutwardExplorer
             {
                 List<string> toAdd = new List<string>();
 
-                Templates._StatusEffect effect = new Templates._StatusEffect();
+                Templates.StatusEffectTemplate effect = new Templates.StatusEffectTemplate();
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(s), effect);
 
                 toAdd.Add(effect.EffectID.ToString());
@@ -1191,7 +1191,7 @@ namespace OutwardExplorer
             {
                 List<string> toAdd = new List<string>();
 
-                Templates._Merchant merchant = new Templates._Merchant();
+                Templates.Merchant merchant = new Templates.Merchant();
                 JsonUtility.FromJsonOverwrite(File.ReadAllText(s), merchant);
 
                 toAdd.Add(merchant.Name);
@@ -1202,10 +1202,10 @@ namespace OutwardExplorer
                 {
                     string json = File.ReadAllText(droptablePath);
 
-                    List<Templates.DropTable> droptables = new List<Templates.DropTable>();
+                    List<Templates.DropTableTemplate> droptables = new List<Templates.DropTableTemplate>();
                     droptables = DroptableJsonFix(ref json);
 
-                    Templates._DropTableContainer summary = new Templates._DropTableContainer();
+                    Templates.DropTableContainer summary = new Templates.DropTableContainer();
                     JsonUtility.FromJsonOverwrite(json, summary);
 
                     toAdd.Add(DropTableAsString(summary, droptables));
@@ -1287,10 +1287,10 @@ namespace OutwardExplorer
                 {
                     string json = File.ReadAllText(droptablePath);
 
-                    List<Templates.DropTable> droptables = new List<Templates.DropTable>();
+                    List<Templates.DropTableTemplate> droptables = new List<Templates.DropTableTemplate>();
                     droptables = DroptableJsonFix(ref json);
 
-                    Templates._DropTableContainer container = new Templates._DropTableContainer();
+                    Templates.DropTableContainer container = new Templates.DropTableContainer();
                     JsonUtility.FromJsonOverwrite(json, container);
 
                     toAdd.Add(DropTableAsString(container, droptables));
@@ -1311,7 +1311,7 @@ namespace OutwardExplorer
             SaveTable(DTTable, Folders["Lists"] + "/" + "SHEETS DropTableTable.txt");
         }
 
-        public string DropTableAsString(Templates._DropTableContainer container, List<Templates.DropTable> tables)
+        public string DropTableAsString(Templates.DropTableContainer container, List<Templates.DropTableTemplate> tables)
         {
             string entry = "";
             List<string> toAdd = new List<string>();
@@ -1331,7 +1331,7 @@ namespace OutwardExplorer
             toAdd.Add(guaMins);
             toAdd.Add(guaMaxs);
 
-            foreach (Templates.DropTable table in tables)
+            foreach (Templates.DropTableTemplate table in tables)
             {
                 toAdd.Add(table.MinNumberOfDrops.ToString());
                 toAdd.Add(table.MaxNumberOfDrops.ToString());
@@ -1597,9 +1597,9 @@ namespace OutwardExplorer
         }
 
         // =============================== special functions =================================
-        public Templates._Enemy EnemyJsonFix(ref string orig)
+        public Templates.EnemyTemplate EnemyJsonFix(ref string orig)
         {
-            Templates._Enemy returnEnemy = new Templates._Enemy();
+            Templates.EnemyTemplate returnEnemy = new Templates.EnemyTemplate();
 
             string search = "Enemy Stats\" : ";
             Regex rx = new Regex(search);
@@ -1622,9 +1622,9 @@ namespace OutwardExplorer
         }
 
 
-        public List<Templates.DropTable> DroptableJsonFix(ref string orig)
+        public List<Templates.DropTableTemplate> DroptableJsonFix(ref string orig)
         {
-            List<Templates.DropTable> returnList = new List<Templates.DropTable>();
+            List<Templates.DropTableTemplate> returnList = new List<Templates.DropTableTemplate>();
 
             int firstmatch = -1;
 
@@ -1652,7 +1652,7 @@ namespace OutwardExplorer
 
                     //Debug.Log("fixed json: \r\n" + fix);
 
-                    returnList.Add(JsonUtility.FromJson(fix, typeof(Templates.DropTable)) as Templates.DropTable);
+                    returnList.Add(JsonUtility.FromJson(fix, typeof(Templates.DropTableTemplate)) as Templates.DropTableTemplate);
                     // return fix;
                 }
                 else
@@ -1713,8 +1713,8 @@ namespace OutwardExplorer
         public class DropTableSummary
         {
             public string Name;
-            public Templates._DropTableContainer ContainerBase;
-            public List<Templates.DropTable> DropTables;
+            public Templates.DropTableContainer ContainerBase;
+            public List<Templates.DropTableTemplate> DropTables;
 
             public List<string> EnemySources;
             public List<string> MerchantSources;
@@ -1728,7 +1728,7 @@ namespace OutwardExplorer
 
             public List<string> Locations;
 
-            public Templates._Enemy enemyJson;
+            public Templates.EnemyTemplate enemyJson;
         }
 
         public class ContainerSummary

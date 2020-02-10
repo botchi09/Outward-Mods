@@ -9,7 +9,7 @@ namespace OutwardExplorer
 {
     public class Templates
     {
-        public class _Item
+        public class ItemTemplate
         {
             public string Type; // class type
             public int ItemID;
@@ -23,7 +23,7 @@ namespace OutwardExplorer
             public List<string> Tags;
         }
 
-        public class _Equipment : _Item
+        public class EquipmentTemplate : ItemTemplate
         {
             public string EquipmentSlot;
             public float Protection;
@@ -38,7 +38,7 @@ namespace OutwardExplorer
             public float ColdProtect;
         }
 
-        public class _Bag : _Equipment
+        public class BagTemplate : EquipmentTemplate
         {
             public bool RestrictDodge;
             public float InventoryProtection;
@@ -47,7 +47,7 @@ namespace OutwardExplorer
             public List<float> PreservationAmounts;
         }
 
-        public class _Weapon : _Equipment
+        public class WeaponTemplate : EquipmentTemplate
         {
             public string WeaponType;
             // WeaponStats
@@ -60,20 +60,20 @@ namespace OutwardExplorer
             public List<float> HitEffects_Buildups;
         }
 
-        public class _Consumable : _Item
+        public class ConsumableTemplate : ItemTemplate
         {
             public float Hunger;
             public float Thirst;
             public List<string> Effects;
         }
 
-        public class _PassiveSkill : _Item
+        public class PassiveSkillTemplate : ItemTemplate
         {
             public List<string> AffectedStats;
             public List<float> Values;
         }
 
-        public class _ActiveSkill : _Item
+        public class ActiveSkillTemplate : ItemTemplate
         {
             public float StaminaCost;
             public float ManaCost;
@@ -100,7 +100,7 @@ namespace OutwardExplorer
         }
 
         // EffectPresets
-        public class _StatusEffect
+        public class StatusEffectTemplate
         {
             public string Name;
             public int EffectID;
@@ -119,7 +119,7 @@ namespace OutwardExplorer
         }
 
         // recipes
-        public class _Recipe
+        public class RecipeTemplate
         {
             public string RecipeType;
             public string Result;
@@ -129,7 +129,7 @@ namespace OutwardExplorer
 
         // Scene Dumper
 
-        public class _Enemy
+        public class EnemyTemplate
         {
             //gameObject
             public string Name;
@@ -165,7 +165,7 @@ namespace OutwardExplorer
             public List<string> DropTables;
         }
 
-        public class _Merchant
+        public class Merchant
         {
             public string Name;
             public string Location;
@@ -173,14 +173,14 @@ namespace OutwardExplorer
             public List<string> DropTables;
         }
 
-        public class _ItemContainer : _Item
+        public class ItemContainerTemplate : ItemTemplate
         {
             public string Location; // map loaded from
             public string ContainerType;
             public List<string> DropTableNames;
         }
 
-        public class _DropTableContainer
+        public class DropTableContainer
         {
             public string Name;
 
@@ -193,7 +193,7 @@ namespace OutwardExplorer
             public int MaxRandomDrops;
         }
 
-        public class DropTable
+        public class DropTableTemplate
         {
             public int MinNumberOfDrops;
             public int MaxNumberOfDrops;

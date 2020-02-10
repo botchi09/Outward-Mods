@@ -38,13 +38,15 @@ namespace CustomWeight
         public static WeightManager Instance;
         public ModConfig config;
 
-        public bool PatchedRPM = false;
-        public int PatchedCharacters = 0;
-        public Dictionary<int, float> OrigCapacities = new Dictionary<int, float>(); // dictionary containing original weight limits on bags (ID : Weight)
+        public float m_timeOfLastUpdate;
+
+        // original capacities on bags (ID : Capacity)
+        public Dictionary<int, float> OrigCapacities = new Dictionary<int, float>();
 
         internal void Start()
         {
             Instance = this;
+
             // set up and load settings
             config = SetupConfig();
             StartCoroutine(SetupCoroutine());
@@ -57,108 +59,70 @@ namespace CustomWeight
         {
             while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
             {
-                Debug.Log("waiting for isinitdone");
                 yield return new WaitForSeconds(0.1f);
             }
 
             config.Register();
-
-            Debug.Log("Registered betterCustomWeight");
         }
 
         internal void Update()
         {
-            if (!PatchedRPM && ResourcesPrefabManager.Instance.Loaded && ConfigManager.Instance.IsInitDone())
+            if (Time.time - m_timeOfLastUpdate > 2f)
             {
-                PatchRPM();
+                m_timeOfLastUpdate = Time.time;
 
-                // check if gameplay is running, patch active bags
-                if (Global.Lobby.PlayersInLobbyCount > 0)
+                if (Global.Lobby.PlayersInLobbyCount > 0 && !NetworkLevelLoader.Instance.IsGameplayPaused)
                 {
-                    PatchActiveBags();
-                }
-
-                PatchedRPM = true;
-            }
-
-            // patch active characters
-            if (Global.Lobby.PlayersInLobbyCount != PatchedCharacters)
-            {
-                foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
-                {
-                    PatchPlayer(ps.ControlledCharacter);
-                }
-                PatchedCharacters = Global.Lobby.PlayersInLobbyCount;
-            }
-        }
-
-        private void PatchPlayer(Character c)
-        {
-            float newValue = 10.0f + (float)config.GetValue(Settings.PouchBonus);
-
-            if ((bool)config.GetValue(Settings.NoContainerLimit)) { newValue = -1; }
-
-            At.SetValue(newValue, typeof(ItemContainer), c.Inventory.Pouch, "m_baseContainerCapacity");
-        }
-
-        private void PatchRPM()
-        {
-            foreach (UnityEngine.Object obj in ResourcesPrefabManager.AllPrefabs)
-            {
-                if (!(obj is GameObject go) || !(go.GetComponent<Bag>() is Bag bag)) { continue; }
-
-                foreach (Transform child in bag.transform)
-                {
-                    if (child.GetComponent<ItemContainer>() is ItemContainer container)
+                    foreach (PlayerSystem player in Global.Lobby.PlayersInLobby)
                     {
-                        // get current (or original) limit
-                        float cap = GetCap(bag, container);
-
-                        //typeof(ItemContainer).GetField("m_baseContainerCapacity", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(container, cap);
-
-                        At.SetValue(cap, typeof(ItemContainer), container, "m_baseContainerCapacity");
-
-                        //string s = ", GetValue: " + At.GetValue(typeof(ItemContainer), container, "m_baseContainerCapacity").ToString();
-                        break;
+                        if (player.ControlledCharacter)
+                        {
+                            UpdatePlayer(player.ControlledCharacter);
+                        }
                     }
                 }
             }
         }
 
-        private void PatchActiveBags()
+        private void UpdatePlayer(Character player)
         {
-            foreach (Bag bag in Resources.FindObjectsOfTypeAll<Bag>())
-            {
-                if (At.GetValue(typeof(Bag), bag, "m_container") is ItemContainerStatic container)
-                {
-                    // get current (or original) limit
-                    float cap = GetCap(bag, container as ItemContainer);
+            float newValue = (bool)config.GetValue(Settings.NoContainerLimit) ? -1 : 10.0f + (float)config.GetValue(Settings.PouchBonus);
 
-                    At.SetValue(cap, typeof(ItemContainer), container, "m_baseContainerCapacity");
-                }
+            if ((float)At.GetValue(typeof(ItemContainer), player.Inventory.Pouch, "m_baseContainerCapacity") != newValue)
+            {
+                At.SetValue(newValue, typeof(ItemContainer), player.Inventory.Pouch, "m_baseContainerCapacity");
+            }
+
+            if (player.Inventory.EquippedBag)
+            {
+                UpdateBag(player.Inventory.EquippedBag);
             }
         }
 
-        private float GetCap(Bag bag, ItemContainer container)
+        private void UpdateBag(Bag bag)
         {
             float cap;
 
-            if (OrigCapacities.ContainsKey(bag.ItemID))
+            if (At.GetValue(typeof(Bag), bag, "m_container") is ItemContainerStatic container)
             {
-                cap = OrigCapacities[bag.ItemID];
-            }
-            else
-            {
-                cap = (float)At.GetValue(typeof(ItemContainer), container, "m_baseContainerCapacity");
-                OrigCapacities.Add(bag.ItemID, cap);
-            }
+                if (OrigCapacities.ContainsKey(bag.ItemID))
+                {
+                    cap = OrigCapacities[bag.ItemID];
+                }
+                else
+                {
+                    cap = (float)At.GetValue(typeof(ItemContainer), container, "m_baseContainerCapacity");
+                    OrigCapacities.Add(bag.ItemID, cap);
+                }
 
-            // set new limit based on settings
-            cap *= (float)config.GetValue(Settings.BagBonusMulti);
-            cap += (float)config.GetValue(Settings.BagBonusFlat);
+                // set new limit based on settings
+                cap *= (float)config.GetValue(Settings.BagBonusMulti);
+                cap += (float)config.GetValue(Settings.BagBonusFlat);
 
-            if ((bool)config.GetValue(Settings.NoContainerLimit)) { cap = -1; }
-            return cap;
+                if ((bool)config.GetValue(Settings.NoContainerLimit)) { cap = -1; }
+
+                At.SetValue(cap, typeof(ItemContainer), container, "m_baseContainerCapacity");
+            }
         }
 
         private void CharacterWeightHook(On.PlayerCharacterStats.orig_UpdateWeight orig, PlayerCharacterStats self)

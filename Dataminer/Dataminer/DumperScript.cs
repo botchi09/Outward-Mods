@@ -70,7 +70,7 @@ namespace OutwardExplorer
                 {
                     var item = gameObject.GetComponent<Item>();
 
-                    Templates._Item itemTemplate = new Templates._Item
+                    Templates.ItemTemplate itemTemplate = new Templates.ItemTemplate
                     {
                         Type = item.GetType().ToString(),
                         ItemID = item.ItemID,
@@ -99,7 +99,7 @@ namespace OutwardExplorer
 
                     if (item is Equipment && item.Stats != null)
                     {
-                        Templates._Equipment equipTemplate = new Templates._Equipment();
+                        Templates.EquipmentTemplate equipTemplate = new Templates.EquipmentTemplate();
 
                         InheritBaseValues(equipTemplate, itemTemplate);
 
@@ -107,7 +107,7 @@ namespace OutwardExplorer
 
                         if (item is Weapon)
                         {
-                            Templates._Weapon weaponTemplate = new Templates._Weapon();
+                            Templates.WeaponTemplate weaponTemplate = new Templates.WeaponTemplate();
 
                             InheritBaseValues(weaponTemplate, equipTemplate);
 
@@ -118,7 +118,7 @@ namespace OutwardExplorer
                         }
                         else if (item is Bag bag)
                         {
-                            Templates._Bag _bag = new Templates._Bag();
+                            Templates.BagTemplate _bag = new Templates.BagTemplate();
 
                             InheritBaseValues(_bag, equipTemplate);
 
@@ -146,7 +146,7 @@ namespace OutwardExplorer
                     }
                     else if (item is PassiveSkill)
                     {
-                        Templates._PassiveSkill passive = new Templates._PassiveSkill();
+                        Templates.PassiveSkillTemplate passive = new Templates.PassiveSkillTemplate();
 
                         InheritBaseValues(passive, itemTemplate);
 
@@ -156,7 +156,7 @@ namespace OutwardExplorer
                     }
                     else if (item is AttackSkill)
                     {
-                        Templates._ActiveSkill skill = new Templates._ActiveSkill();
+                        Templates.ActiveSkillTemplate skill = new Templates.ActiveSkillTemplate();
 
                         InheritBaseValues(skill, itemTemplate);
 
@@ -166,7 +166,7 @@ namespace OutwardExplorer
                     }
                     else if (consumeFlag)
                     {
-                        Templates._Consumable consumableTemplate = new Templates._Consumable();
+                        Templates.ConsumableTemplate consumableTemplate = new Templates.ConsumableTemplate();
 
                         InheritBaseValues(consumableTemplate, itemTemplate);
 
@@ -194,7 +194,7 @@ namespace OutwardExplorer
 
                     if (effect is ImbueEffectPreset || effect.GetComponent<StatusEffect>() != null)
                     {
-                        Templates._StatusEffect statustemplate = new Templates._StatusEffect
+                        Templates.StatusEffectTemplate statustemplate = new Templates.StatusEffectTemplate
                         {
                             EffectID = effect.PresetID
                         };
@@ -239,7 +239,7 @@ namespace OutwardExplorer
 
         // ============= item parsers =============
 
-        public void ParseEquipment(Item item, ref Templates._Equipment equipTemplate)
+        public void ParseEquipment(Item item, ref Templates.EquipmentTemplate equipTemplate)
         {
             Equipment equip = item as Equipment;
 
@@ -261,7 +261,7 @@ namespace OutwardExplorer
             return;
         }
 
-        public void ParseWeapon(Item item, ref Templates._Weapon weaponTemplate)
+        public void ParseWeapon(Item item, ref Templates.WeaponTemplate weaponTemplate)
         {
             weaponTemplate.WeaponType = (item as Weapon).Type.ToString();
 
@@ -290,7 +290,7 @@ namespace OutwardExplorer
 
         // =========== skill parsers ===========
 
-        public void ParsePassiveSkill(Item item, ref Templates._PassiveSkill template)
+        public void ParsePassiveSkill(Item item, ref Templates.PassiveSkillTemplate template)
         {
             template.AffectedStats = new List<string>();
             template.Values = new List<float>();
@@ -305,7 +305,7 @@ namespace OutwardExplorer
             }
         }
 
-        public void ParseActiveSkill(Item item, ref Templates._ActiveSkill template)
+        public void ParseActiveSkill(Item item, ref Templates.ActiveSkillTemplate template)
         {
             Skill skill = item as Skill;
 
@@ -406,7 +406,7 @@ namespace OutwardExplorer
 
         // =========== food parser ===========
 
-        public void ParseConsumable(Item item, ref Templates._Consumable template)
+        public void ParseConsumable(Item item, ref Templates.ConsumableTemplate template)
         {
             template.Effects = new List<string>();
 
@@ -444,7 +444,7 @@ namespace OutwardExplorer
 
         // =========== effect preset parsers ===========
 
-        public void ParseStatusEffect(EffectPreset effect, ref Templates._StatusEffect template)
+        public void ParseStatusEffect(EffectPreset effect, ref Templates.StatusEffectTemplate template)
         {
             template.AffectedStats = new List<string>();
             template.Values = new List<string>();
@@ -534,7 +534,7 @@ namespace OutwardExplorer
 
         public void DumpRecipeSingle(Recipe recipe)
         {
-            Templates._Recipe _recipe = new Templates._Recipe
+            Templates.RecipeTemplate _recipe = new Templates.RecipeTemplate
             {
                 RecipeType = recipe.CraftingStationType.ToString(),
                 Result = recipe.Results[0].Item.Name,
@@ -556,7 +556,7 @@ namespace OutwardExplorer
             SaveRecipeRecursive(_recipe, recipe.Name, 1);
         }
 
-        private void SaveRecipeRecursive(Templates._Recipe recipe, string name, int count)
+        private void SaveRecipeRecursive(Templates.RecipeTemplate recipe, string name, int count)
         {
             if (count == 1 && !File.Exists(Folders["Recipes"] + "/" + name + ".json"))
             {
@@ -721,7 +721,7 @@ namespace OutwardExplorer
 
                 yield return new WaitForSeconds(0.5f); 
 
-                Templates._Enemy enemy = new Templates._Enemy
+                Templates.EnemyTemplate enemy = new Templates.EnemyTemplate
                 {
                     Name = c.Name,
                     Faction = c.Faction.ToString(),
@@ -763,7 +763,7 @@ namespace OutwardExplorer
             yield return null;
         }
 
-        public void DumpEnemySingle(Character c, ref Templates._Enemy enemy)
+        public void DumpEnemySingle(Character c, ref Templates.EnemyTemplate enemy)
         {
             try { enemy.HealthRegen = c.Stats.HealthRegen; } catch { }
 
@@ -978,7 +978,7 @@ namespace OutwardExplorer
         {
             Debug.Log(c.ShopName);
 
-            Templates._Merchant merchant = new Templates._Merchant
+            Templates.Merchant merchant = new Templates.Merchant
             {
                 Name = c.ShopName,
                 Location = utils.GetCurrentLocation(c.transform.position)
@@ -1027,7 +1027,7 @@ namespace OutwardExplorer
 
             if (item is SelfFilledItemContainer itemContainer)
             {
-                Templates._ItemContainer containerTemplate = new Templates._ItemContainer
+                Templates.ItemContainerTemplate containerTemplate = new Templates.ItemContainerTemplate
                 {
                     Name = itemContainer.Name,
                     Type = item.GetType().ToString(),
@@ -1093,7 +1093,7 @@ namespace OutwardExplorer
         {
             //Debug.Log(dropper.name);
 
-            Templates._DropTableContainer template = new Templates._DropTableContainer
+            Templates.DropTableContainer template = new Templates.DropTableContainer
             {
                 Name = dropper.name,
             };
@@ -1138,7 +1138,7 @@ namespace OutwardExplorer
                 foreach (DropTable table in dropTables)
                 {
                     j++;
-                    Templates.DropTable tableTemplate = new Templates.DropTable
+                    Templates.DropTableTemplate tableTemplate = new Templates.DropTableTemplate
                     {
                         ItemChances = new List<string>(),
                         ItemChanceIDs = new List<int>(),
