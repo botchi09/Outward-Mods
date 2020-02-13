@@ -156,8 +156,19 @@ namespace Dataminer
             List<string> ItemTable = new List<string>();
             foreach (var entry in Items)
             {
-                // todo save spreadsheet list.
-                // "ItemID | Item.Name | item.gameObject.name | dir"
+                string saveDir = entry.Value.saveDir;
+                if (string.IsNullOrEmpty(saveDir))
+                {
+                    if (entry.Value.Tags.Contains("Consummable"))
+                    {
+                        saveDir = "/Consumable";
+                    }
+                    else
+                    {
+                        saveDir = "/_Unsorted";
+                    }
+                }
+
                 ItemTable.Add(entry.Key + "	" + entry.Value.Name + "	" + entry.Value.gameObjectName + "	" + entry.Value.saveDir);
 
             }

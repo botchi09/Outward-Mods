@@ -65,7 +65,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomWeight", "! Small Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomAreaResetTime", "! Small Mods\Custom Area Reset Time\CustomAreaReset\CustomAreaResetTime.csproj", "{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataminer", "Dataminer_2\Dataminer_2\Dataminer.csproj", "{7CF617BC-6DFD-4D46-8402-42AE93274A44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataminer", "Dataminer\Dataminer_2\Dataminer.csproj", "{7CF617BC-6DFD-4D46-8402-42AE93274A44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
