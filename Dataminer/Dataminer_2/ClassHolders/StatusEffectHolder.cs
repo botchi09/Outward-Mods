@@ -137,11 +137,7 @@ namespace Dataminer
                     if (!string.IsNullOrEmpty(statusHolder.Name))
                     {
                         string dir = Folders.Prefabs + "/Effects";
-                        if (preset is ImbueEffectPreset)
-                        {
-                            dir += "/Imbues";
-                        }
-                        string saveName = statusHolder.Name + " (" + preset.gameObject.name + ")";
+                        string saveName = statusHolder.Name;
 
                         Dataminer.SerializeXML(dir, saveName, statusHolder, typeof(StatusEffectHolder));
                     }

@@ -169,7 +169,7 @@ namespace Dataminer
                     }
                 }
 
-                ItemTable.Add(entry.Key + "	" + entry.Value.Name + "	" + entry.Value.gameObjectName + "	" + entry.Value.saveDir);
+                ItemTable.Add(entry.Key + "	" + entry.Value.Name + "	" + entry.Value.gameObjectName + "	" + saveDir);
 
             }
             File.WriteAllLines(Folders.Lists + "/Items.txt", ItemTable.ToArray());
@@ -178,7 +178,7 @@ namespace Dataminer
             List<string> EffectsTable = new List<string>();
             foreach (var entry in Effects)
             {
-                EffectsTable.Add(entry.Value + "	" + entry.Value.Name);
+                EffectsTable.Add(entry.Key + "	" + entry.Value.Name);
             }
             File.WriteAllLines(Folders.Lists + "/Effects.txt", EffectsTable.ToArray());
 
@@ -200,7 +200,7 @@ namespace Dataminer
                     ingredients += ingredient;
                 }
 
-                RecipesTable.Add(entry.Key + "	" + entry.Value.Name + "	" + results + " " + ingredients);
+                RecipesTable.Add(entry.Key + "	" + entry.Value.StationType + "	" + results + "	" + ingredients);
             }
             File.WriteAllLines(Folders.Lists + "/Recipes.txt", RecipesTable.ToArray());
 
