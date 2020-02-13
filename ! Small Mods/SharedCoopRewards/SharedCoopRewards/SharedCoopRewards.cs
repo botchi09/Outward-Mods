@@ -49,6 +49,7 @@ namespace SharedCoopRewards
     public class Settings
     {
         public static readonly string Shared_Quest_Rewards = "Shared_Quest_Rewards";
+        public static readonly string Shared_ALL_Quest_Rewards = "Share ALL Quest Rewards";
         public static readonly string Shared_World_Drops = "Shared_World_Drops";
         //public bool Shared_Quest_Progression_BETA = false;
     }
@@ -68,6 +69,9 @@ namespace SharedCoopRewards
 
             // Quest reward hook
             On.NodeCanvas.Framework.ActionList.OnExecute += ListExecuteHook;
+
+            // unsafe share hook
+            On.NodeCanvas.Tasks.Actions.GiveReward.OnExecute += GiveRewardHook;
             
             // drop table hook
             On.Dropable.GenerateContents_1 += GenerateContentsHook;
@@ -81,6 +85,17 @@ namespace SharedCoopRewards
             }
 
             config.Register();
+        }
+
+        // experimental unsafe hook
+        private void GiveRewardHook(On.NodeCanvas.Tasks.Actions.GiveReward.orig_OnExecute orig, GiveReward self)
+        {
+            if ((bool)config.GetValue(Settings.Shared_ALL_Quest_Rewards))
+            {
+                self.RewardReceiver = GiveReward.Receiver.Everyone;
+            }
+
+            orig(self);
         }
 
         // list reward hook - check if silver cost is one of the actions. if so, dont share this reward.
@@ -144,14 +159,20 @@ namespace SharedCoopRewards
             var newConfig = new ModConfig
             {
                 ModName = "SharedCoopRewards",
-                SettingsVersion = 1.0,
+                SettingsVersion = 1.1,
                 Settings = new List<BBSetting>
                 {
                     new BoolSetting
                     {
                         Name = Settings.Shared_Quest_Rewards,
-                        Description = "Share Items and Skills from Quest Rewards",
+                        Description = "Share Items and Skills from Quest Rewards (safer, may not cover everything)",
                         DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Shared_ALL_Quest_Rewards,
+                        Description = "Share ALL Quest Rewards (may occasionally lead to unexpected things being shared)",
+                        DefaultValue = false
                     },
                     new BoolSetting
                     {

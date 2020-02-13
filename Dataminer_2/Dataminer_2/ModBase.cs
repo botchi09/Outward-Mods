@@ -24,6 +24,8 @@ namespace Dataminer_2
             GameObject.DontDestroyOnLoad(obj);
 
             obj.AddComponent<Dataminer>();
+            obj.AddComponent<ListManager>();
+            obj.AddComponent<SceneManager>();
         }
     }
 }

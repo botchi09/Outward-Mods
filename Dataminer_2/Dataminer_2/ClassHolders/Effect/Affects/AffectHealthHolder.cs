@@ -9,13 +9,15 @@ namespace Dataminer_2
     {
         public float AffectQuantity;
         public bool IsModifier;
+        public float AffectQuanityAI;
 
         public static AffectHealthHolder ParseAffectHealth(AffectHealth affectHealth, EffectHolder _effectHolder)
         {
             var affectHealthHolder = new AffectHealthHolder
             {
                 AffectQuantity = affectHealth.AffectQuantity,
-                IsModifier = affectHealth.IsModifier
+                IsModifier = affectHealth.IsModifier,
+                AffectQuanityAI = affectHealth.AffectQuantityOnAI
             };
 
             At.InheritBaseValues(affectHealthHolder, _effectHolder);

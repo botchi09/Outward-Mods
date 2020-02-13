@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Dataminer_2
 {
-    public class TrapEffectHOlder
+    public class TrapEffectHolder
     {
         public string Name;
         public string Description;
@@ -17,9 +17,9 @@ namespace Dataminer_2
         public List<EffectHolder> NormalEffects = new List<EffectHolder>();
         public List<EffectHolder> ImprovedEffects = new List<EffectHolder>();
 
-        public static TrapEffectHOlder ParseTrapEffect(TrapEffectRecipe recipe)
+        public static TrapEffectHolder ParseTrapEffect(TrapEffectRecipe recipe)
         {
-            var trapEffectHolder = new TrapEffectHOlder
+            var trapEffectHolder = new TrapEffectHolder
             {
                 Name = recipe.Name,
                 Description = recipe.Description

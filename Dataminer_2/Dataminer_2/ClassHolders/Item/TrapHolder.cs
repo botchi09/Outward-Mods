@@ -8,7 +8,7 @@ namespace Dataminer_2
 {
     public class TrapHolder : ItemHolder
     {
-        public List<TrapEffectHOlder> TrapEffects = new List<TrapEffectHOlder>();
+        public List<TrapEffectHolder> TrapEffects = new List<TrapEffectHolder>();
 
         public static TrapHolder ParseTrap(DeployableTrap trap, ItemHolder itemHolder)
         {
@@ -19,7 +19,7 @@ namespace Dataminer_2
             {
                 foreach (TrapEffectRecipe recipe in recipes)
                 {
-                    var effectHolder = TrapEffectHOlder.ParseTrapEffect(recipe);
+                    var effectHolder = TrapEffectHolder.ParseTrapEffect(recipe);
 
                     trapHolder.TrapEffects.Add(effectHolder);
                 }

@@ -1274,6 +1274,25 @@ namespace OutwardExplorer
 
         private void ExceptionHook(string message, string stackTrace, LogType type)
         {
+            // useless spam errors (unity warnings)
+            string[] blacklist = new string[]
+            {
+                "Internal: JobTempAlloc",
+                "GUI Error:",
+                "BoxColliders does not support negative scale or size",
+                "is registered with more than one LODGroup",
+                "only 0 controls when doing Repaint",
+                "it is not close enough to the NavMesh"
+            };
+
+            foreach (string s in blacklist)
+            {
+                if (message.ToLower().Contains(s.ToLower()))
+                {
+                    return;
+                }
+            }
+
             if (type == LogType.Exception && !message.Contains("Repaint"))
             {
                 OLogger.Error(message + "\r\nStack Trace: " + stackTrace);

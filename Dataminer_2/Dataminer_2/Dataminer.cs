@@ -14,11 +14,6 @@ namespace Dataminer_2
     {
         public static Dataminer Instance;
 
-        // Key: "Item.Name (item.gameObject.name)", Value: "Path to .xml file"
-        public Dictionary<string, string> ItemManifest = new Dictionary<string, string>(); 
-
-        // ------------------ Functions ------------------ //
-
         internal void Awake()
         {
             Instance = this;
@@ -30,7 +25,6 @@ namespace Dataminer_2
 
             if (newDump)
             {
-                Debug.Log("[Dataminer] No " + Folders.SaveFolder + " folder detected. Dumping prefabs...");
                 StartCoroutine(PrefabCoroutine());
             }
         }
@@ -42,71 +36,41 @@ namespace Dataminer_2
                 yield return new WaitForSeconds(1f);
             }
 
-            Debug.Log("-------- Beginning Prefab Datamine --------");
-
-            if (At.GetValue(typeof(ResourcesPrefabManager), null, "ITEM_PREFABS") is Dictionary<string, Item> ItemPrefabs)
+            // setup tags
+            for (int i = 1; i < 500; i++)
             {
-                foreach (Item item in ItemPrefabs.Values)
+                if (TagSourceManager.Instance.GetTag(i.ToString()) is Tag tag)
                 {
-                    Debug.Log("Parsing " + item.Name + ", typeof: " + item.GetType());
+                    if (tag == Tag.None)
+                    {
+                        break;
+                    }
 
-                    // Parse the item. This will recursively dive.
-                    var itemHolder = ItemHolder.ParseItem(item);
-
-                    // Folder and Save Name
-                    string dir = GetItemFolder(item, itemHolder);
-                    string saveName = ReplaceInvalidChars(item.Name + " (" + item.gameObject.name + ")");
-
-                    // Serialize and add to manifest
-                    ItemManifest.Add(saveName, dir);
-                    SerializeXML(dir + "/" + saveName + ".xml", itemHolder, typeof(ItemHolder), TypesToSerialize.Types.ToArray());
-                }
-
-                List<string> ManifestToTable = new List<string>();
-                foreach (KeyValuePair<string,string> entry in ItemManifest)
-                {
-                    ManifestToTable.Add(entry.Key + "  " + entry.Value); // space is a tab, so can copy+paste into a spreadsheet 
-                }
-                Debug.Log("Parsed items: " + ItemManifest.Count + ". Saving Manifest table of count: " + ManifestToTable.Count);
-                File.WriteAllLines(Folders.SaveFolder + "/ItemManifest.txt", ManifestToTable.ToArray());
-            }
-            else
-            {
-                Debug.LogError("Could not find Item Prefabs!");
-            }
-
-            Debug.Log("-------- Finished Prefab Datamine --------");
-        }
-
-        private string GetItemFolder(Item item, ItemHolder itemHolder)
-        {
-            string dir = Folders.Prefabs + "/Items";
-
-            if (item.GetType().ToString() != "Item")
-            {
-                dir += GetRelativeTypeDirectory(item, "", item.GetType());
-            }
-            else
-            {
-                if (itemHolder.Tags.Contains("Consummable"))
-                {
-                    dir += "/Consumable";
+                    ListManager.TagSources.Add(tag.TagName, new List<string>());
                 }
                 else
                 {
-                    dir += "/_Unsorted";
+                    break;
                 }
             }
-            if (!Directory.Exists(dir))
-            {
-                Directory.CreateDirectory(dir); // will automatically create necessary parents
-            }
 
-            return dir;
+            ItemHolder.ParseAllItems();
+
+            StatusEffectHolder.ParseAllEffects();
+
+            RecipeHolder.ParseAllRecipes();
         }
 
-        public static void SerializeXML(string path, object obj, Type type, Type[] extraTypes)
+        public static void SerializeXML(string dir, string saveName, object obj, Type type, Type[] extraTypes = null)
         {
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            saveName = ReplaceInvalidChars(saveName);
+
+            string path = dir + "/" + saveName + ".xml";
             if (File.Exists(path))
             {
                 Debug.LogWarning("[Dataminer] SerializeXML: A file already exists at " + path + ", skipping...");
@@ -114,22 +78,13 @@ namespace Dataminer_2
             }
             else
             {
-                XmlSerializer xml = new XmlSerializer(type, extraTypes);
+                var typesToSerialize = extraTypes ?? TypesToSerialize.Types;
+
+                XmlSerializer xml = new XmlSerializer(type, typesToSerialize);
                 FileStream file = File.Create(path);
                 xml.Serialize(file, obj);
                 file.Close();
             }
-        }
-
-        public static string GetRelativeTypeDirectory(Item item, string dir, Type type)
-        {
-            dir = "/" + type + dir;
-            var baseType = type.BaseType;
-            if (baseType != typeof(Item))
-            {
-                dir = GetRelativeTypeDirectory(item, dir, baseType);
-            }
-            return dir;
         }
 
         public static string ReplaceInvalidChars(string filename)
@@ -140,7 +95,7 @@ namespace Dataminer_2
     
     public class TypesToSerialize
     {
-        public static List<Type> Types { get; } = new List<Type>
+        public static Type[] Types { get; } = new Type[]
         {
             typeof(AddStatusEffectBuildupHolder),
             typeof(AddStatusEffectHolder),
@@ -155,7 +110,12 @@ namespace Dataminer_2
             typeof(AffectStaminaHolder),
             typeof(AffectStatHolder),
             typeof(BagHolder),
+            typeof(ContainerSummary),
             typeof(Damages),
+            typeof(DropTableChanceEntry),
+            typeof(DropTableEntry),
+            typeof(DroptableHolder),
+            typeof(DroptableHolder.DropGeneratorHolder),
             typeof(EffectConditionHolder),
             typeof(EffectConditionHolder.ConditionHolder),
             typeof(EffectHolder),
@@ -165,14 +125,28 @@ namespace Dataminer_2
             typeof(EquipmentStatsHolder),
             typeof(ImbueWeaponHolder),
             typeof(ItemHolder),
+            typeof(ItemSource),
+            typeof(GatherableHolder),
             typeof(ItemStatsHolder),
+            typeof(ItemSpawnHolder),
+            typeof(LootContainerHolder),
+            typeof(MerchantHolder),
+            typeof(QuestHolder),
             typeof(PunctualDamageHolder),
+            typeof(RecipeHolder),
+            typeof(RecipeHolder.ItemQuantityHolder),
             typeof(ReduceDurabilityHolder),
             typeof(RemoveStatusEffectHolder),
+            typeof(SceneSummary),
+            typeof(SceneSummary.QuantityHolder),
+            typeof(SkillHolder),
+            typeof(SkillHolder.SkillItemReq),
             typeof(ShootBlastHolder),
             typeof(ShootProjectileHolder),
-            typeof(TrapEffectHOlder),
+            typeof(StatusEffectHolder),
+            typeof(TrapEffectHolder),
             typeof(TrapHolder),
+            typeof(Vector3),
             typeof(WeaponHolder),
             typeof(WeaponStatsHolder),
             typeof(WeaponStats.AttackData),
@@ -198,6 +172,10 @@ namespace Dataminer_2
         }
 
         public static readonly string SaveFolder = @"Dumps_2";        
-        public static readonly string Prefabs = SaveFolder + "/Prefabs"; // ResourcesPrefabManager Prefabs (Items, Effects, etc)
+        public static readonly string Prefabs = SaveFolder + "/Prefabs";
+        public static readonly string Lists = SaveFolder + "/Lists";
+        public static readonly string Scenes = SaveFolder + "/Scenes";
+        public static readonly string Enemies = SaveFolder + "/Enemies";
+        public static readonly string Merchants = SaveFolder + "/Merchants";
     }
 }

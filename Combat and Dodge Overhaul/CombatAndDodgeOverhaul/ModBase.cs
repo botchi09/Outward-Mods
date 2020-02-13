@@ -76,7 +76,7 @@ namespace CombatAndDodgeOverhaul
         public static string Blocking_Staggers_Attacker = "Blocking_Staggers_Attacker";
         public static string No_Stability_Regen_When_Blocking = "No_Stability_Regen_When_Blocking";
         public static string Stability_Regen_Speed = "Stability_Regen_Speed";
-        public static string Stability_Regen_Delay = "Enable_StabilityMods";
+        public static string Stability_Regen_Delay = "Stability_Regen_Delay";
         public static string Stagger_Threshold = "Stagger_Threshold";
         public static string Stagger_Immunity_Period = "Stagger_Immunity_Period";
         public static string Knockdown_Threshold = "Knockdown_Threshold";
