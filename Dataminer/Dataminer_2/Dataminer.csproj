@@ -1,0 +1,142 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7CF617BC-6DFD-4D46-8402-42AE93274A44}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dataminer</RootNamespace>
+    <AssemblyName>Dataminer</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\Release\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="HOOKS-Assembly-CSharp">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Partiality">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Photon3Unity3D">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Rewired_Core">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharedModConfig">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\SharedModConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Sideloader">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClassHolders\ContainerSummary.cs" />
+    <Compile Include="ClassHolders\Damages.cs" />
+    <Compile Include="ClassHolders\DroptableHolder.cs" />
+    <Compile Include="ClassHolders\EffectTransformHolder.cs" />
+    <Compile Include="ClassHolders\Effect\AddStatusEffectBuildupHolder.cs" />
+    <Compile Include="ClassHolders\Effect\AddStatusEffectHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectBurntHealthHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectBurntManaHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectBurntStaminaHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectHealthHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectHealthParentOwnerHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectManaHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectNeedHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectStabilityHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectStaminaHolder.cs" />
+    <Compile Include="ClassHolders\Effect\Affects\AffectStat.cs" />
+    <Compile Include="ClassHolders\Effect\EffectHolder.cs" />
+    <Compile Include="ClassHolders\Effect\EffectConditionHolder.cs" />
+    <Compile Include="ClassHolders\Effect\ReduceDurabilityHolder.cs" />
+    <Compile Include="ClassHolders\Effect\ImbueWeaponHolder.cs" />
+    <Compile Include="ClassHolders\Effect\PunctualDamageHolder.cs" />
+    <Compile Include="ClassHolders\Effect\RemoveStatusEffectHolder.cs" />
+    <Compile Include="ClassHolders\Effect\ShootBlastHolder.cs" />
+    <Compile Include="ClassHolders\Effect\ShootProjectileHolder.cs" />
+    <Compile Include="ClassHolders\Effect\WeaponDamageHolder.cs" />
+    <Compile Include="ClassHolders\EnemyHolder.cs" />
+    <Compile Include="ClassHolders\GatherableHolder.cs" />
+    <Compile Include="ClassHolders\ItemSource.cs" />
+    <Compile Include="ClassHolders\LootContainerHolder.cs" />
+    <Compile Include="ClassHolders\DropTableEntry.cs" />
+    <Compile Include="ClassHolders\ItemSpawnHolder.cs" />
+    <Compile Include="ClassHolders\Item\BagHolder.cs" />
+    <Compile Include="ClassHolders\Item\EquipmentHolder.cs" />
+    <Compile Include="ClassHolders\ItemHolder.cs" />
+    <Compile Include="ClassHolders\Item\ItemStats\EquipmentStatsHolder.cs" />
+    <Compile Include="ClassHolders\Item\ItemStats\ItemStatsHolder.cs" />
+    <Compile Include="ClassHolders\Item\ItemStats\WeaponStatsHolder.cs" />
+    <Compile Include="ClassHolders\Item\QuestHolder.cs" />
+    <Compile Include="ClassHolders\Item\SkillHolder.cs" />
+    <Compile Include="ClassHolders\Item\TrapEffectHolder.cs" />
+    <Compile Include="ClassHolders\Item\TrapHolder.cs" />
+    <Compile Include="ClassHolders\Item\WeaponHolder.cs" />
+    <Compile Include="ClassHolders\MerchantHolder.cs" />
+    <Compile Include="ListManager.cs" />
+    <Compile Include="ClassHolders\RecipeHolder.cs" />
+    <Compile Include="ClassHolders\SceneSummary.cs" />
+    <Compile Include="ClassHolders\StatusEffectHolder.cs" />
+    <Compile Include="Dataminer.cs" />
+    <Compile Include="ModBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SceneHelper.cs" />
+    <Compile Include="SceneManager.cs" />
+    <Compile Include="utils\SinAPI.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
