@@ -44,11 +44,15 @@ namespace CombatAndDodgeOverhaul
     }
     #endregion
 
-    #region Settings Class
+    #region Settings Names
     public class Settings
     {
         // player settings
         public static string Dodge_Cancelling = "Dodge_Cancelling";
+        public static string Dodge_DelayAfterStagger = "Dodge_Delay_After_Stagger";
+        public static string Dodge_DelayAfterKD = "Dodge_Delay_After_KD";
+        public static string Dodge_DelayAfterHit = "Dodge_DelayAfterHit";
+
         public static string Stamina_Cost_Stat = "Stamina_Cost_Stat";
         public static string Custom_Dodge_Cost = "Custom_Dodge_Cost";
         public static string Custom_Bag_Burden = "Custom_Bag_Burden";
@@ -108,19 +112,20 @@ namespace CombatAndDodgeOverhaul
         {
             // LoadSettings();
             config = SetupConfig();
-
-            StartCoroutine(SetupCoroutine());
-        }
-
-        private IEnumerator SetupCoroutine()
-        {
-            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
             config.Register();
+
+            //StartCoroutine(SetupCoroutine());
         }
+
+        //private IEnumerator SetupCoroutine()
+        //{
+        //    while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
+        //    {
+        //        yield return new WaitForSeconds(0.1f);
+        //    }
+
+        //    config.Register();
+        //}
 
         // ============ settings ============== //
 
@@ -138,6 +143,36 @@ namespace CombatAndDodgeOverhaul
                         SectionTitle = "Player Animations",
                         Description = "Allow animation cancelling with dodge",
                         DefaultValue = true
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Dodge_DelayAfterHit,
+                        Description = "Timeout after hitting an enemy before you can dodge (seconds)",
+                        DefaultValue = 0.35f,
+                        MinValue = 0f,
+                        MaxValue = 2f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Dodge_DelayAfterStagger,
+                        Description = "Timeout after being staggered before you can dodge (seconds)",
+                        DefaultValue = 0.8f,
+                        MinValue = 0f,
+                        MaxValue = 2f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Dodge_DelayAfterKD,
+                        Description = "Timeout after being knocked-down before you can dodge (seconds)",
+                        DefaultValue = 2f,
+                        MinValue = 0f,
+                        MaxValue = 5f,
+                        RoundTo = 2,
+                        ShowPercent = false
                     },
                     new BoolSetting
                     {

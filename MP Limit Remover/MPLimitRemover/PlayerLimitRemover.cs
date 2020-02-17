@@ -14,7 +14,7 @@ namespace MPLimitRemover
     public class ModBase : PartialityMod
     {
         public string ID = "MP Limit Remover";
-        public double version = 2.2;
+        public double version = 2.21;
 
         public ModBase()
         {
@@ -87,14 +87,10 @@ namespace MPLimitRemover
                     PhotonNetwork.room.maxPlayers = limitInt;
                 }
 
-                // handle logic for opening / closing room based on custom limit.
+                // not sure if this is necessary
                 if (!PhotonNetwork.room.open && PhotonNetwork.room.playerCount < limitInt)
                 {
                     PhotonNetwork.room.open = true;
-                }
-                else if (PhotonNetwork.room.open && PhotonNetwork.room.playerCount >= limitInt)
-                {
-                    PhotonNetwork.room.open = false;
                 }
             }
         }

@@ -29,6 +29,15 @@ namespace Dataminer
             }
         }
 
+        //internal void Update()
+        //{
+        //    if (Input.GetKeyDown(KeyCode.F11))
+        //    {
+        //        Debug.Log("Parsing enemies...");
+        //        EnemyHolder.ParseAllEnemies();
+        //    }
+        //}
+
         private IEnumerator PrefabCoroutine()
         {
             while (!ResourcesPrefabManager.Instance.Loaded)
@@ -41,16 +50,7 @@ namespace Dataminer
             {
                 if (TagSourceManager.Instance.GetTag(i.ToString()) is Tag tag)
                 {
-                    if (tag == Tag.None)
-                    {
-                        break;
-                    }
-
-                    ListManager.TagSources.Add(tag.TagName, new List<string>());
-                }
-                else
-                {
-                    break;
+                    ListManager.AddTagSource(tag, null);
                 }
             }
 

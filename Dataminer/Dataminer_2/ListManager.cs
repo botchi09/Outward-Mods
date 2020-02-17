@@ -26,6 +26,7 @@ namespace Dataminer
 
         // Lists
         public static Dictionary<string, List<EnemyHolder>> EnemyManifest = new Dictionary<string, List<EnemyHolder>>();
+        public static Dictionary<string, MerchantHolder> Merchants = new Dictionary<string, MerchantHolder>();
         public static Dictionary<string, ItemHolder> Items = new Dictionary<string, ItemHolder>();
         public static Dictionary<string, StatusEffectHolder> Effects = new Dictionary<string, StatusEffectHolder>();
         public static Dictionary<string, RecipeHolder> Recipes = new Dictionary<string, RecipeHolder>();
@@ -50,18 +51,24 @@ namespace Dataminer
             return SceneManager.Instance.GetCurrentRegion() + ":" + SceneManager.Instance.GetCurrentLocation(position);
         }
 
-        public static void AddTagSource(string tag, string source)
+        public static void AddTagSource(Tag tag, string source)
         {
-            if (TagSources.ContainsKey(tag))
+            string key = tag.ToString();
+
+            if (TagSources.ContainsKey(key))
             {
-                if (!TagSources[tag].Contains(source))
+                if (source != null && !TagSources[key].Contains(source))
                 {
-                    TagSources[tag].Add(source);
+                    TagSources[key].Add(source);
                 }
             }
             else
             {
-                TagSources.Add(tag, new List<string> { source });
+                TagSources.Add(key, new List<string> { });
+                if (source != null)
+                {
+                    TagSources[key].Add(source);
+                }
             }
         }
 
@@ -152,6 +159,14 @@ namespace Dataminer
             }
             File.WriteAllLines(Folders.Lists + "/Enemies.txt", EnemyTable.ToArray());
 
+            // ========== Merchants ===========
+            List<string> MerchantTable = new List<string>();
+            foreach (var entry in Merchants)
+            {
+                MerchantTable.Add(entry.Key);
+            }
+            File.WriteAllLines(Folders.Lists + "/Merchants.txt", MerchantTable.ToArray());
+
             // ========== Items ==========
             List<string> ItemTable = new List<string>();
             foreach (var entry in Items)
@@ -209,21 +224,5 @@ namespace Dataminer
 
             Debug.Log("[Dataminer] List building complete!");
         }
-
-        //List<string> ManifestToTable = new List<string>();
-        //foreach (KeyValuePair<string, string> entry in ItemManifest.Manifest)
-        //{
-        //    ManifestToTable.Add(entry.Key + "  " + entry.Value); // space is a tab, so can copy+paste into a spreadsheet 
-        //}
-        //Debug.Log("Parsed items: " + ItemManifest.Manifest.Count + ". Saving Manifest table of count: " + ManifestToTable.Count);
-        //File.WriteAllLines(Folders.SaveFolder + "/ItemManifest.txt", ManifestToTable.ToArray());
-
-        //List<string> ManifestToTable = new List<string>();
-        //foreach (KeyValuePair<string, string> entry in RecipeManifest.Manifest)
-        //{
-        //    ManifestToTable.Add(entry.Key + "  " + entry.Value); // space is a tab, so can copy+paste into a spreadsheet 
-        //}
-        //Debug.Log("Parsed recipes: " + RecipeManifest.Manifest.Count + ". Saving Manifest table of count: " + ManifestToTable.Count);
-        //File.WriteAllLines(Folders.SaveFolder + "/RecipeManifest.txt", ManifestToTable.ToArray());
     }
 }

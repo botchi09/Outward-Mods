@@ -56,7 +56,13 @@ namespace SharedModConfig
         {
             if (config == null || config.ModName == null)
             {
-                Debug.LogError("Null name or null config!");
+                Debug.LogError("[SharedModConfig] A mod is trying to register with a null Name or null ModConfig!");
+                return;
+            }
+
+            if (!MenuManager.Instance.IsInitDone())
+            {
+                StartCoroutine(RegisterSettingsDelayed(config));
                 return;
             }
 
@@ -67,14 +73,14 @@ namespace SharedModConfig
             else
             {
                 string path = saveFolder + "/" + config.ModName + ".xml";
-                bool flag = false;
+                bool hasSettings = false;
 
                 if (File.Exists(path))
                 {
-                    flag = LoadXML(path, config);
+                    hasSettings = LoadXML(path, config);
                 }
                 
-                if (!flag)
+                if (!hasSettings)
                 {
                     SaveXML(config);
 
@@ -93,6 +99,16 @@ namespace SharedModConfig
             }
         }
 
+        private IEnumerator RegisterSettingsDelayed(ModConfig config)
+        {
+            while (!MenuManager.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(1f);
+            }
+
+            RegisterSettings(config);
+        }
+
         private bool LoadXML(string path, ModConfig config)
         {
             Type[] extraTypes = { typeof(BBSetting), typeof(BoolSetting), typeof(FloatSetting), typeof(StringSetting) };
@@ -103,37 +119,39 @@ namespace SharedModConfig
 
                 if (tempCfg != null)
                 {
-                    if (tempCfg.SettingsVersion < config.SettingsVersion)
+                    foreach (BBSetting setting in config.Settings)
                     {
-                        Debug.LogWarning("[SharedModConfig] The settings version on disk (" + 
-                            tempCfg.SettingsVersion + 
-                            ") is older than the current mod settings: " + 
-                            config.SettingsVersion
-                            + "\r\nThe old file will be renamed to " + path + ".bak");
-
-                        streamReader.Close();
-
-                        string bakPath = path + ".bak";
-                        if (File.Exists(bakPath))
+                        if (tempCfg.Settings.Find(x => x.Name == setting.Name) is BBSetting tempSetting)
                         {
-                            File.Delete(bakPath);
+                            setting.SetValue(tempSetting.GetValue());
                         }
-
-                        File.Move(path, bakPath);
-                        return false;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < config.Settings.Count; i++)
+                        else
                         {
-                            if (tempCfg.Settings[i].Name == config.Settings[i].Name)
-                            {
-                                config.Settings[i].SetValue(tempCfg.Settings[i].GetValue());
-                            }
+                            setting.SetValue(setting.DefaultValue);
                         }
-                        streamReader.Close();
-                        return true;
                     }
+                    streamReader.Close();
+                    return true;
+
+                    //if (tempCfg.SettingsVersion < config.SettingsVersion)
+                    //{
+                    //    Debug.LogWarning("[SharedModConfig] The settings version on disk (" + 
+                    //        tempCfg.SettingsVersion + 
+                    //        ") is older than the current mod settings: " + 
+                    //        config.SettingsVersion
+                    //        + "\r\nThe old file will be renamed to " + path + ".bak");
+
+                    //    streamReader.Close();
+
+                    //    string bakPath = path + ".bak";
+                    //    if (File.Exists(bakPath))
+                    //    {
+                    //        File.Delete(bakPath);
+                    //    }
+
+                    //    File.Move(path, bakPath);
+                    //    return false;
+                    //}
                 }
                 else
                 {

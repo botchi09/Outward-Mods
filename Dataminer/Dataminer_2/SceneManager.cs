@@ -82,98 +82,8 @@ namespace Dataminer
                 // Disable the TreeBehaviour Managers while we do stuff with enemies
                 DisableCanvases();
 
-                // leaving this inside the coroutine as it uses WaitForSeconds.
-                // I'm limiting the parse to a single coroutine.
-                #region Parse All Enemies
                 // Parse Enemies
-                var enemies = CharacterManager.Instance.Characters.Values
-                    .Where(x => x.IsAI
-                        && x.Faction != Character.Factions.Player
-                        && x.Stats != null);
-
-                var playerPos = CharacterManager.Instance.GetFirstLocalCharacter().CenterPosition;
-
-                foreach (Character enemy in enemies)
-                {
-                    Debug.Log("-- Parsing enemy " + enemy.Name);
-
-                    var origPos = enemy.transform.position;
-
-                    // move to us and force init
-                    enemy.transform.position = playerPos;
-                    ForceObjectActive(enemy.gameObject);
-
-                    // wait for init
-                    while (!enemy.gameObject.activeSelf || !enemy.IsLateInitDone)
-                    {
-                        yield return new WaitForSeconds(0.1f);
-                    }
-
-                    // disable AI
-                    foreach (AIState state in enemy.GetComponent<CharacterAI>().AiStates)
-                    {
-                        state.gameObject.SetActive(false);
-                    }
-
-                    // wait a bit per Equipment that needs instantiating. It takes a bit for them to init their stats.
-                    if (enemy.GetComponent<StartingEquipment>() is StartingEquipment startingEquipment)
-                    {
-                        int count = 0;
-                        if (startingEquipment.OverrideStartingEquipments != null && startingEquipment.OverrideStartingEquipments.Length > 0)
-                        {
-                            count = startingEquipment.OverrideStartingEquipments.Where(x => x != null).Count();
-                        }
-                        else if (startingEquipment.Equipments != null && startingEquipment.Equipments.Length > 0)
-                        {
-                            count = startingEquipment.Equipments.Where(x => x != null).Count();
-                        }
-                        Debug.Log("Waiting " + ((count * 0.4f) + 0.5f) + " secs for equipment to load...");
-                        yield return new WaitForSeconds(count * 0.4f);
-                    }
-                    yield return new WaitForSeconds(0.5f);
-
-                    EnemyHolder enemyHolder = null;
-
-                    try
-                    {
-                        enemyHolder = EnemyHolder.ParseEnemy(enemy, origPos);
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.LogWarning("Exception parsing enemy " + enemy.Name + "\r\nMessage: " + ex.Message + "\r\nStack Trace: " + ex.StackTrace);
-                    }
-
-                    // put that thing back where it came from or so help me
-                    enemy.transform.position = origPos;
-
-                    if (enemyHolder != null)
-                    {
-                        var summary = ListManager.SceneSummaries[ListManager.GetSceneSummaryKey(origPos)];
-
-                        // add to scene summary
-                        string saveName = enemyHolder.Name + " (" + enemyHolder.Unique_ID + ")";
-                        bool found = false;
-                        foreach (SceneSummary.QuantityHolder holder in summary.Enemies)
-                        {
-                            if (holder.Name == saveName)
-                            {
-                                // list contains this unique ID. add to.
-                                holder.Quantity++;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found)
-                        {
-                            summary.Enemies.Add(new SceneSummary.QuantityHolder
-                            {
-                                Name = saveName,
-                                Quantity = 1
-                            });
-                        }
-                    }
-                }
-                #endregion
+                EnemyHolder.ParseAllEnemies();
 
                 // Parse Merchants
                 MerchantHolder.ParseAllMerchants();
@@ -209,6 +119,9 @@ namespace Dataminer
                         var lootContainer = LootContainerHolder.ParseLootContainer(item as TreasureChest);
                         AddQuantity(lootContainer.Name, summary.Loot_Containers);
                         ListManager.AddContainerSummary(lootContainer.Name, ListManager.GetSceneSummaryKey(item.transform.position), lootContainer.DropTables);
+
+                        if (!summary.UniqueContainerList.Contains(lootContainer.Name + "_" + lootContainer.UID))
+                            summary.UniqueContainerList.Add(lootContainer.Name + "_" + lootContainer.UID);
                     }
                     else if (item is Gatherable)
                     {

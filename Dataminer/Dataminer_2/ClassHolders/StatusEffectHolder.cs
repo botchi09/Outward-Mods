@@ -54,7 +54,7 @@ namespace Dataminer
                 foreach (Tag tag in status.InheritedTags)
                 {
                     statusEffectHolder.Tags.Add(tag.TagName);
-                    ListManager.AddTagSource(tag.TagName, statusEffectHolder.Name);
+                    ListManager.AddTagSource(tag, statusEffectHolder.Name);
                 }
 
                 if (status is Disease disease)
@@ -119,8 +119,6 @@ namespace Dataminer
                 }
             }
 
-            ListManager.Effects.Add(statusEffectHolder.PresetID.ToString(), statusEffectHolder);
-
             return statusEffectHolder;
         }
 
@@ -138,6 +136,8 @@ namespace Dataminer
                     {
                         string dir = Folders.Prefabs + "/Effects";
                         string saveName = statusHolder.Name;
+
+                        ListManager.Effects.Add(statusHolder.PresetID.ToString(), statusHolder);
 
                         Dataminer.SerializeXML(dir, saveName, statusHolder, typeof(StatusEffectHolder));
                     }

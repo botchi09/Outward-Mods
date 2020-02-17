@@ -38,45 +38,105 @@ namespace Dataminer
         public List<DropTableEntry> Guaranteed_Drops = new List<DropTableEntry>();
         public List<string> DropTable_Names = new List<string>();
 
-        public static EnemyHolder ParseEnemy(Character character, Vector3 origPos)
+        public static void ParseAllEnemies()
+        {
+            var enemies = CharacterManager.Instance.Characters.Values
+                    .Where(x => x.IsAI
+                        && x.Faction != Character.Factions.Player
+                        && x.Stats != null);
+
+            foreach (Character enemy in enemies)
+            {
+                var enemyHolder = ParseEnemy(enemy);
+
+                if (enemyHolder != null)
+                {
+                    var summary = ListManager.SceneSummaries[ListManager.GetSceneSummaryKey(enemy.transform.position)];
+
+                    // add to scene summary
+                    string saveName = enemyHolder.Name + " (" + enemyHolder.Unique_ID + ")";
+                    bool found = false;
+                    foreach (SceneSummary.QuantityHolder holder in summary.Enemies)
+                    {
+                        if (holder.Name == saveName)
+                        {
+                            // list contains this unique ID. add to.
+                            holder.Quantity++;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        summary.Enemies.Add(new SceneSummary.QuantityHolder
+                        {
+                            Name = saveName,
+                            Quantity = 1
+                        });
+                    }
+                }
+            }
+        }
+
+        public static EnemyHolder ParseEnemy(Character character)
         {
             Debug.Log("parsing enemy " + character.Name + " (" + character.gameObject.name + ")");
+            var pos = character.transform.position;
 
             var enemyHolder = new EnemyHolder
             {
                 Name = character.Name,
                 Unique_ID = 1,
                 Max_Health = character.Stats.MaxHealth,
-                Health_Regen_Per_Second = character.Stats.HealthRegen,
-                Impact_Resistance = character.Stats.GetImpactResistance(),
-                Damage_Resistances = character.Stats.DamageResistance,
-                Damage_Bonuses = At.GetValue(typeof(CharacterStats), character.Stats, "m_totalDamageAttack") as float[],
-                Protection = character.Stats.DamageProtection,
                 Faction = character.Faction.ToString(),
                 Allied_To_Same_Faction = character.TargetingSystem.AlliedToSameFaction,
                 Collider_Radius = character.CharacterController.radius
             };
 
-            // *----------------- TEMPORARY DEBUG -----------------* //
-            int z = 0;
-            foreach (float f in enemyHolder.Protection)
+            FixName(enemyHolder, character);
+
+            // add to Locations (first location)
+            string location = ListManager.GetSceneSummaryKey(pos);
+            enemyHolder.Locations_Found.Add(location);
+
+            // get Status Immunities
+            GetStatusImmunities(enemyHolder, character);
+
+            // get Drops (and dropper info)
+            bool dropWeapon = false;
+            bool dropPouch = false;
+            GetDrops(enemyHolder, character, ref dropWeapon, ref dropPouch);
+
+            // get stats
+            GetStats(enemyHolder, character);
+
+            // get Starting Equipment
+            try
             {
-                if (z > 0 && f > 0.01f)
-                {
-                    Debug.LogError("!!!!!!! ENEMY HAS " + (DamageType.Types)z + " PROTECTION !!!!!!!!");
-                }
-                z++;
+                GetEquipment(enemyHolder, character, dropWeapon, dropPouch);
             }
-            // *---------------------------------------------------* //
-
-
-            // adjust some stats to expected value format
-            for (int i = 0; i < 9; i++)
+            catch (Exception e)
             {
-                enemyHolder.Damage_Resistances[i] = (float)Math.Round(enemyHolder.Damage_Resistances[i] * 100f, 2);
-                enemyHolder.Damage_Bonuses[i] = (float)Math.Round((enemyHolder.Damage_Bonuses[i] - 1) * 100f, 2);
+                Debug.LogWarning("Exception parsing startingequipment of " + character.Name + ", messsage: " + e.Message);
             }
 
+            // round stats nicely
+            for (int i = 0; i < 6; i++)
+            {
+                enemyHolder.Damage_Bonuses[i] = (float)Math.Round(enemyHolder.Damage_Bonuses[i], 2);
+                enemyHolder.Damage_Resistances[i] = (float)Math.Round(enemyHolder.Damage_Resistances[i], 2);
+                enemyHolder.Protection[i] = (float)Math.Round(enemyHolder.Protection[i], 2);
+            }
+
+            // compare to existing enemies, see if we should save as new unique
+            CheckUnique(enemyHolder, location);
+
+            return enemyHolder;
+        }
+
+        // Fix Name
+        private static void FixName(EnemyHolder enemyHolder, Character character)
+        {
             // fix a few enemy names
             switch (enemyHolder.Name)
             {
@@ -95,11 +155,11 @@ namespace Dataminer
             goName = goName.Substring(0, goName.Length - (character.UID.ToString().Length + 1));
             goName = Regex.Replace(goName, @"\s*[(][\d][)]$", "");
             enemyHolder.GameObject_Name = goName;
+        }
 
-            // add to Locations (first location)
-            string location = ListManager.GetSceneSummaryKey(origPos);
-            enemyHolder.Locations_Found.Add(location);
-
+        // Status Effect Immunity
+        private static void GetStatusImmunities(EnemyHolder enemyHolder, Character character)
+        {
             // Immunities
             foreach (TagSourceSelector tagSelector in At.GetValue(typeof(CharacterStats), character.Stats, "m_statusEffectsNaturalImmunity") as TagSourceSelector[])
             {
@@ -112,134 +172,233 @@ namespace Dataminer
                     enemyHolder.Status_Immunities.Add(entry.Key.TagName);
                 }
             }
+        }
 
-            // Drops
-            bool dropWeapon = false;
-            bool dropPouch = false;
+        // DropTables
+        private static void GetDrops(EnemyHolder enemyHolder, Character character, ref bool dropWeapon, ref bool dropPouch)
+        {
             if (character.GetComponent<LootableOnDeath>() is LootableOnDeath lootableOnDeath)
             {
-                dropWeapon = lootableOnDeath.DropWeapons;
-                dropPouch = lootableOnDeath.EnabledPouch;
-
-                if (At.GetValue(typeof(LootableOnDeath), lootableOnDeath, "m_lootDroppers") is Dropable[] m_lootDroppers)
+                try
                 {
-                    foreach (Dropable dropper in m_lootDroppers)
+                    dropWeapon = lootableOnDeath.DropWeapons;
+                    dropPouch = lootableOnDeath.EnabledPouch;
+
+                    if (At.GetValue(typeof(LootableOnDeath), lootableOnDeath, "m_lootDroppers") is Dropable[] m_lootDroppers)
                     {
-                        var dropTableHolder = DroptableHolder.ParseDropTable(dropper);
-                        enemyHolder.DropTable_Names.Add(dropTableHolder.Name); 
+                        foreach (Dropable dropper in m_lootDroppers)
+                        {
+                            var dropTableHolder = DroptableHolder.ParseDropTable(dropper);
+                            enemyHolder.DropTable_Names.Add(dropTableHolder.Name);
+                        }
                     }
                 }
+                catch (Exception e)
+                {
+                    Debug.LogError("Exception parsing enemy droptable: " + e.Message);
+                }
+            }
+        }
+
+        // stats
+        private static void GetStats(EnemyHolder enemyHolder, Character character)
+        {
+            if (character.Stats == null)
+            {
+                Debug.LogError("Character stats is null!");
+                return;
             }
 
-            // Starting Equipment
+            if (At.GetValue(typeof(CharacterStats), character.Stats, "m_healthRegen") is Stat healthRegen)
+            {
+                enemyHolder.Health_Regen_Per_Second = healthRegen.BaseValue;
+            }
+
+            // impact resist
+            enemyHolder.Impact_Resistance = character.Stats.ImpactResistanceStat.BaseValue;
+
+            // damage stats
+            List<float> damageBonuses = new List<float>();
+            List<float> damageRes = new List<float>();
+            List<float> damageProt = new List<float>();
+
+            //// get base stats
+            //var allDmgBonus = (At.GetValue(typeof(CharacterStats), character.Stats, "m_damageModifiers") as Stat).BaseValue;
+            //allDmgBonus -= 1;
+            //allDmgBonus *= 100f;
+
+            //var allResBonus = (At.GetValue(typeof(CharacterStats), character.Stats, "m_resistanceModifiers") as Stat).BaseValue;
+            //if (allResBonus == 1)
+            //    allResBonus = 0;
+
+            var orig_DmgBonus = At.GetValue(typeof(CharacterStats), character.Stats, "m_damageTypesModifier") as Stat[];
+            var orig_Res = At.GetValue(typeof(CharacterStats), character.Stats, "m_damageResistance") as Stat[];
+            var orig_Prot = At.GetValue(typeof(CharacterStats), character.Stats, "m_damageProtection") as Stat[];
+
+            for (int i = 0; i < 6; i++)
+            {
+                // damage bonuses
+                damageBonuses.Add((orig_DmgBonus[i].BaseValue - 1) * 100f);
+
+                // damage res
+                damageRes.Add(orig_Res[i].BaseValue);
+
+                // protection
+                damageProt.Add(orig_Prot[i].BaseValue);
+            }
+
+            enemyHolder.Damage_Bonuses = damageBonuses.ToArray();
+            enemyHolder.Damage_Resistances = damageRes.ToArray();
+            enemyHolder.Protection = damageProt.ToArray();
+        }
+
+        // Starting Equipment (and EquipmentStats)
+        private static void GetEquipment(EnemyHolder enemyHolder, Character character, bool dropWeapon, bool dropPouch)
+        {
             if (character.GetComponent<StartingEquipment>() is StartingEquipment startingEquipment)
             {
-                Equipment[] equipments = null;
-
-                if (startingEquipment.OverrideStartingEquipments != null && startingEquipment.OverrideStartingEquipments.Length > 0)
+                if (startingEquipment.StartingSkills != null)
                 {
-                    equipments = startingEquipment.OverrideStartingEquipments;
-                }
-                else if (startingEquipment.Equipments != null && startingEquipment.Equipments.Length > 0)
-                {
-                    equipments = startingEquipment.Equipments;
-                }
-
-                if (equipments != null)
-                {
-                    foreach (Equipment equipment in equipments.Where(x => x != null))
+                    foreach (Skill skill in startingEquipment.StartingSkills.Where(x => x != null))
                     {
-                        enemyHolder.Starting_Equipment.Add(equipment.Name + " (" + equipment.ItemID + ")");
-
-                        if (equipment is Weapon weapon)
-                        {
-                            bool addDrop = false;
-
-                            if (weapon.Type != Weapon.WeaponType.Shield)
-                            {
-                                if (character.CurrentWeapon != null)
-                                {
-                                    SetWeaponDamage(enemyHolder, character.CurrentWeapon);
-                                    if (dropWeapon && equipment.IsPickable)
-                                    {
-                                        enemyHolder.Guaranteed_Drops.Add(new DropTableEntry
-                                        {
-                                            Item_ID = character.CurrentWeapon.ItemID,
-                                            Item_Name = character.CurrentWeapon.Name,
-                                            Min_Quantity = 1,
-                                            Max_Quantity = 1
-                                        });
-                                    }
-
-                                    addDrop = dropPouch;
-                                }
-                                else
-                                {
-                                    SetWeaponDamage(enemyHolder, weapon);
-                                    addDrop = dropWeapon;
-                                }
-                            }
-                           
-                            if ((addDrop || weapon.Type == Weapon.WeaponType.Shield) && equipment.IsPickable)
-                            {
-                                bool flag = false;
-                                if (weapon.TwoHanded)
-                                {
-                                    foreach (DropTableEntry entry in enemyHolder.Guaranteed_Drops)
-                                    {
-                                        if (entry.Item_ID == weapon.ItemID)
-                                        {
-                                            flag = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (!flag)
-                                {
-                                    enemyHolder.Guaranteed_Drops.Add(new DropTableEntry
-                                    {
-                                        Item_ID = equipment.ItemID,
-                                        Item_Name = equipment.Name,
-                                        Min_Quantity = 1,
-                                        Max_Quantity = 1
-                                    });
-                                }
-                            } 
-                        }
-                    }
-                }
-
-                if (dropPouch)
-                {
-                    if (startingEquipment.StartingPouchItems != null)
-                    {
-                        foreach (ItemQuantity itemQuantity in startingEquipment.StartingPouchItems)
-                        {
-                            enemyHolder.Guaranteed_Drops.Add(new DropTableEntry
-                            {
-                                Item_ID = itemQuantity.Item.ItemID,
-                                Item_Name = itemQuantity.Item.Name,
-                                Min_Quantity = itemQuantity.Quantity,
-                                Max_Quantity = itemQuantity.Quantity
-                            });
-                        }
+                        enemyHolder.Skill_Knowledge.Add((skill.Name ?? skill.name) + " (" + skill.ItemID + ")");
                     }
                 }
             }
 
-            // Skills
-            if (character.Inventory != null 
-                && character.Inventory.SkillKnowledge != null
-                && At.GetValue(typeof(CharacterKnowledge), character.Inventory.SkillKnowledge as CharacterKnowledge, "m_learnedItems") is List<Item> learned
-                && learned.Count() > 0)
+            if (character.Inventory.Pouch != null && dropPouch)
             {
-                foreach (Item skill in learned)
+                foreach (Item item in character.Inventory.Pouch.GetContainedItems())
                 {
-                    enemyHolder.Skill_Knowledge.Add(skill.Name ?? skill.name + " (" + skill.ItemID + ")");
+                    if (item.IsPickable)
+                    {
+                        AddGuaranteedDrop(enemyHolder, item.ItemID, item.Name, 1, -1, true);
+                    }
+                }
+            }
+            
+            if (character.Inventory.Equipment != null)
+            {
+                foreach (Equipment equipment in character.Inventory.Equipment.GetComponentsInChildren<Equipment>())
+                {
+                    enemyHolder.Starting_Equipment.Add(equipment.Name + " (" + equipment.ItemID + ")");
+
+                    var stats = equipment.GetComponent<EquipmentStats>() ?? ResourcesPrefabManager.Instance.GetItemPrefab(equipment.ItemID).Stats as EquipmentStats;
+
+                    if (stats != null)
+                    {
+                        if (!(stats is WeaponStats))
+                        {
+                            // weaponstats cant give impact resistance (only used for blocking)
+                            enemyHolder.Impact_Resistance += stats.ImpactResistance;
+                        }
+
+                        var damageBonus = At.GetValue(typeof(EquipmentStats), stats, "m_damageAttack") as float[];
+                        var damageRes = At.GetValue(typeof(EquipmentStats), stats, "m_damageResistance") as float[];
+                        var damageProt = At.GetValue(typeof(EquipmentStats), stats, "m_damageProtection") as float[];
+
+                        for (int i = 0; i < 6; i++)
+                        {
+                            enemyHolder.Damage_Bonuses[i] += damageBonus[i];
+                            enemyHolder.Damage_Resistances[i] += damageRes[i];
+                            enemyHolder.Protection[i] += damageProt[i];
+                        }
+                    }
+
+                    // add weapon drops to guaranteed drops
+                    if (equipment is Weapon && dropWeapon && equipment.IsPickable)
+                    {
+                        if (equipment is Ammunition)
+                        {
+                            int count = (int)At.GetValue(typeof(Ammunition), equipment as Ammunition, "m_currentCapacity");
+                            AddGuaranteedDrop(enemyHolder, equipment.ItemID, equipment.Name, count, -1, true);
+                        }
+                        else
+                        {
+                            AddGuaranteedDrop(enemyHolder, equipment.ItemID, equipment.Name, 1);
+                        }
+                    }
+                }
+
+                // fix weapon damage after parsing all equipment
+                Weapon charWeapon = null;
+                if (character.CurrentWeapon != null)
+                {
+                    charWeapon = character.CurrentWeapon;
+                }
+                else
+                {
+                    foreach (Weapon weapon in character.Inventory.Equipment.GetComponentsInChildren<Weapon>())
+                    {
+                        if (weapon.Type != Weapon.WeaponType.Shield && !(weapon is Ammunition))
+                        {
+                            charWeapon = weapon;
+                            break;
+                        }
+                    }
+                }
+                if (charWeapon != null)
+                {
+                    SetWeaponDamage(enemyHolder, charWeapon);
+                }
+            }
+        }
+
+        // Add to guaranteed drops
+        private static void AddGuaranteedDrop(EnemyHolder holder, int id, string name, int qty, int maxQty = -1, bool cumulative = false)
+        {
+            foreach (DropTableEntry entry in holder.Guaranteed_Drops)
+            {
+                if (entry.Item_ID == id)
+                {
+                    if (cumulative)
+                    {
+                        entry.Min_Quantity += qty;
+                        entry.Max_Quantity += maxQty == -1 ? qty : maxQty;
+                    }
+                    return;
                 }
             }
 
-            // compare to existing enemies, see if we should save as new unique
+            holder.Guaranteed_Drops.Add(new DropTableEntry
+            {
+                Item_ID = id,
+                Item_Name = name,
+                Min_Quantity = qty,
+                Max_Quantity = maxQty == -1 ? qty : maxQty
+            });
+        }
+
+        // Weapon Damages
+        private static void SetWeaponDamage(EnemyHolder holder, Weapon weapon)
+        {
+            WeaponStats stats = weapon.Stats ?? ResourcesPrefabManager.Instance.GetItemPrefab(weapon.ItemID).Stats as WeaponStats;
+
+            if (stats != null)
+            {
+                holder.Weapon_Impact = stats.Impact;
+
+                var list = stats.BaseDamage.Clone();
+                for (int i = 0; i < 6; i++)
+                {
+                    float multi = holder.Damage_Bonuses[i];
+                    if (list[(DamageType.Types)i] != null)
+                    {
+                        list[(DamageType.Types)i].Damage *= 1 + (0.01f * multi);
+                        list[(DamageType.Types)i].Damage = (float)Math.Round(list[(DamageType.Types)i].Damage, 2);
+                    }
+                }
+                holder.True_WeaponDamage = Damages.ParseDamageList(list);
+            }
+            else
+            {
+                Debug.LogWarning("Null stats for " + weapon.Name);
+            }
+        }
+
+        // Check if unique
+        private static void CheckUnique(EnemyHolder enemyHolder, string location)
+        {
             bool newSave = true;
             if (ListManager.EnemyManifest.ContainsKey(enemyHolder.Name))
             {
@@ -273,40 +432,14 @@ namespace Dataminer
             {
                 ListManager.EnemyManifest.Add(enemyHolder.Name, new List<EnemyHolder> { enemyHolder });
             }
-            
+
             if (newSave)
             {
                 SaveEnemy(enemyHolder);
             }
-
-            return enemyHolder;
         }
 
-        private static void SetWeaponDamage(EnemyHolder holder, Weapon weapon)
-        {
-            WeaponStats stats = weapon.Stats ?? ResourcesPrefabManager.Instance.GetItemPrefab(weapon.ItemID).Stats as WeaponStats;
-
-            if (stats != null)
-            {
-                holder.Weapon_Impact = stats.Impact;
-
-                var list = stats.BaseDamage.Clone();
-                for (int i = 0; i < 6; i++)
-                {
-                    float multi = holder.Damage_Bonuses[i];
-                    if (list[(DamageType.Types)i] != null)
-                    {
-                        list[(DamageType.Types)i].Damage *= 1 + (0.01f * multi);
-                    }
-                }
-                holder.True_WeaponDamage = Damages.ParseDamageList(list);
-            }
-            else
-            {
-                Debug.LogWarning("Null stats for " + weapon.Name);
-            }
-        }
-
+        // Actual save
         private static void SaveEnemy(EnemyHolder holder)
         {
             Debug.LogWarning(string.Format("Saving enemy '{0}' (unique ID: {1})", holder.Name, holder.Unique_ID));
@@ -324,6 +457,7 @@ namespace Dataminer
             Dataminer.SerializeXML(dir, saveName, holder, typeof(EnemyHolder));
         }
 
+        // Custom Equals comparer
         public bool Equals(EnemyHolder other)
         {
             bool equal = this.GameObject_Name == other.GameObject_Name
@@ -379,13 +513,16 @@ namespace Dataminer
                 // check damage bonus and resistances
                 for (int i = 0; i < 6; i++)
                 {
-                    // fix for the comparison not using the corrected values sometimes.
-                    // need to figure out why this is even happening.
-                    float otherRes = (float)Math.Round(other.Damage_Resistances[i] * 100f, 2);
-                    float otherBonus = (float)Math.Round((other.Damage_Bonuses[i] - 1) * 100f, 2);
+                    //// fix for the comparison not using the corrected values sometimes.
+                    //// need to figure out why this is even happening.
+                    //float otherRes = other.Damage_Resistances[i];
+                    //float otherBonus = other.Damage_Bonuses[i];
 
-                    if ((this.Damage_Resistances[i] != other.Damage_Resistances[i] && this.Damage_Resistances[i] != otherRes)
-                        || (this.Damage_Bonuses[i] != other.Damage_Bonuses[i] && this.Damage_Bonuses[i] != otherBonus)
+                    //otherRes = (float)Math.Round(otherRes * 100f, 2);
+                    //otherBonus = (float)Math.Round((otherBonus - 1) * 100f, 2);
+
+                    if (this.Damage_Resistances[i] != other.Damage_Resistances[i] // && this.Damage_Resistances[i] != otherRes)
+                        || this.Damage_Bonuses[i] != other.Damage_Bonuses[i] // && this.Damage_Bonuses[i] != otherBonus)
                         || this.Protection[i] != other.Protection[i])
                     {
                         return false;

@@ -89,19 +89,19 @@ namespace CombatAndDodgeOverhaul
             }
             else
             {
-                if (PlayerLastHitTimes.ContainsKey(self.UID) && Time.time - PlayerLastHitTimes[self.UID] < 0.35f)
+                if (PlayerLastHitTimes.ContainsKey(self.UID) && Time.time - PlayerLastHitTimes[self.UID] < (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterHit))
                 {
-                    //  Debug.Log("Player has hit within the last 0.35 seconds. Dodge not allowed!");
+                    //  Debug.Log("Player has hit within the last few seconds. Dodge not allowed!");
                     return;
                 }
 
                 Character.HurtType hurtType = (Character.HurtType)At.GetValue(typeof(Character), self, "m_hurtType");
 
                 // manual fix (game sometimes does not reset HurtType to NONE when animation ends.
-                float timeout = 0.8f;
+                float timeout = (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterStagger);
                 if (hurtType == Character.HurtType.Knockdown)
                 {
-                    timeout = 2.0f;
+                    timeout = (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterKD);
                 }
 
                 if ((float)At.GetValue(typeof(Character), self, "m_timeOfLastStabilityHit") is float lasthit && Time.time - lasthit > timeout)

@@ -31,6 +31,8 @@ namespace Dataminer
 
             Dataminer.SerializeXML(dir, saveName, merchantHolder, typeof(MerchantHolder));
 
+            ListManager.Merchants.Add(saveName, merchantHolder);
+
             return merchantHolder;
         }
 

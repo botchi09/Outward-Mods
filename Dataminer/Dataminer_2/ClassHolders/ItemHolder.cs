@@ -62,7 +62,7 @@ namespace Dataminer
                 foreach (Tag tag in item.Tags)
                 {
                     itemHolder.Tags.Add(tag.TagName);
-                    ListManager.AddTagSource(tag.TagName, item.Name);
+                    ListManager.AddTagSource(tag, item.Name);
                 }
             }
 

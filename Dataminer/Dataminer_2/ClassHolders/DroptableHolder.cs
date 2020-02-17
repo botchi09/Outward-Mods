@@ -71,6 +71,8 @@ namespace Dataminer
                         {
                             float percentage = (float)((decimal)dropChance.DropChance / generatorHolder.MaxDiceValue) * 100f;
 
+                            percentage = (float)Math.Round(percentage, 2);
+
                             if (percentage == 100)
                             {
                                 var pos = dropper.transform.position;

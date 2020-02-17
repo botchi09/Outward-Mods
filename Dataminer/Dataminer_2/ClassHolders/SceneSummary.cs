@@ -16,6 +16,8 @@ namespace Dataminer
         public List<QuantityHolder> Gatherables = new List<QuantityHolder>();
         public List<ItemSpawnHolder> Item_Spawns = new List<ItemSpawnHolder>();
 
+        public List<string> UniqueContainerList = new List<string>();
+
         public class QuantityHolder
         {
             public string Name;

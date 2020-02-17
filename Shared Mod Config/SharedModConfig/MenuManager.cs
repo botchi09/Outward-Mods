@@ -16,6 +16,9 @@ namespace SharedModConfig
 
         // UI canvas
         private GameObject m_ConfigCanvas;
+
+        private Button m_MenuButton;
+        private GameObject m_ConfigPanel;
         private bool m_lastCanvasState;
 
         private Button m_closeButton;
@@ -33,23 +36,39 @@ namespace SharedModConfig
             return m_initDone;
         }
 
-        #region Internal Setup
-        internal void Awake()
-        {
-            Instance = this;
-            StartCoroutine(SetupCoroutine());
-
-            CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
-        }
-
         internal void Update()
         {
+            if (!Instance.IsInitDone())
+            {
+                return;
+            }
+
+            //if (!m_MenuButton.gameObject.activeSelf)
+            //{
+            //    m_MenuButton.gameObject.SetActive(true);
+            //}
+
+            if (global::MenuManager.Instance.IsInMainMenuScene)
+            {
+                if (!m_MenuButton.gameObject.activeSelf)
+                {
+                    m_MenuButton.gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                if (m_MenuButton.gameObject.activeSelf)
+                {
+                    m_MenuButton.gameObject.SetActive(false);
+                }
+            }
+
             foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
             {
                 if (CustomKeybindings.m_playerInputManager[player.RewiredID].GetButtonDown(MenuKey))
                 {
-                    bool active = m_ConfigCanvas.activeSelf;
-                    m_ConfigCanvas.SetActive(!active);
+                    bool active = m_ConfigPanel.activeSelf;
+                    m_ConfigPanel.SetActive(!active);
                 }
             }
 
@@ -57,6 +76,15 @@ namespace SharedModConfig
             {
                 MenuMouseFix();
             }
+        }
+
+        #region Internal Setup
+        internal void Awake()
+        {
+            Instance = this;
+            StartCoroutine(SetupCoroutine());
+
+            CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
         }
 
         private IEnumerator SetupCoroutine()
@@ -81,8 +109,15 @@ namespace SharedModConfig
             {
                 m_ConfigCanvas = Instantiate(canvasAsset);
                 DontDestroyOnLoad(m_ConfigCanvas);
+                m_ConfigCanvas.SetActive(true);
 
-                var headerHolder = m_ConfigCanvas.transform.Find("Panel").Find("Header_Holder");
+                m_MenuButton = m_ConfigCanvas.transform.Find("MenuButton").GetComponent<Button>();
+                m_MenuButton.gameObject.SetActive(true);
+                m_MenuButton.onClick.AddListener(MenuButton);
+
+                m_ConfigPanel = m_ConfigCanvas.transform.Find("Panel").gameObject;
+
+                var headerHolder = m_ConfigPanel.transform.Find("Header_Holder");
 
                 // close button (X)
                 m_closeButton = headerHolder.transform.Find("CloseButton").gameObject.GetComponent<Button>();
@@ -96,13 +131,13 @@ namespace SharedModConfig
                 m_ModListButtonPrefab.SetActive(false);
 
                 // mod settings template
-                m_SettingsHolder = m_ConfigCanvas.transform.Find("Panel").Find("Settings_Holder").gameObject;
+                m_SettingsHolder = m_ConfigPanel.transform.Find("Settings_Holder").gameObject;
 
                 m_SettingsPrefab = m_SettingsHolder.transform.Find("Settings_Prefab").gameObject;
                 m_SettingsPrefab.SetActive(false);
 
-                // disable canvas
-                m_ConfigCanvas.SetActive(false);
+                // disable main panel
+                m_ConfigPanel.SetActive(false);
             }
         }
         #endregion
@@ -111,7 +146,13 @@ namespace SharedModConfig
         #region UI Button Listener Functions
         private void CloseButton()
         {
-            m_ConfigCanvas.SetActive(false);
+            m_ConfigPanel.SetActive(false);
+        }
+
+        private void MenuButton()
+        {
+            bool active = m_ConfigPanel.activeSelf;
+            m_ConfigPanel.SetActive(!active);
         }
 
         private void ModListButton()
@@ -281,9 +322,9 @@ namespace SharedModConfig
         #region Menu Mouse Fix
         private void MenuMouseFix()
         {
-            if (m_lastCanvasState != m_ConfigCanvas.activeSelf)
+            if (m_lastCanvasState != m_ConfigPanel.activeSelf)
             {
-                m_lastCanvasState = m_ConfigCanvas.activeSelf;
+                m_lastCanvasState = m_ConfigPanel.activeSelf;
 
                 Character c = CharacterManager.Instance.GetFirstLocalCharacter();
 
