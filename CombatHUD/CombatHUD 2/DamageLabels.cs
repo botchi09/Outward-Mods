@@ -36,7 +36,8 @@ namespace CombatHUD
             //cleanup dead labels first
             for (int z = 0; z < ActiveLabels.Count; z++)
             {
-                if (Time.time - ActiveLabels[z].CreationTime > (float)HUDManager.config.GetValue(Settings.LabelLifespan))
+                if (Time.time - ActiveLabels[z].CreationTime > (float)HUDManager.config.GetValue(Settings.LabelLifespan)
+                    || ActiveLabels[z].Target == null)
                 {
                     ActiveLabels.RemoveAt(z);
                     z--;

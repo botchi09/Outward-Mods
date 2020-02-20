@@ -10,7 +10,8 @@ namespace Dataminer
         public string Name;
         public int ItemID;
 
-        public List<string> Locations_Found = new List<string>();
+        public List<SceneSummary.QuantityHolder> Locations_Found = new List<SceneSummary.QuantityHolder>();
+        //public List<string> Locations_Found = new List<string>();
         public List<string> All_DropTables = new List<string>();
     }
 }

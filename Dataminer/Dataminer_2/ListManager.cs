@@ -76,14 +76,32 @@ namespace Dataminer
         {
             if (ContainerSummaries.ContainsKey(name))
             {
-                ContainerSummaries[name].Locations_Found.Add(location);
-                ContainerSummaries[name].Locations_Found.Sort();
+                var summary = ContainerSummaries[name];
+
+                bool addLocation = true;
+                foreach (var loc in summary.Locations_Found)
+                {
+                    if (loc.Name == location)
+                    {
+                        loc.Quantity++;
+                        addLocation = false;
+                        break;
+                    }
+                }
+                if (addLocation)
+                {
+                    summary.Locations_Found.Add(new SceneSummary.QuantityHolder
+                    {
+                        Name = location,
+                        Quantity = 1
+                    });
+                }
 
                 foreach (string table in dropTables)
                 {
-                    if (!ContainerSummaries[name].All_DropTables.Contains(table))
+                    if (!summary.All_DropTables.Contains(table))
                     {
-                        ContainerSummaries[name].All_DropTables.Add(table);
+                        summary.All_DropTables.Add(table);
                     }
                 }
             }
@@ -92,9 +110,13 @@ namespace Dataminer
                 ContainerSummaries.Add(name, new ContainerSummary
                 {
                     Name = name,
-                    Locations_Found = new List<string>
+                    Locations_Found = new List<SceneSummary.QuantityHolder>
                     {
-                        location
+                        new SceneSummary.QuantityHolder
+                        {
+                            Name = location,
+                            Quantity = 1
+                        }
                     },
                     All_DropTables = dropTables ?? new List<string>()
                 });
