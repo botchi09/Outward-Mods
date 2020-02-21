@@ -41,8 +41,6 @@ namespace Dataminer
             string saveName = lootHolder.Name + "_" + lootHolder.UID;
             Dataminer.SerializeXML(dir + "/LootContainers", saveName, lootHolder, typeof(LootContainerHolder));
 
-            ListManager.AddContainerSummary(lootHolder.Name, ListManager.GetSceneSummaryKey(loot.transform.position), lootHolder.DropTables);
-
             return lootHolder;
         }
     }

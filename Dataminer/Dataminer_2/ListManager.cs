@@ -37,14 +37,14 @@ namespace Dataminer
             Instance = this;
         }
 
-        internal void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.ScrollLock))
-            {
-                Debug.Log("Force saving lists");
-                SaveLists();
-            }
-        }
+        //internal void Update()
+        //{
+        //    if (Input.GetKeyDown(KeyCode.ScrollLock))
+        //    {
+        //        Debug.Log("Force saving lists");
+        //        SaveLists();
+        //    }
+        //}
 
         public static string GetSceneSummaryKey(Vector3 position)
         {
