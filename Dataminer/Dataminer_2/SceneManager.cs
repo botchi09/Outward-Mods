@@ -79,6 +79,9 @@ namespace Dataminer
 
                 /*        Parse Scene        */
 
+                //// temp debug: find cheatable dialogues
+                //FindCheatableDialogue();
+
                 // Disable the TreeBehaviour Managers while we do stuff with enemies
                 DisableCanvases();
 
@@ -101,6 +104,79 @@ namespace Dataminer
 
             Debug.Log("[Dataminer] Finished.");
         }
+
+        //// temp debug
+        //private void FindCheatableDialogue()
+        //{
+        //    foreach (var tree in Resources.FindObjectsOfTypeAll<NodeCanvas.DialogueTrees.DialogueTreeExt>())
+        //    {
+        //        var nodes = At.GetValue(typeof(NodeCanvas.Framework.Graph), tree as NodeCanvas.Framework.Graph, "_nodes") as List<NodeCanvas.Framework.Node>;
+
+        //        foreach (var node in nodes.Where(x => x is NodeCanvas.DialogueTrees.MultipleChoiceNodeExt))
+        //        {
+        //            var multichoice = node as NodeCanvas.DialogueTrees.MultipleChoiceNodeExt;
+
+        //            // make sure previous option had multichoice
+        //            if (node.inConnections == null 
+        //                || node.inConnections.Count < 1 
+        //                || node.inConnections[0].sourceNode.inConnections == null 
+        //                || node.inConnections[0].sourceNode.inConnections.Count < 1)
+        //            {
+        //                continue;
+        //            }
+
+        //            var prevMulti = node.inConnections[0].sourceNode.inConnections[0].sourceNode as NodeCanvas.DialogueTrees.MultipleChoiceNodeExt;
+
+        //            if (prevMulti == null)
+        //            {
+        //                continue;
+        //            }
+
+        //            Dictionary<int, int> conditionKeys = new Dictionary<int, int>();
+        //            for (int i = 0; i < multichoice.availableChoices.Count; i++)
+        //            {
+        //                if (multichoice.availableChoices[i].condition != null)
+        //                {
+        //                    int fix = i - conditionKeys.Count;
+        //                    conditionKeys.Add(i, fix);
+        //                }
+        //            }
+
+        //            foreach (var key2 in conditionKeys)
+        //            {
+        //                if (prevMulti.outConnections.Count - 1 >= key2.Value)
+        //                {
+        //                    Debug.Log("-----------[ " + tree.name + " ]----------");
+        //                    Debug.Log("POTENTIAL EXPLOITABLE!");
+
+        //                    var actors = "";
+        //                    foreach (var actor in tree.actorParameters)
+        //                    {
+        //                        if (actors != "") { actors += ", "; }
+        //                        actors += actor.name;
+        //                    }
+        //                    Debug.Log("Actors: " + actors);
+
+        //                    //find which node leads to the second node
+        //                    int key1 = 0;
+        //                    foreach (var connection in prevMulti.outConnections)
+        //                    {
+        //                        if (connection.targetNode != null && connection.targetNode.outConnections.Count > 0 && connection.targetNode.outConnections[0].targetNode == multichoice)
+        //                        {
+        //                            Debug.Log("Key1 is " + (key1 + 1) + ": " + prevMulti.availableChoices[key1].statement);
+        //                            break;
+        //                        }
+        //                        key1++;
+        //                    }
+
+        //                    Debug.Log("Key2 is " + (key2.Value + 1) + ": " + multichoice.availableChoices[key2.Key].statement);
+        //                    Debug.Log("Real Key2: " + (key2.Key + 1));
+        //                    Debug.Log("--------------------------------------------");
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         #region PARSE ALL LOOT FUNCTION
         // Parse Loot

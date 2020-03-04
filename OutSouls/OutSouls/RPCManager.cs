@@ -23,7 +23,7 @@ namespace OutSoulsMod
             if (this.photonView == null && PhotonNetwork.inRoom)
             {
                 this.gameObject.AddComponent<PhotonView>();
-                this.photonView.viewID = PhotonNetwork.AllocateViewID();
+                this.photonView.viewID = 903;
             }
         }
 

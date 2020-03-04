@@ -74,7 +74,10 @@ namespace OutwardExplorer
                 guiHelper.objectTransformEdits[i] = "";
 
             //PatchHooks();
-            On.QuestEventDictionary.Load += new On.QuestEventDictionary.hook_Load(QuestLoad);
+            On.QuestEventDictionary.Load += QuestLoad;
+
+            On.SendQuestEventInteraction.OnActivate += SendQuestInteractionHook;
+            On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += SendQuestEventHook;
 
             OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
         }
@@ -93,6 +96,42 @@ namespace OutwardExplorer
                     questEvents.Add(sig.EventName, sig);
                 }
             }
+        }
+
+        private void SendQuestInteractionHook(On.SendQuestEventInteraction.orig_OnActivate orig, SendQuestEventInteraction self)
+        {
+            var _ref = GetValue(typeof(SendQuestEventInteraction), self, "m_questReference") as QuestEventReference;
+            var _event = _ref.Event;
+            var s = _ref.EventUID;
+
+            if (_event != null && s != null)
+            {
+                Debug.LogWarning(
+                    "------ ADDING QUEST EVENT (trigger) -------" +
+                    "\r\nName: " + _event.EventName +
+                    "\r\nDescription: " + _event.Description +
+                    "\r\n--------------------------------------");
+            }
+
+            orig(self);
+        }
+
+        private void SendQuestEventHook(On.NodeCanvas.Tasks.Actions.SendQuestEvent.orig_OnExecute orig, NodeCanvas.Tasks.Actions.SendQuestEvent self)
+        {
+            var _event = self.QuestEventRef.Event;
+            var s = self.QuestEventRef.EventUID;
+
+            if (_event != null && s != null)
+            {
+                Debug.LogWarning(
+                    "------ ADDING QUEST EVENT -------" +
+                    "\r\nName: " + _event.EventName +
+                    "\r\nDescription: " + _event.Description +
+                    "\r\nStack: " + self.StackAmount +
+                    "\r\n---------------------------");
+            }
+
+            orig(self);            
         }
 
         // On update

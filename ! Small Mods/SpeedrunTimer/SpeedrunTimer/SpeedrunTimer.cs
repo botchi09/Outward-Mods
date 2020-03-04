@@ -59,7 +59,7 @@ namespace SpeedrunTimer
         public Dictionary<string, List<int>> StopConditions = new Dictionary<string, List<int>>
         {
             { "Well-Earned Rest", new List<int> { 7011104, 7011204, 7011304 } }, // checks for all 3 "Peacemaker" quests
-            { "Blood Price", new List<int> { 7011001} }, // checks for Call to Adventure (does not check success)
+            { "Blood Price", new List<int> { 7011001 } }, // checks for Call to Adventure (does not check success)
         };
         private int m_currentStopCondition = 0;
 
@@ -145,7 +145,6 @@ namespace SpeedrunTimer
                         runCompleted = true;
                     }
                 }
-
             }
         }
 
@@ -156,35 +155,36 @@ namespace SpeedrunTimer
 
         internal void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(8, 5, 250, 200));
-            GUILayout.BeginVertical();
             int origFontsize = GUI.skin.label.fontSize;
+            GUI.BeginGroup(new Rect(5, 5, 350, 250));
 
-            GUI.skin.label.padding = new RectOffset(0, 0, 0, 0);
-            GUI.skin.label.margin = new RectOffset(3, 3, 3, 3);
+            // Category
             GUI.skin.label.fontSize = 14;
-            GUILayout.Label("In-game time:", GUILayout.Height(24));
+            GUI.Label(new Rect(3, 3, 350, 25), "[" + settings.ConditionKey + "] Category: " + StopConditions.ElementAt(m_currentStopCondition).Key);
 
-            GUI.skin.label.fontSize = 25;
+            // Timer
+            GUI.skin.label.fontSize = 27;
+            // shadowtext
+            GUI.color = Color.black;
+            GUI.Label(new Rect(4, 31, 349, 79), timeString);
+            // main text
             if (!timerRunning || !IsGameplayRunning())
                 if (runCompleted)
                     GUI.color = Color.green;
-                else 
+                else
                     GUI.color = Color.yellow;
             else
                 GUI.color = Color.white;
-            GUILayout.Label(timeString, GUILayout.Height(35));
+            GUI.Label(new Rect(3, 30, 350, 35), timeString);
 
-            GUI.skin.label.fontSize = 13;
+            // [StartKey] to start...
             if (!timerRunning)
             {
-                GUILayout.Label(StartKey.ToString() + " to start...");
+                GUI.skin.label.fontSize = 13;
+                GUI.Label(new Rect(3, 70, 350, 30), StartKey.ToString() + " to start...");
             }
-            
-            GUILayout.Label("Stop condition: (" + settings.ConditionKey + ") " + StopConditions.ElementAt(m_currentStopCondition).Key);
 
-            GUILayout.EndVertical();
-            GUILayout.EndArea();
+            GUI.EndGroup();
             GUI.skin.label.fontSize = origFontsize;
             GUI.color = Color.white;
         }

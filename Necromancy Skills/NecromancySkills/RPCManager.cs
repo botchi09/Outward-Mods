@@ -23,7 +23,7 @@ namespace NecromancerSkills
         {
             if (PhotonNetwork.inRoom && this.photonView == null)
             {
-                this.gameObject.AddComponent(new PhotonView() { viewID = PhotonNetwork.AllocateViewID() });
+                this.gameObject.AddComponent(new PhotonView() { viewID = 900 });
                 Instance = this;
             }
         }

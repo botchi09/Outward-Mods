@@ -119,9 +119,9 @@ namespace PvP
             if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) { return; }
 
             // setup PhotonView (add or remove when needed)
-            if (!PhotonNetwork.offlineMode && photonView == null)
+            if (PhotonNetwork.inRoom && photonView == null)
             {
-                gameObject.AddComponent(new PhotonView() { viewID = 9997 });
+                gameObject.AddComponent(new PhotonView() { viewID = 994 });
             }
 
             // handle custom multiplayer limit 

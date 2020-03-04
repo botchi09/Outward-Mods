@@ -26,7 +26,7 @@ Changing the keybindings:
 
 How to Use / Notes:
 
-- These keybindings work from the menu, they're not in-game keybindings.
+- These keybindings work from anywhere in the game.
 - You need to press the Start key to begin the run. It will start ticking when gameplay begins.
 - You can press the Stop key to end the timer. It could be the same key you use to stop LiveSplit, etc.
 - The timer will no longer reset when you go to menu. You can press Start or Stop to reset.

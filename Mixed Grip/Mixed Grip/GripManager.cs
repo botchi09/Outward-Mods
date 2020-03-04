@@ -36,7 +36,7 @@ namespace MixedGrip
             // setup PhotonView (add when needed)
             if (PhotonNetwork.inRoom && photonView == null)
             {
-                gameObject.AddComponent(new PhotonView() { viewID = 7263 });
+                gameObject.AddComponent(new PhotonView() { viewID = 901 });
             }
 
             MixedGripUpdate();            
