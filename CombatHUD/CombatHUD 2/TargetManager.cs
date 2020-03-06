@@ -54,6 +54,7 @@ namespace CombatHUD
 
             m_infoboxName   = texts.Find("text_Name").GetComponent<Text>();
             m_infoboxHealth = texts.Find("text_Health").GetComponent<Text>();
+            m_infoboxHealth.fontSize = 14;
             m_infoboxImpact = texts.Find("text_Impact").GetComponent<Text>();
 
             var damageTexts = texts.Find("DamageTexts");

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace CombatHUD
 {
@@ -24,11 +25,22 @@ namespace CombatHUD
                 LabelHolders.Add(child.gameObject);
             }
 
+            SceneManager.sceneLoaded += OnSceneChange;
+
             // hooks
             On.PunctualDamage.DealHit += PunctualHook; // non-weapon skill hits, traps, effects, etc
             On.WeaponDamage.DealHit += WeaponSkillHook; // weapon skill hits
             On.Weapon.HasHit += WeaponHitHook; // melee weapon hit
             On.ProjectileWeapon.HasHit += ProjectileHitHook;
+        }
+
+        private void OnSceneChange(Scene scene, LoadSceneMode mode)
+        {
+            ActiveLabels.Clear();
+            for (int j = 0; j < LabelHolders.Count; j++)
+            {
+                LabelHolders[j].SetActive(false);
+            }
         }
 
         internal void Update()
