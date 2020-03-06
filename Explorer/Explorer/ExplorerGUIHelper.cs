@@ -3,13 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace OutwardExplorer
 {
     public class ExplorerGUIHelper : MonoBehaviour
     {
-        public ExplorerScript script;
+        public static ExplorerGUIHelper Instance;
 
+        internal void Awake()
+        {
+            Instance = this;
+        }
 
         // main OnGUI
         internal void OnGUI()
@@ -32,7 +37,7 @@ namespace OutwardExplorer
                 }
                 else
                 {
-                    m_inspectorRect = GUI.Window(98, m_inspectorRect, script.InspectorWindow, "Object Inspector");
+                    m_inspectorRect = GUI.Window(98, m_inspectorRect, ExplorerScript.Instance.InspectorWindow, "Object Inspector");
                 }
             }
         }
@@ -92,12 +97,10 @@ namespace OutwardExplorer
             }
             catch
             {
-                script.explorerComponentsObject = null;
-                script.explorerTransform = null;
-                script.inspectorObject = null;
+                ExplorerScript.Instance.Reset();
             }
             //else if (guiPage == 3)
-            //    xScript.dumper.utils.DumperGUIPage();
+            //    xExplorerScript.Instance.dumper.utils.DumperGUIPage();
 
             GUILayout.EndScrollView();
 
@@ -154,7 +157,7 @@ namespace OutwardExplorer
             if (GUILayout.Button(SceneManagerHelper.ActiveSceneName, GUILayout.Width(140)))
             {
                 Area a = AreaManager.Instance.GetAreaFromSceneName(SceneManagerHelper.ActiveSceneName);
-                script.SetInspectorObject(a);
+                ExplorerScript.Instance.SetInspectorObject(a);
             }
 
             // search
@@ -163,30 +166,30 @@ namespace OutwardExplorer
             {
                 if (GameObject.Find(exploreSearch) is GameObject result)
                 {
-                    script.explorerPath.Clear();
-                    script.explorerPath.Add(result.transform);
-                    script.explorerTransform = result.transform;
+                    ExplorerScript.Instance.explorerPath.Clear();
+                    ExplorerScript.Instance.explorerPath.Add(result.transform);
+                    ExplorerScript.Instance.explorerTransform = result.transform;
                 }
             }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            if (script.explorerTransform != null)
+            if (ExplorerScript.Instance.explorerTransform != null)
             {
                 if (GUILayout.Button("X", GUILayout.Width(30)))
                 {
-                    script.explorerTransform = null;
-                    script.explorerPath.Clear();
+                    ExplorerScript.Instance.explorerTransform = null;
+                    ExplorerScript.Instance.explorerPath.Clear();
                     GUILayout.EndHorizontal();
                     return;
                 }
-                if (script.explorerTransform.parent != null)
+                if (ExplorerScript.Instance.explorerTransform.parent != null)
                 {
                     if (GUILayout.Button("<-", new GUILayoutOption[] { GUILayout.Height(21), GUILayout.Width(60) }))
                     {
-                        //explorerPath = explorerPath.Substring(0, explorerPath.Length - script.explorerTransform.name.Length - 1);
-                        script.explorerPath.RemoveAt(script.explorerPath.Count - 1);
-                        script.explorerTransform = script.explorerTransform.parent;
+                        //explorerPath = explorerPath.Substring(0, explorerPath.Length - ExplorerScript.Instance.explorerTransform.name.Length - 1);
+                        ExplorerScript.Instance.explorerPath.RemoveAt(ExplorerScript.Instance.explorerPath.Count - 1);
+                        ExplorerScript.Instance.explorerTransform = ExplorerScript.Instance.explorerTransform.parent;
                         GUILayout.EndHorizontal();
                         return;
                     }
@@ -196,7 +199,7 @@ namespace OutwardExplorer
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
             string s = "";
-            foreach (Transform t in script.explorerPath)
+            foreach (Transform t in ExplorerScript.Instance.explorerPath)
             {
                 s += t.name + "/";
             }
@@ -208,33 +211,33 @@ namespace OutwardExplorer
 
             scroll2 = GUILayout.BeginScrollView(scroll2, GUILayout.MaxHeight(260));
 
-            if (script.explorerTransform == null)
+            if (ExplorerScript.Instance.explorerTransform == null)
             {
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby)
                 {
                     Character c = ps.ControlledCharacter;
-                    script.ListChildObjects(c.gameObject, false);
+                    ExplorerScript.Instance.ListChildObjects(c.gameObject, false);
                 }
                 foreach (GameObject child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.transform.childCount > 0))
                 {
-                    script.ListChildObjects(child.gameObject, false);
+                    ExplorerScript.Instance.ListChildObjects(child.gameObject, false);
                 }
                 foreach (GameObject child in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects().Where(x => x.transform.childCount <= 0))
                 {
-                    script.ListChildObjects(child.gameObject, false);
+                    ExplorerScript.Instance.ListChildObjects(child.gameObject, false);
                 }
             }
             else
             {
-                foreach (Transform child in script.explorerTransform)
+                foreach (Transform child in ExplorerScript.Instance.explorerTransform)
                 {
                     if (child.childCount > 0)
-                        script.ListChildObjects(child.gameObject, false);
+                        ExplorerScript.Instance.ListChildObjects(child.gameObject, false);
                 }
-                foreach (Transform child in script.explorerTransform)
+                foreach (Transform child in ExplorerScript.Instance.explorerTransform)
                 {
                     if (child.childCount <= 0)
-                        script.ListChildObjects(child.gameObject, false);
+                        ExplorerScript.Instance.ListChildObjects(child.gameObject, false);
                 }
             }
             GUILayout.EndScrollView();
@@ -254,8 +257,8 @@ namespace OutwardExplorer
                 {
                     obj.transform.position = c.transform.position + new Vector3(0, 1, 0);
                 }
-                if (script.explorerTransform != null)
-                    obj.transform.parent = script.explorerTransform;
+                if (ExplorerScript.Instance.explorerTransform != null)
+                    obj.transform.parent = ExplorerScript.Instance.explorerTransform;
                 else
                     obj.transform.parent = null;
             }
@@ -266,9 +269,9 @@ namespace OutwardExplorer
             //GUI.skin.horizontalScrollbar.padding = new RectOffset(0, 0, 0, 0);
             GUILayout.Label("", GUI.skin.horizontalScrollbar);
 
-            if (script.explorerComponentsObject != null)
+            if (ExplorerScript.Instance.explorerComponentsObject != null)
             {
-                script.ListComponents(script.explorerComponentsObject, false);
+                ExplorerScript.Instance.ListComponents(ExplorerScript.Instance.explorerComponentsObject, false);
             }
         }
 
@@ -278,7 +281,7 @@ namespace OutwardExplorer
         {
             GUILayout.BeginVertical();
 
-            if (script.currentPrefab == null)
+            if (ExplorerScript.Instance.currentPrefab == null)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Search for an item:");
@@ -293,12 +296,12 @@ namespace OutwardExplorer
                     if (itemSearch == "*") { itemSearch = ""; } // if we're in wildcard, set "*" to "" temporarily to draw the full list
 
                     scrollPrefabs = GUILayout.BeginScrollView(scrollPrefabs);
-                    foreach (KeyValuePair<string, GameObject> entry in script.allPrefabs.Where(x => x.Key.ToLower().Contains(itemSearch.ToLower())))
+                    foreach (KeyValuePair<string, GameObject> entry in ExplorerScript.Instance.allPrefabs.Where(x => x.Key.ToLower().Contains(itemSearch.ToLower())))
                     {
                         GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                         if (GUILayout.Button(entry.Key, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(510) }))
                         {
-                            script.currentPrefab = entry.Value;
+                            ExplorerScript.Instance.currentPrefab = entry.Value;
                         }
                         GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                     }
@@ -308,32 +311,32 @@ namespace OutwardExplorer
                 }
             }
 
-            if (script.currentPrefab != null)
+            if (ExplorerScript.Instance.currentPrefab != null)
             {
                 GUILayout.BeginHorizontal();
 
                 if (GUILayout.Button("Back", GUILayout.Width(50)))
                 {
-                    script.currentPrefabChild = null;
-                    if (script.currentPrefab.transform.parent != null)
+                    ExplorerScript.Instance.currentPrefabChild = null;
+                    if (ExplorerScript.Instance.currentPrefab.transform.parent != null)
                     {
-                        script.currentPrefab = script.currentPrefab.transform.parent.gameObject;
+                        ExplorerScript.Instance.currentPrefab = ExplorerScript.Instance.currentPrefab.transform.parent.gameObject;
                     }
                     else
                     {
-                        script.currentPrefab = null;
+                        ExplorerScript.Instance.currentPrefab = null;
                     }
                     return;
                 }
 
                 GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label(script.currentPrefab.name);
+                GUILayout.Label(ExplorerScript.Instance.currentPrefab.name);
                 GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
                 GUILayout.Space(50);
                 GUILayout.EndHorizontal();
 
-                Item item = script.currentPrefab.GetComponent<Item>();
+                Item item = ExplorerScript.Instance.currentPrefab.GetComponent<Item>();
 
                 if (GUILayout.Button("Create object (root scene)"))
                 {
@@ -372,24 +375,24 @@ namespace OutwardExplorer
                         name = prefabAddObjectEdit,
                         hideFlags = HideFlags.None,
                     };
-                    obj.transform.parent = script.currentPrefab.transform;
+                    obj.transform.parent = ExplorerScript.Instance.currentPrefab.transform;
                 }
                 GUILayout.EndHorizontal();
 
                 // -----------------------------transform / component viewer -------------------------------
 
                 scroll2 = GUILayout.BeginScrollView(scroll2, GUILayout.MaxHeight(310));
-                if (script.currentPrefab.transform != null)
+                if (ExplorerScript.Instance.currentPrefab.transform != null)
                 {
-                    foreach (Transform child in script.currentPrefab.transform)
+                    foreach (Transform child in ExplorerScript.Instance.currentPrefab.transform)
                     {
                         if (child.childCount > 0)
-                            script.ListChildObjects(child.gameObject, true);
+                            ExplorerScript.Instance.ListChildObjects(child.gameObject, true);
                     }
-                    foreach (Transform child in script.currentPrefab.transform)
+                    foreach (Transform child in ExplorerScript.Instance.currentPrefab.transform)
                     {
                         if (child.childCount <= 0)
-                            script.ListChildObjects(child.gameObject, true);
+                            ExplorerScript.Instance.ListChildObjects(child.gameObject, true);
                     }
                 }
                 GUILayout.EndScrollView();
@@ -397,13 +400,13 @@ namespace OutwardExplorer
                 GUILayout.Space(20);
                 GUILayout.Label("GameObject Components:");
 
-                if (script.currentPrefabChild != null)
+                if (ExplorerScript.Instance.currentPrefabChild != null)
                 {
-                    script.ListComponents(script.currentPrefabChild.gameObject, true);
+                    ExplorerScript.Instance.ListComponents(ExplorerScript.Instance.currentPrefabChild.gameObject, true);
                 }
-                else if (script.currentPrefab != null)
+                else if (ExplorerScript.Instance.currentPrefab != null)
                 {
-                    script.ListComponents(script.currentPrefab.gameObject, true);
+                    ExplorerScript.Instance.ListComponents(ExplorerScript.Instance.currentPrefab.gameObject, true);
                 }
             }
 
@@ -472,14 +475,14 @@ namespace OutwardExplorer
             }
             else if (s != "")
             {
-                if (script.questEvents != null && script.questEvents.Count > 0)
+                if (ExplorerScript.Instance.questEvents != null && ExplorerScript.Instance.questEvents.Count > 0)
                 {
                     int max = 0;
-                    foreach (KeyValuePair<string, QuestEventSignature> entry in script.questEvents.Where(x => x.Key.ToLower().Contains(s.ToLower())))
+                    foreach (KeyValuePair<string, QuestEventSignature> entry in ExplorerScript.Instance.questEvents.Where(x => x.Key.ToLower().Contains(s.ToLower())))
                     {
                         max++;
 
-                        if (max > 50)
+                        if (max > 250)
                             break;
 
                         GUILayout.BeginHorizontal();

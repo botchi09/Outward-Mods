@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using OutwardExplorer;
+using UnityEngine.SceneManagement;
 
 /*
  * THIS MOD DESPERATELY NEEDS A REWORK / CLEANUP. VERY OLD. 
@@ -16,7 +17,7 @@ namespace OutwardExplorer
 {
     public class ExplorerScript : MonoBehaviour
     {
-        public ExplorerGUIHelper guiHelper;
+        public static ExplorerScript Instance;
 
         public Assembly asm;
 
@@ -44,9 +45,11 @@ namespace OutwardExplorer
         public Dictionary<string, QuestEventSignature> questEvents;
         public List<SendQuestEventInteraction> questInteractions;
 
-        // init
-        public void Initialise()
+        internal void Awake()
         {
+            Instance = this;
+            SceneManager.sceneLoaded += OnSceneChange;
+
             var m_window = new Vector2(600, 260);
             OLogger.CreateLog(new Rect(Screen.width - m_window.x - 5, Screen.height - m_window.y - 5, m_window.x, m_window.y));
 
@@ -63,23 +66,37 @@ namespace OutwardExplorer
             questEvents = new Dictionary<string, QuestEventSignature>();
             questInteractions = new List<SendQuestEventInteraction>();
 
-            guiHelper.miscEdits = new string[2];
-            for (int i = 0; i < guiHelper.miscEdits.Length; i++)
-                guiHelper.miscEdits[i] = "";
+            ExplorerGUIHelper.Instance.miscEdits = new string[2];
+            for (int i = 0; i < ExplorerGUIHelper.Instance.miscEdits.Length; i++)
+                ExplorerGUIHelper.Instance.miscEdits[i] = "";
 
             inspectorEdits = new Dictionary<string, string>();
 
-            guiHelper.objectTransformEdits = new string[5]; // x/y/z/rot/scale
-            for (int i = 0; i < guiHelper.objectTransformEdits.Length; i++)
-                guiHelper.objectTransformEdits[i] = "";
+            ExplorerGUIHelper.Instance.objectTransformEdits = new string[5]; // x/y/z/rot/scale
+            for (int i = 0; i < ExplorerGUIHelper.Instance.objectTransformEdits.Length; i++)
+                ExplorerGUIHelper.Instance.objectTransformEdits[i] = "";
 
-            //PatchHooks();
+            // some debug hooks for quests
             On.QuestEventDictionary.Load += QuestLoad;
-
             On.SendQuestEventInteraction.OnActivate += SendQuestInteractionHook;
             On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += SendQuestEventHook;
 
             OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
+        }
+
+        private void OnSceneChange(Scene scene, LoadSceneMode mode)
+        {
+            Reset();
+        }
+
+        public void Reset()
+        {
+            explorerComponentsObject = null;
+            explorerTransform = null;
+            inspectorObject = null;
+            currentPrefabChild = null;
+            currentPrefab = null;
+            inspectingPrefab = false;
         }
 
         private void QuestLoad(On.QuestEventDictionary.orig_Load orig)
@@ -139,7 +156,7 @@ namespace OutwardExplorer
         {
             if (Input.GetKeyUp(KeyCode.F7))
             {
-                guiHelper.ShowGui = !guiHelper.ShowGui;
+                ExplorerGUIHelper.Instance.ShowGui = !ExplorerGUIHelper.Instance.ShowGui;
             }
 
             if (!prefabsLoaded && ResourcesPrefabManager.Instance.Loaded)
@@ -183,12 +200,12 @@ namespace OutwardExplorer
                 {
                     inspectorObject = null;
                 }
-                guiHelper.tempHideGui = true;
+                ExplorerGUIHelper.Instance.tempHideGui = true;
                 return;
             }
             else
             {
-                guiHelper.tempHideGui = false;
+                ExplorerGUIHelper.Instance.tempHideGui = false;
             }
         }
 
@@ -203,11 +220,11 @@ namespace OutwardExplorer
 
         internal void InspectorWindow(int id)
         {
-            GUI.DragWindow(new Rect(0, 0, guiHelper.m_inspectorRect.width - 20, 20));
+            GUI.DragWindow(new Rect(0, 0, ExplorerGUIHelper.Instance.m_inspectorRect.width - 20, 20));
 
             if (inspectorObject == null) // || (inspectorJsonDump == "" && jsonObjects.Count == 0 && jsonStatus.Count == 0 && jsonTextures.Count == 0))
             {
-                GUI.color = guiHelper.lightRed;
+                GUI.color = ExplorerGUIHelper.Instance.lightRed;
                 GUILayout.Label("No component!");
                 GUILayout.EndHorizontal();
                 GUILayout.EndVertical();
@@ -218,13 +235,13 @@ namespace OutwardExplorer
 
             if (GUILayout.Button("X", GUILayout.Width(60)))
             {
-                guiHelper.showInspector = false;
+                ExplorerGUIHelper.Instance.showInspector = false;
                 inspectorObject = null;
                 inspectorPath.Clear();
                 return;
             }
 
-            GUILayout.Label(inspectorObject.GetType() + " (" + inspectorObject + ")", new GUILayoutOption[] { GUILayout.Width(guiHelper.m_windowRect.width - 80), GUILayout.Height(20) });
+            GUILayout.Label(inspectorObject.GetType() + " (" + inspectorObject + ")", new GUILayoutOption[] { GUILayout.Width(ExplorerGUIHelper.Instance.m_windowRect.width - 80), GUILayout.Height(20) });
 
             GUILayout.EndHorizontal();
 
@@ -255,7 +272,7 @@ namespace OutwardExplorer
                 {
                     s += o.ToString() + " / ";
                 }
-                GUILayout.TextField(s, GUILayout.Width(guiHelper.m_windowRect.width - 80));
+                GUILayout.TextField(s, GUILayout.Width(ExplorerGUIHelper.Instance.m_windowRect.width - 80));
             }
             GUILayout.EndHorizontal();
 
@@ -264,23 +281,23 @@ namespace OutwardExplorer
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Reflection", GUILayout.Width(100)))
             {
-                guiHelper.inspectorPage = 0;
+                ExplorerGUIHelper.Instance.inspectorPage = 0;
             }
             if (GUILayout.Button("JSON Utility", GUILayout.Width(100)))
             {
-                guiHelper.inspectorPage = 1;
+                ExplorerGUIHelper.Instance.inspectorPage = 1;
             }
             GUILayout.EndHorizontal();
 
-            if (guiHelper.inspectorPage == 0)
+            if (ExplorerGUIHelper.Instance.inspectorPage == 0)
             {
-                guiHelper.rect2scroll = GUILayout.BeginScrollView(guiHelper.rect2scroll, new GUILayoutOption[] { GUILayout.Width(730) });
+                ExplorerGUIHelper.Instance.rect2scroll = GUILayout.BeginScrollView(ExplorerGUIHelper.Instance.rect2scroll, new GUILayoutOption[] { GUILayout.Width(730) });
 
                 ReflectionPage(inspectorObject);
 
                 GUILayout.EndScrollView();
             }
-            else if (guiHelper.inspectorPage == 1)
+            else if (ExplorerGUIHelper.Instance.inspectorPage == 1)
             {
                 GUIJsonDump();
             }
@@ -310,7 +327,7 @@ namespace OutwardExplorer
                 if (entry.Key.GetValue(objToDump) != null)
                 {
                     value = entry.Key.GetValue(objToDump);
-                    GUI.color = guiHelper.lightGreen;
+                    GUI.color = ExplorerGUIHelper.Instance.lightGreen;
                 }
                 else
                 {
@@ -776,11 +793,11 @@ namespace OutwardExplorer
             GUILayout.EndHorizontal();
             GUILayout.Space(10);
 
-            guiHelper.rect2scroll = GUILayout.BeginScrollView(guiHelper.rect2scroll);
+            ExplorerGUIHelper.Instance.rect2scroll = GUILayout.BeginScrollView(ExplorerGUIHelper.Instance.rect2scroll);
 
             if (inspectorJsonDump.Length > 0)
             {
-                inspectorJsonDump = GUILayout.TextArea(inspectorJsonDump, GUILayout.MaxWidth(guiHelper.m_windowRect.width - 30));
+                inspectorJsonDump = GUILayout.TextArea(inspectorJsonDump, GUILayout.MaxWidth(ExplorerGUIHelper.Instance.m_windowRect.width - 30));
             }
             GUILayout.EndScrollView();
             GUILayout.Space(10);
@@ -804,18 +821,18 @@ namespace OutwardExplorer
 
         public void ListComponents(GameObject obj, bool isPrefab)
         {
-            if (obj == null) { GUI.color = guiHelper.lightRed; GUILayout.Label("No GameObject selected!"); GUI.color = Color.white; return; };
+            if (obj == null) { GUI.color = ExplorerGUIHelper.Instance.lightRed; GUILayout.Label("No GameObject selected!"); GUI.color = Color.white; return; };
 
             GUILayout.BeginHorizontal();
             if (componentPage == 0)
-                GUI.color = guiHelper.lightGreen;
+                GUI.color = ExplorerGUIHelper.Instance.lightGreen;
             if (GUILayout.Button("Components"))
             {
                 componentPage = 0;
             }
             GUI.color = Color.white;
             if (componentPage == 1)
-                GUI.color = guiHelper.lightGreen;
+                GUI.color = ExplorerGUIHelper.Instance.lightGreen;
             if (GUILayout.Button("Tools"))
             {
                 componentPage = 1;
@@ -832,7 +849,7 @@ namespace OutwardExplorer
 
             GUILayout.BeginHorizontal();
 
-            GUI.color = guiHelper.lightRed;
+            GUI.color = ExplorerGUIHelper.Instance.lightRed;
             if (isPrefab && currentPrefabChild != null)
             {
                 if (GUILayout.Button("X", GUILayout.Width(30)))
@@ -855,7 +872,7 @@ namespace OutwardExplorer
             GUI.skin.label.alignment = TextAnchor.UpperRight;
             if (isEnabled)
             {
-                GUI.color = guiHelper.lightGreen;
+                GUI.color = ExplorerGUIHelper.Instance.lightGreen;
                 if (GUILayout.Button("Try Disable"))
                 {
                     obj.SetActive(false);
@@ -863,14 +880,14 @@ namespace OutwardExplorer
             }
             else
             {
-                GUI.color = guiHelper.lightRed;
+                GUI.color = ExplorerGUIHelper.Instance.lightRed;
                 if (GUILayout.Button("Try Enable"))
                 {
                     obj.SetActive(true);
                 }
             }
 
-            GUI.color = guiHelper.lightRed;
+            GUI.color = ExplorerGUIHelper.Instance.lightRed;
             if (GUILayout.Button("Destroy"))
             {
                 DestroyImmediate(obj);
@@ -881,7 +898,7 @@ namespace OutwardExplorer
 
             GUILayout.EndHorizontal();
 
-            guiHelper.scroll3 = GUILayout.BeginScrollView(guiHelper.scroll3, GUILayout.Height(230));
+            ExplorerGUIHelper.Instance.scroll3 = GUILayout.BeginScrollView(ExplorerGUIHelper.Instance.scroll3, GUILayout.Height(230));
 
             // component list
 
@@ -897,7 +914,7 @@ namespace OutwardExplorer
                     {
                         GUILayout.BeginHorizontal();
 
-                        GUI.color = guiHelper.lightGreen;
+                        GUI.color = ExplorerGUIHelper.Instance.lightGreen;
                         if (GUILayout.Button("Inspect Object"))
                         {
                             if (isPrefab)
@@ -915,7 +932,7 @@ namespace OutwardExplorer
 
                         GUILayout.Label(c.GetType().ToString(), GUILayout.Width(320));
 
-                        GUI.color = guiHelper.lightRed;
+                        GUI.color = ExplorerGUIHelper.Instance.lightRed;
                         if (GUILayout.Button("Remove", GUILayout.Width(60)))
                         {
                             Destroy(c);
@@ -946,22 +963,22 @@ namespace OutwardExplorer
                         obj.transform.parent = null;
                     }
 
-                    guiHelper.teleToSelf = GUILayout.Toggle(guiHelper.teleToSelf, "Tele to self?", GUILayout.Width(90));
+                    ExplorerGUIHelper.Instance.teleToSelf = GUILayout.Toggle(ExplorerGUIHelper.Instance.teleToSelf, "Tele to self?", GUILayout.Width(90));
 
                     string text = "Tele ";
-                    if (guiHelper.teleToSelf)
+                    if (ExplorerGUIHelper.Instance.teleToSelf)
                     {
                         text += "to self";
-                        GUI.color = guiHelper.lightRed;
+                        GUI.color = ExplorerGUIHelper.Instance.lightRed;
                     }
                     else
                     {
                         text += "self to";
-                        GUI.color = guiHelper.lightGreen;
+                        GUI.color = ExplorerGUIHelper.Instance.lightGreen;
                     }
                     if (GUILayout.Button(text, GUILayout.Width(80)))
                     {
-                        guiHelper.Teleport(obj.transform);
+                        ExplorerGUIHelper.Instance.Teleport(obj.transform);
                     }
                     GUI.color = Color.white;
 
@@ -981,41 +998,41 @@ namespace OutwardExplorer
 
                     GUILayout.BeginHorizontal();
 
-                    if (guiHelper.objectTransformEdits[0] == "")
+                    if (ExplorerGUIHelper.Instance.objectTransformEdits[0] == "")
                     {
-                        guiHelper.objectTransformEdits[0] = explorerComponentsObject.transform.position.x.ToString();
-                        guiHelper.objectTransformEdits[1] = explorerComponentsObject.transform.position.y.ToString();
-                        guiHelper.objectTransformEdits[2] = explorerComponentsObject.transform.position.z.ToString();
-                        guiHelper.objectTransformEdits[3] = explorerComponentsObject.transform.localScale.x.ToString();
+                        ExplorerGUIHelper.Instance.objectTransformEdits[0] = explorerComponentsObject.transform.position.x.ToString();
+                        ExplorerGUIHelper.Instance.objectTransformEdits[1] = explorerComponentsObject.transform.position.y.ToString();
+                        ExplorerGUIHelper.Instance.objectTransformEdits[2] = explorerComponentsObject.transform.position.z.ToString();
+                        ExplorerGUIHelper.Instance.objectTransformEdits[3] = explorerComponentsObject.transform.localScale.x.ToString();
                     }
                     //if (gui.objectTransformEdits[3] == "") { gui.objectTransformEdits[3] = "50.0"; };
 
                     GUI.skin.label.alignment = TextAnchor.UpperRight;
                     GUILayout.Label("X:", GUILayout.Width(20));
                     TranslateButtons(0);
-                    guiHelper.objectTransformEdits[0] = GUILayout.TextField(guiHelper.objectTransformEdits[0], GUILayout.Width(60));
+                    ExplorerGUIHelper.Instance.objectTransformEdits[0] = GUILayout.TextField(ExplorerGUIHelper.Instance.objectTransformEdits[0], GUILayout.Width(60));
 
                     GUILayout.Label("Y:", GUILayout.Width(20));
                     TranslateButtons(1);
-                    guiHelper.objectTransformEdits[1] = GUILayout.TextField(guiHelper.objectTransformEdits[1], GUILayout.Width(60));
+                    ExplorerGUIHelper.Instance.objectTransformEdits[1] = GUILayout.TextField(ExplorerGUIHelper.Instance.objectTransformEdits[1], GUILayout.Width(60));
 
                     GUILayout.Label("Z:", GUILayout.Width(20));
                     TranslateButtons(2);
-                    guiHelper.objectTransformEdits[2] = GUILayout.TextField(guiHelper.objectTransformEdits[2], GUILayout.Width(60));
+                    ExplorerGUIHelper.Instance.objectTransformEdits[2] = GUILayout.TextField(ExplorerGUIHelper.Instance.objectTransformEdits[2], GUILayout.Width(60));
 
                     //GUILayout.Label("Scale:", GUILayout.Width(40));
-                    //guiHelper.objectTransformEdits[4] = GUILayout.TextField(guiHelper.objectTransformEdits[4], GUILayout.Width(60));
+                    //ExplorerGUIHelper.Instance.objectTransformEdits[4] = GUILayout.TextField(ExplorerGUIHelper.Instance.objectTransformEdits[4], GUILayout.Width(60));
 
                     GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     if (GUILayout.Button("Apply"))
                     {
-                        if (Single.TryParse(guiHelper.objectTransformEdits[0], out float x)
-                            && Single.TryParse(guiHelper.objectTransformEdits[1], out float y)
-                            && Single.TryParse(guiHelper.objectTransformEdits[2], out float z))
+                        if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[0], out float x)
+                            && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[1], out float y)
+                            && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[2], out float z))
                         {
                             explorerComponentsObject.transform.position = new Vector3(x, y, z);
                         }
-                        //if (float.TryParse(guiHelper.objectTransformEdits[4], out float scale))
+                        //if (float.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[4], out float scale))
                         //{
                         //    explorerComponentsObject.transform.localScale = new Vector3(scale, scale, scale);
                         //}
@@ -1027,14 +1044,14 @@ namespace OutwardExplorer
                     GUILayout.BeginHorizontal();
 
                     GUILayout.Label("Rot speed:", GUILayout.Width(90));
-                    if (guiHelper.objectTransformEdits[3] == null || guiHelper.objectTransformEdits[3] == "")
+                    if (ExplorerGUIHelper.Instance.objectTransformEdits[3] == null || ExplorerGUIHelper.Instance.objectTransformEdits[3] == "")
                     {
-                        guiHelper.objectTransformEdits[3] = "50.0";
+                        ExplorerGUIHelper.Instance.objectTransformEdits[3] = "50.0";
                     }
-                    guiHelper.objectTransformEdits[3] = GUILayout.TextField(guiHelper.objectTransformEdits[3], GUILayout.Width(60));
+                    ExplorerGUIHelper.Instance.objectTransformEdits[3] = GUILayout.TextField(ExplorerGUIHelper.Instance.objectTransformEdits[3], GUILayout.Width(60));
 
                     float f = 50.0f;
-                    if (Single.TryParse(guiHelper.objectTransformEdits[3], out float f2))
+                    if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[3], out float f2))
                     {
                         f = f2;
                     }
@@ -1090,12 +1107,12 @@ namespace OutwardExplorer
 
                 GUILayout.BeginHorizontal();
 
-                guiHelper.addComponentEdit = GUILayout.TextField(guiHelper.addComponentEdit, GUILayout.Width(156));
+                ExplorerGUIHelper.Instance.addComponentEdit = GUILayout.TextField(ExplorerGUIHelper.Instance.addComponentEdit, GUILayout.Width(156));
                 if (GUILayout.Button("Add Comp", GUILayout.Width(90)))
                 {
                     if (asm != null && asm is Assembly)
                     {
-                        if (asm.GetType(guiHelper.addComponentEdit) is Type t)
+                        if (asm.GetType(ExplorerGUIHelper.Instance.addComponentEdit) is Type t)
                         {
                             try { obj.AddComponent(t); } catch { Debug.LogError("Could not add component!"); }
                         }
@@ -1108,10 +1125,10 @@ namespace OutwardExplorer
                     }
                 }
 
-                guiHelper.setParentEdit = GUILayout.TextField(guiHelper.setParentEdit, GUILayout.Width(156));
+                ExplorerGUIHelper.Instance.setParentEdit = GUILayout.TextField(ExplorerGUIHelper.Instance.setParentEdit, GUILayout.Width(156));
                 if (GUILayout.Button("Set Parent", GUILayout.Width(90)))
                 {
-                    if (GameObject.Find(guiHelper.setParentEdit) is GameObject newParent)
+                    if (GameObject.Find(ExplorerGUIHelper.Instance.setParentEdit) is GameObject newParent)
                     {
                         obj.transform.parent = newParent.transform;
                     }
@@ -1129,15 +1146,15 @@ namespace OutwardExplorer
         {
             if (GUILayout.RepeatButton("+", GUILayout.Width(20)))
             {
-                if (Single.TryParse(guiHelper.objectTransformEdits[fieldID], out float f))
+                if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[fieldID], out float f))
                 {
                     f += 0.5f * Time.deltaTime;
 
-                    guiHelper.objectTransformEdits[fieldID] = f.ToString();
+                    ExplorerGUIHelper.Instance.objectTransformEdits[fieldID] = f.ToString();
 
-                    if (Single.TryParse(guiHelper.objectTransformEdits[0], out float x)
-                        && Single.TryParse(guiHelper.objectTransformEdits[1], out float y)
-                        && Single.TryParse(guiHelper.objectTransformEdits[2], out float z))
+                    if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[0], out float x)
+                        && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[1], out float y)
+                        && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[2], out float z))
                     {
                         explorerComponentsObject.transform.position = new Vector3(x, y, z);
                     }
@@ -1146,15 +1163,15 @@ namespace OutwardExplorer
 
             if (GUILayout.RepeatButton("-", GUILayout.Width(20)))
             {
-                if (Single.TryParse(guiHelper.objectTransformEdits[fieldID], out float f))
+                if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[fieldID], out float f))
                 {
                     f -= 1.0f * Time.deltaTime;
 
-                    guiHelper.objectTransformEdits[fieldID] = f.ToString();
+                    ExplorerGUIHelper.Instance.objectTransformEdits[fieldID] = f.ToString();
 
-                    if (Single.TryParse(guiHelper.objectTransformEdits[0], out float x)
-                        && Single.TryParse(guiHelper.objectTransformEdits[1], out float y)
-                        && Single.TryParse(guiHelper.objectTransformEdits[2], out float z))
+                    if (Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[0], out float x)
+                        && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[1], out float y)
+                        && Single.TryParse(ExplorerGUIHelper.Instance.objectTransformEdits[2], out float z))
                     {
                         explorerComponentsObject.transform.position = new Vector3(x, y, z);
                     }
@@ -1169,13 +1186,13 @@ namespace OutwardExplorer
 
             GUILayout.BeginHorizontal();
 
-            GUI.color = guiHelper.lightRed;
+            GUI.color = ExplorerGUIHelper.Instance.lightRed;
             if (enabled)
             {
                 if (children)
                     GUI.color = Color.green;
                 else
-                    GUI.color = guiHelper.lightGreen;
+                    GUI.color = ExplorerGUIHelper.Instance.lightGreen;
             }
 
             // build name
@@ -1207,7 +1224,7 @@ namespace OutwardExplorer
                     }
                     else
                     {
-                        guiHelper.scroll2 = Vector2.zero;
+                        ExplorerGUIHelper.Instance.scroll2 = Vector2.zero;
                         explorerTransform = obj.transform;
                         explorerPath.Add(obj.transform);
                     }
@@ -1225,7 +1242,7 @@ namespace OutwardExplorer
                     {
                         explorerComponentsObject = obj;
                         for (int i = 0; i < 4; i++)
-                            guiHelper.objectTransformEdits[i] = "";
+                            ExplorerGUIHelper.Instance.objectTransformEdits[i] = "";
                     }
                 }
             }
@@ -1244,7 +1261,7 @@ namespace OutwardExplorer
                 {
                     explorerComponentsObject = obj;
                     for (int i = 0; i < 4; i++)
-                        guiHelper.objectTransformEdits[i] = "";
+                        ExplorerGUIHelper.Instance.objectTransformEdits[i] = "";
                 }
             }         
 
@@ -1260,7 +1277,7 @@ namespace OutwardExplorer
             List<FieldInfo> fields = new List<FieldInfo>();
             GetFieldsRecursive(type, ref fields, obj);
 
-            guiHelper.showInspector = true;
+            ExplorerGUIHelper.Instance.showInspector = true;
             inspectorObject = obj;
 
             inspectorPath.Add(obj);

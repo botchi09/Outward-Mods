@@ -38,17 +38,8 @@ namespace OutwardExplorer
 
             explorerScript = _obj.AddComponent<ExplorerScript>();
             explorerGUI = _obj.AddComponent<ExplorerGUIHelper>();
-            //markers = _obj.AddComponent<MapMarkers>();
-
-            explorerScript.guiHelper = explorerGUI;
-
-            explorerGUI.script = explorerScript;
-
-            explorerScript.Initialise();
-            //markers.Init();
 
             skipLogos = _obj.AddComponent<SkipLogos>();
-            skipLogos.Init();
         }
 
         public override void OnDisable()

@@ -8,7 +8,7 @@ namespace NecromancerSkills
     public class Settings
     {
         // Summon
-        public float Summon_HealthCost = 0.1f; // ! TODO
+        public float Summon_HealthCost = 0.1f; 
         public bool Summon_BurnsHealth = false;
         public int Summon_MaxSummons_NoArmyOfDeath = 1;
         public int Summon_MaxSummons_WithArmyOfDeath = 3;

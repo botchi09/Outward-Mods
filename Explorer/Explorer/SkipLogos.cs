@@ -11,7 +11,7 @@ namespace OutwardExplorer
 {
     public class SkipLogos : MonoBehaviour
     {
-        public void Init()
+        internal void Awake()
         {
             On.StartupVideo.Start += new On.StartupVideo.hook_Start(StartupVideo_Start);
         }
