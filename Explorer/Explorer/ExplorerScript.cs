@@ -50,6 +50,46 @@ namespace OutwardExplorer
             Instance = this;
             SceneManager.sceneLoaded += OnSceneChange;
 
+            Application.logMessageReceived += Application_logMessageReceived;
+        }
+
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            // useless spam errors (unity warnings)
+            string[] blacklist = new string[]
+            {
+                "Internal: JobTempAlloc",
+                "GUI Error:",
+                "BoxColliders does not support negative scale or size",
+                "is registered with more than one LODGroup",
+                "only 0 controls when doing Repaint",
+                "it is not close enough to the NavMesh"
+            };
+
+            foreach (string s in blacklist)
+            {
+                if (condition.ToLower().Contains(s.ToLower()))
+                {
+                    return;
+                }
+            }
+
+            if (type == LogType.Exception && !condition.Contains("Repaint"))
+            {
+                OLogger.Error(condition + "\r\nStack Trace: " + stackTrace);
+            }
+            else if (type == LogType.Warning)
+            {
+                OLogger.Warning(condition);
+            }
+            else
+            {
+                OLogger.Log(condition);
+            }
+        }
+
+        internal void Start()
+        {
             var m_window = new Vector2(600, 260);
             OLogger.CreateLog(new Rect(Screen.width - m_window.x - 5, Screen.height - m_window.y - 5, m_window.x, m_window.y));
 
@@ -1319,48 +1359,6 @@ namespace OutwardExplorer
         {
             FieldInfo fieldInfo = type.GetField(value, BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
             return fieldInfo.GetValue(obj);
-        }
-
-        // ------------------------ debug stuff -----------------
-        [Obsolete]
-        protected virtual void Start()
-        {
-            Application.RegisterLogCallback(ExceptionHook);
-        }
-
-        private void ExceptionHook(string message, string stackTrace, LogType type)
-        {
-            // useless spam errors (unity warnings)
-            string[] blacklist = new string[]
-            {
-                "Internal: JobTempAlloc",
-                "GUI Error:",
-                "BoxColliders does not support negative scale or size",
-                "is registered with more than one LODGroup",
-                "only 0 controls when doing Repaint",
-                "it is not close enough to the NavMesh"
-            };
-
-            foreach (string s in blacklist)
-            {
-                if (message.ToLower().Contains(s.ToLower()))
-                {
-                    return;
-                }
-            }
-
-            if (type == LogType.Exception && !message.Contains("Repaint"))
-            {
-                OLogger.Error(message + "\r\nStack Trace: " + stackTrace);
-            }
-            else if (type == LogType.Warning)
-            {
-                OLogger.Warning(message);
-            }
-            else
-            {
-                OLogger.Log(message);
-            }
         }
 
     }
