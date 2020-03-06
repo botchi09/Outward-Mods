@@ -53,41 +53,6 @@ namespace OutwardExplorer
             Application.logMessageReceived += Application_logMessageReceived;
         }
 
-        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
-        {
-            // useless spam errors (unity warnings)
-            string[] blacklist = new string[]
-            {
-                "Internal: JobTempAlloc",
-                "GUI Error:",
-                "BoxColliders does not support negative scale or size",
-                "is registered with more than one LODGroup",
-                "only 0 controls when doing Repaint",
-                "it is not close enough to the NavMesh"
-            };
-
-            foreach (string s in blacklist)
-            {
-                if (condition.ToLower().Contains(s.ToLower()))
-                {
-                    return;
-                }
-            }
-
-            if (type == LogType.Exception && !condition.Contains("Repaint"))
-            {
-                OLogger.Error(condition + "\r\nStack Trace: " + stackTrace);
-            }
-            else if (type == LogType.Warning)
-            {
-                OLogger.Warning(condition);
-            }
-            else
-            {
-                OLogger.Log(condition);
-            }
-        }
-
         internal void Start()
         {
             var m_window = new Vector2(600, 260);
@@ -117,7 +82,7 @@ namespace OutwardExplorer
                 ExplorerGUIHelper.Instance.objectTransformEdits[i] = "";
 
             // some debug hooks for quests
-            On.QuestEventDictionary.Load += QuestLoad;
+            //On.QuestEventDictionary.Load += QuestLoad;
             On.SendQuestEventInteraction.OnActivate += SendQuestInteractionHook;
             On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += SendQuestEventHook;
 
@@ -262,15 +227,6 @@ namespace OutwardExplorer
         {
             GUI.DragWindow(new Rect(0, 0, ExplorerGUIHelper.Instance.m_inspectorRect.width - 20, 20));
 
-            if (inspectorObject == null) // || (inspectorJsonDump == "" && jsonObjects.Count == 0 && jsonStatus.Count == 0 && jsonTextures.Count == 0))
-            {
-                GUI.color = ExplorerGUIHelper.Instance.lightRed;
-                GUILayout.Label("No component!");
-                GUILayout.EndHorizontal();
-                GUILayout.EndVertical();
-                return;
-            }
-
             GUILayout.BeginHorizontal();
 
             if (GUILayout.Button("X", GUILayout.Width(60)))
@@ -281,9 +237,19 @@ namespace OutwardExplorer
                 return;
             }
 
-            GUILayout.Label(inspectorObject.GetType() + " (" + inspectorObject + ")", new GUILayoutOption[] { GUILayout.Width(ExplorerGUIHelper.Instance.m_windowRect.width - 80), GUILayout.Height(20) });
+            if (inspectorObject != null) // || (inspectorJsonDump == "" && jsonObjects.Count == 0 && jsonStatus.Count == 0 && jsonTextures.Count == 0))
+            {
+                GUILayout.Label(inspectorObject.GetType() + " (" + inspectorObject + ")", new GUILayoutOption[] { GUILayout.Width(ExplorerGUIHelper.Instance.m_windowRect.width - 80), GUILayout.Height(20) });
 
-            GUILayout.EndHorizontal();
+                GUILayout.EndHorizontal();
+            }
+            else
+            {
+                GUILayout.EndHorizontal();
+                GUI.color = ExplorerGUIHelper.Instance.lightRed;
+                GUILayout.Label("No component!");
+                return;
+            }
 
             GUILayout.BeginVertical(GUI.skin.box);
 
@@ -1335,7 +1301,40 @@ namespace OutwardExplorer
             }
         }
 
-        
+        private void Application_logMessageReceived(string condition, string stackTrace, LogType type)
+        {
+            // useless spam errors (unity warnings)
+            string[] blacklist = new string[]
+            {
+                "Internal: JobTempAlloc",
+                "GUI Error:",
+                "BoxColliders does not support negative scale or size",
+                "is registered with more than one LODGroup",
+                "only 0 controls when doing Repaint",
+                "it is not close enough to the NavMesh"
+            };
+
+            foreach (string s in blacklist)
+            {
+                if (condition.ToLower().Contains(s.ToLower()))
+                {
+                    return;
+                }
+            }
+
+            if (type == LogType.Exception && !condition.Contains("Repaint"))
+            {
+                OLogger.Error(condition + "\r\nStack Trace: " + stackTrace);
+            }
+            else if (type == LogType.Warning)
+            {
+                OLogger.Warning(condition);
+            }
+            else
+            {
+                OLogger.Log(condition);
+            }
+        }
 
         // ------------------- REFLECTION HELPERS ------------------------
 
