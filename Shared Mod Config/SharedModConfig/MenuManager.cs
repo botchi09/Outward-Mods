@@ -14,6 +14,9 @@ namespace SharedModConfig
 
         private readonly string MenuKey = "Shared Mod Config Menu";
 
+        public delegate void MenuLoaded();
+        public static event MenuLoaded OnMenuLoaded;
+
         // UI canvas
         private GameObject m_ConfigCanvas;
 
@@ -28,26 +31,19 @@ namespace SharedModConfig
 
         private GameObject m_SettingsHolder;
         private GameObject m_currentActiveSettings;
+        private ModConfig m_currentModConfig;
         private GameObject m_SettingsPrefab;
 
-        private bool m_initDone;
-        public bool IsInitDone()
-        {
-            return m_initDone;
-        }
+        public bool InitDone { get; private set; } = false;
 
         internal void Update()
         {
-            if (!Instance.IsInitDone())
+            if (!Instance.InitDone)
             {
                 return;
             }
 
-            //if (!m_MenuButton.gameObject.activeSelf)
-            //{
-            //    m_MenuButton.gameObject.SetActive(true);
-            //}
-
+            // show/hide main menu button
             if (global::MenuManager.Instance.IsInMainMenuScene)
             {
                 if (!m_MenuButton.gameObject.activeSelf)
@@ -63,6 +59,7 @@ namespace SharedModConfig
                 }
             }
 
+            // keybind check
             foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
             {
                 if (CustomKeybindings.m_playerInputManager[player.RewiredID].GetButtonDown(MenuKey))
@@ -72,9 +69,19 @@ namespace SharedModConfig
                 }
             }
 
+            // fix for displaying mouse when menu opens
             if (Global.Lobby.PlayersInLobbyCount > 0 && !NetworkLevelLoader.Instance.IsGameplayPaused)
             {
                 MenuMouseFix();
+            }
+
+            // Update current config's displayed values (currently only really used for Float slider value)
+            if (m_currentModConfig != null && m_currentModConfig.m_linkedPanel.activeSelf)
+            {
+                foreach (var setting in m_currentModConfig.Settings)
+                {
+                    setting.UpdateValue(true); // true = no save
+                }
             }
         }
 
@@ -96,7 +103,8 @@ namespace SharedModConfig
 
             SetupCanvas();
 
-            m_initDone = true;
+            InitDone = true;
+            OnMenuLoaded?.Invoke();
         }
 
         private void SetupCanvas()
@@ -168,6 +176,11 @@ namespace SharedModConfig
 
                 t.gameObject.SetActive(true);
                 m_currentActiveSettings = t.gameObject;
+
+                if (ConfigManager.RegisteredConfigs.ContainsKey(buttontext))
+                {
+                    m_currentModConfig = ConfigManager.RegisteredConfigs[buttontext];
+                }
             }
             else
             {

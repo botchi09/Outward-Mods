@@ -28,7 +28,7 @@ namespace SharedModConfig
             var obj = new GameObject(ModName);
             GameObject.DontDestroyOnLoad(obj);
 
-            ConfigManager.Instance = obj.AddComponent<ConfigManager>(); // not sure if this is any faster than Awake(), just trying it
+            obj.AddComponent<ConfigManager>(); // not sure if this is any faster than Awake(), just trying it
             obj.AddComponent<MenuManager>();
         }
     }

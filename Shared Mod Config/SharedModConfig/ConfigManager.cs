@@ -17,11 +17,13 @@ namespace SharedModConfig
     {
         public static ConfigManager Instance;
 
-        public bool InitDone { get => MenuManager.Instance.IsInitDone(); }
+        public bool InitDone { get => MenuManager.Instance.InitDone; }
         public bool IsInitDone() { return InitDone; } // legacy
 
-        private static Dictionary<string, ModConfig> RegisteredConfigs = new Dictionary<string, ModConfig>();
-        private static readonly string saveFolder = @"Mods/ModConfigs";      
+        public static Dictionary<string, ModConfig> RegisteredConfigs = new Dictionary<string, ModConfig>();
+        private static readonly string saveFolder = @"Mods/ModConfigs";
+
+        private static List<ModConfig> m_delayedConfigs = new List<ModConfig>();
 
         internal void Awake()
         {
@@ -31,21 +33,8 @@ namespace SharedModConfig
             {
                 Directory.CreateDirectory(saveFolder);
             }
-        }
 
-        internal void Update()
-        {
-            foreach (var config in RegisteredConfigs.Values)
-            {
-                if (config.m_linkedPanel != null && config.m_linkedPanel.activeSelf)
-                {
-                    foreach (var setting in config.Settings)
-                    {
-                        setting.UpdateValue(true);
-                    }
-                    break;
-                }
-            }
+            MenuManager.OnMenuLoaded += INTERNAL_OnMenuLoaded;
         }
 
         public static void RegisterSettings(ModConfig config)
@@ -59,58 +48,55 @@ namespace SharedModConfig
             if (RegisteredConfigs.ContainsKey(config.ModName))
             {
                 Debug.LogError(config.ModName + " is already registered!");
+                return;
+            }
+
+            string path = saveFolder + "/" + config.ModName + ".xml";
+            bool hasSettings = false;
+
+            if (File.Exists(path))
+            {
+                hasSettings = LoadXML(path, config);
+            }
+
+            if (!hasSettings)
+            {
+                SaveXML(config);
+
+                foreach (var setting in config.Settings)
+                {
+                    if (setting.DefaultValue != null)
+                    {
+                        setting.SetValue(setting.DefaultValue);
+                    }
+                }
+            }
+
+            // if MenuManager has done init, add now. Otherwise add to delayed callback list.
+            if (MenuManager.Instance != null && MenuManager.Instance.InitDone)
+            {
+                MenuManager.Instance.AddConfig(config);
             }
             else
             {
-                string path = saveFolder + "/" + config.ModName + ".xml";
-                bool hasSettings = false;
-
-                if (File.Exists(path))
-                {
-                    hasSettings = LoadXML(path, config);
-                }
-                
-                if (!hasSettings)
-                {
-                    SaveXML(config);
-
-                    foreach (var setting in config.Settings)
-                    {
-                        if (setting.DefaultValue != null)
-                        {
-                            setting.SetValue(setting.DefaultValue);
-                        }
-                    }
-                }
-
-                if (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
-                {
-                    new Thread(() =>
-                    {
-                        DelayedRegister(config);
-
-                    }).Start();
-                }
-                else
-                {
-                    MenuManager.Instance.AddConfig(config);
-                }
-
-                RegisteredConfigs.Add(config.ModName, config);
-
-                // Call the Callback for the Settings, now that they're ready.
-                config.INTERNAL_OnSettingsLoaded();
+                m_delayedConfigs.Add(config);
             }
+
+            RegisteredConfigs.Add(config.ModName, config);
+
+            // Call the Callback for the Settings, now that they're ready.
+            config.INTERNAL_OnSettingsLoaded();
         }
 
-        private static void DelayedRegister(ModConfig config)
+        public void INTERNAL_OnMenuLoaded()
         {
-            while (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
+            foreach (var config in m_delayedConfigs)
             {
-                Thread.Sleep(100);
+                MenuManager.Instance.AddConfig(config);
             }
 
-            MenuManager.Instance.AddConfig(config);
+            m_delayedConfigs.Clear();
+            m_delayedConfigs = null;
         }
 
         private static bool LoadXML(string path, ModConfig config)
