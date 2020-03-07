@@ -33,7 +33,7 @@ namespace CombatHUD
         private Image m_infoboxPoisonSprite; // Poison sprite
 
         private Vector2 m_startPos;
-        private Vector2 m_currentOffset;
+        private Vector2 m_currentOffset = new Vector2(0, 0);
 
         #region Awake (setup global vars from the prefab asset)
         internal void Awake()

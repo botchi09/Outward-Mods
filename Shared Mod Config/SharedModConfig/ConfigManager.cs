@@ -35,19 +35,15 @@ namespace SharedModConfig
 
         internal void Update()
         {
-            if (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
+            foreach (var config in RegisteredConfigs.Values)
             {
-                return;
-            }
-
-            foreach (ModConfig config in RegisteredConfigs.Values)
-            {
-                if (config.m_linkedPanel && config.m_linkedPanel.activeSelf)
+                if (config.m_linkedPanel != null && config.m_linkedPanel.activeSelf)
                 {
-                    foreach (BBSetting setting in config.Settings)
+                    foreach (var setting in config.Settings)
                     {
-                        setting.UpdateValue();
+                        setting.UpdateValue(true);
                     }
+                    break;
                 }
             }
         }

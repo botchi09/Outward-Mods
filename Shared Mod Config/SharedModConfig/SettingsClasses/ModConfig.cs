@@ -19,6 +19,10 @@ namespace SharedModConfig
         public delegate void SettingsLoaded();
         public event SettingsLoaded OnSettingsLoaded;
 
+        // On Settings Saved Callback
+        public delegate void SettingsSaved();
+        public event SettingsSaved OnSettingsSaved;
+
         // internal use only
         [XmlIgnore] private Dictionary<string, BBSetting> m_Settings = new Dictionary<string, BBSetting>();
         [XmlIgnore] public GameObject m_linkedPanel;
@@ -37,8 +41,22 @@ namespace SharedModConfig
         {
             if (OnSettingsLoaded != null)
             {
-                Debug.Log("OnSettingsLoaded for " + this.ModName);
+                Debug.Log("OnSettingsLoaded Callback for " + this.ModName);
                 OnSettingsLoaded.Invoke();
+            }
+        }
+
+        public void INTERNAL_OnSettingsSaved()
+        {
+            foreach (var setting in Settings)
+            {
+                setting.UpdateValue();
+            }
+
+            if (OnSettingsSaved != null)
+            {
+                Debug.Log("OnSettingsSaved Callback for " + this.ModName);
+                OnSettingsSaved.Invoke();
             }
         }
 

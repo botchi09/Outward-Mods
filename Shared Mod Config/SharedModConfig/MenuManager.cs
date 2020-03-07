@@ -176,7 +176,6 @@ namespace SharedModConfig
         }
         #endregion
 
-
         #region Adding a Config to the UI Menu
         public void AddConfig(ModConfig config)
         {
@@ -215,11 +214,18 @@ namespace SharedModConfig
 
             config.m_linkedPanel = newCanvas;
 
+            // set Title
             var title = newCanvas.transform.Find("Title").GetComponent<Text>();
             title.text = config.ModName;
 
+            // setup Save button and add callback listener
+            var saveButton = newCanvas.transform.Find("SaveButton").GetComponent<Button>();
+            saveButton.onClick.AddListener(new UnityEngine.Events.UnityAction(config.INTERNAL_OnSettingsSaved));
+
+            // setup the settings content holder
             var contentHolder = newCanvas.transform.Find("SettingsScroll_Holder").Find("Settings_Viewport").Find("Settings_Content");
 
+            // get the setting template prefabs
             var boolPrefab = contentHolder.Find("Toggle_Holder").gameObject;
             boolPrefab.transform.SetParent(null, false);
             var stringPrefab = contentHolder.Find("InputField_Holder").gameObject;
@@ -229,8 +235,8 @@ namespace SharedModConfig
             var titlePrefab = contentHolder.Find("Title_Holder").gameObject;
             titlePrefab.transform.SetParent(null, false);
 
-            // setup settings
-            foreach (BBSetting setting in config.Settings)
+            // setup actual settings
+            foreach (var setting in config.Settings)
             {
                 switch (setting.GetType().Name)
                 {

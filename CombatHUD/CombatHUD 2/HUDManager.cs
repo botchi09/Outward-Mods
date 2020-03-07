@@ -28,7 +28,7 @@ namespace CombatHUD
 
             StartCoroutine(SetupCoroutine());
         }
-
+    
         internal void Update()
         {
             if (HUDCanvas == null || Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)

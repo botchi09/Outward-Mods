@@ -21,8 +21,6 @@ namespace SharedModConfig
         [XmlIgnore]
         private Toggle m_toggleButton;
 
-        public override event SettingChanged OnSettingChanged;
-
         public override object GetValue()
         {
             return m_value;
@@ -36,11 +34,9 @@ namespace SharedModConfig
             {
                 m_toggleButton.isOn = m_value;
             }
-
-            OnSettingChanged?.Invoke();
         }
 
-        public override void UpdateValue()
+        public override void UpdateValue(bool noSave = false)
         {
             if (this.LinkedGameObject)
             {
@@ -49,11 +45,9 @@ namespace SharedModConfig
                     m_toggleButton = LinkedGameObject.GetComponentInChildren<Toggle>();
                 }
 
-                if (m_value != m_toggleButton.isOn)
+                if (!noSave && m_value != m_toggleButton.isOn)
                 {
                     m_value = m_toggleButton.isOn;
-
-                    OnSettingChanged?.Invoke();
                 }
             }
         }
