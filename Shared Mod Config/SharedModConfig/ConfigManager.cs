@@ -8,6 +8,7 @@ using UnityEngine.UI;
 using SideLoader;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Xml.Serialization;
 
 namespace SharedModConfig
@@ -16,22 +17,16 @@ namespace SharedModConfig
     {
         public static ConfigManager Instance;
 
-        private static Dictionary<string, ModConfig> RegisteredConfigs = new Dictionary<string, ModConfig>();
-        private static readonly string saveFolder = @"Mods/ModConfigs";
+        public bool InitDone { get => MenuManager.Instance.IsInitDone(); }
+        public bool IsInitDone() { return InitDone; } // legacy
 
-        public bool IsInitDone()
-        {
-            return MenuManager.Instance.IsInitDone();
-        }
+        private static Dictionary<string, ModConfig> RegisteredConfigs = new Dictionary<string, ModConfig>();
+        private static readonly string saveFolder = @"Mods/ModConfigs";      
 
         internal void Awake()
         {
             Instance = this;
 
-            if (!Directory.Exists("Mods")) 
-            {
-                Directory.CreateDirectory("Mods"); 
-            }
             if (!Directory.Exists(saveFolder))
             {
                 Directory.CreateDirectory(saveFolder);
@@ -40,9 +35,14 @@ namespace SharedModConfig
 
         internal void Update()
         {
+            if (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
+            {
+                return;
+            }
+
             foreach (ModConfig config in RegisteredConfigs.Values)
             {
-                if (config.m_linkedPanel.activeSelf)
+                if (config.m_linkedPanel && config.m_linkedPanel.activeSelf)
                 {
                     foreach (BBSetting setting in config.Settings)
                     {
@@ -52,17 +52,11 @@ namespace SharedModConfig
             }
         }
 
-        public void RegisterSettings(ModConfig config)
+        public static void RegisterSettings(ModConfig config)
         {
-            if (config == null || config.ModName == null)
+            if (string.IsNullOrEmpty(config.ModName))
             {
-                Debug.LogError("[SharedModConfig] A mod is trying to register with a null Name or null ModConfig!");
-                return;
-            }
-
-            if (!MenuManager.Instance.IsInitDone())
-            {
-                StartCoroutine(RegisterSettingsDelayed(config));
+                Debug.LogError("[SharedModConfig] A mod is trying to register with a null or empty ModName!");
                 return;
             }
 
@@ -93,23 +87,37 @@ namespace SharedModConfig
                     }
                 }
 
-                MenuManager.Instance.AddConfig(config);
+                if (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
+                {
+                    new Thread(() =>
+                    {
+                        DelayedRegister(config);
+
+                    }).Start();
+                }
+                else
+                {
+                    MenuManager.Instance.AddConfig(config);
+                }
 
                 RegisteredConfigs.Add(config.ModName, config);
+
+                // Call the Callback for the Settings, now that they're ready.
+                config.INTERNAL_OnSettingsLoaded();
             }
         }
 
-        private IEnumerator RegisterSettingsDelayed(ModConfig config)
+        private static void DelayedRegister(ModConfig config)
         {
-            while (!MenuManager.Instance.IsInitDone())
+            while (MenuManager.Instance == null || !MenuManager.Instance.IsInitDone())
             {
-                yield return new WaitForSeconds(1f);
+                Thread.Sleep(100);
             }
 
-            RegisterSettings(config);
+            MenuManager.Instance.AddConfig(config);
         }
 
-        private bool LoadXML(string path, ModConfig config)
+        private static bool LoadXML(string path, ModConfig config)
         {
             Type[] extraTypes = { typeof(BBSetting), typeof(BoolSetting), typeof(FloatSetting), typeof(StringSetting) };
             XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModConfig), extraTypes);
@@ -132,26 +140,6 @@ namespace SharedModConfig
                     }
                     streamReader.Close();
                     return true;
-
-                    //if (tempCfg.SettingsVersion < config.SettingsVersion)
-                    //{
-                    //    Debug.LogWarning("[SharedModConfig] The settings version on disk (" + 
-                    //        tempCfg.SettingsVersion + 
-                    //        ") is older than the current mod settings: " + 
-                    //        config.SettingsVersion
-                    //        + "\r\nThe old file will be renamed to " + path + ".bak");
-
-                    //    streamReader.Close();
-
-                    //    string bakPath = path + ".bak";
-                    //    if (File.Exists(bakPath))
-                    //    {
-                    //        File.Delete(bakPath);
-                    //    }
-
-                    //    File.Move(path, bakPath);
-                    //    return false;
-                    //}
                 }
                 else
                 {
@@ -163,7 +151,7 @@ namespace SharedModConfig
             }
         }
 
-        private void SaveXML(ModConfig config)
+        private static void SaveXML(ModConfig config)
         {
             if (!Directory.Exists(saveFolder)) { Directory.CreateDirectory(saveFolder); }
 

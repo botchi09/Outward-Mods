@@ -11,7 +11,7 @@ namespace SharedModConfig
     public class ModBase : PartialityMod
     {
         public static string ModName = "SharedModConfig";
-        public static string ModVersion = "1.1";
+        public static string ModVersion = "1.3";
         public static string ModAuthor = "Sinai";
 
         public ModBase()
@@ -28,7 +28,7 @@ namespace SharedModConfig
             var obj = new GameObject(ModName);
             GameObject.DontDestroyOnLoad(obj);
 
-            obj.AddComponent<ConfigManager>();
+            ConfigManager.Instance = obj.AddComponent<ConfigManager>(); // not sure if this is any faster than Awake(), just trying it
             obj.AddComponent<MenuManager>();
         }
     }

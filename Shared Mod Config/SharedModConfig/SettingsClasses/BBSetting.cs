@@ -24,5 +24,8 @@ namespace SharedModConfig
         public abstract object GetValue();
         public abstract void SetValue(object value);
         public abstract void UpdateValue();
+
+        public delegate void SettingChanged();
+        public abstract event SettingChanged OnSettingChanged;
     }
 }

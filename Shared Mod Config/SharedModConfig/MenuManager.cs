@@ -89,7 +89,7 @@ namespace SharedModConfig
 
         private IEnumerator SetupCoroutine()
         {
-            while (!SL.Instance.IsInitDone())
+            while (SL.Instance == null || !SL.Instance.IsInitDone())
             {
                 yield return new WaitForSeconds(0.1f);
             }
@@ -221,9 +221,13 @@ namespace SharedModConfig
             var contentHolder = newCanvas.transform.Find("SettingsScroll_Holder").Find("Settings_Viewport").Find("Settings_Content");
 
             var boolPrefab = contentHolder.Find("Toggle_Holder").gameObject;
+            boolPrefab.transform.SetParent(null, false);
             var stringPrefab = contentHolder.Find("InputField_Holder").gameObject;
+            stringPrefab.transform.SetParent(null, false);
             var floatPrefab = contentHolder.Find("HSlider_Holder").gameObject;
+            floatPrefab.transform.SetParent(null, false);
             var titlePrefab = contentHolder.Find("Title_Holder").gameObject;
+            titlePrefab.transform.SetParent(null, false);
 
             // setup settings
             foreach (BBSetting setting in config.Settings)

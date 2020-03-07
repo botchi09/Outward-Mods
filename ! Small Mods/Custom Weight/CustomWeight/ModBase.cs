@@ -49,20 +49,10 @@ namespace CustomWeight
 
             // set up and load settings
             config = SetupConfig();
-            StartCoroutine(SetupCoroutine());
+            config.Register();
 
             // hooks
             On.PlayerCharacterStats.UpdateWeight += CharacterWeightHook;
-        }
-
-        private IEnumerator SetupCoroutine()
-        {
-            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
-            config.Register();
         }
 
         internal void Update()

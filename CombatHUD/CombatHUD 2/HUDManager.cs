@@ -24,25 +24,9 @@ namespace CombatHUD
         internal void Start()
         {
             config = SetupConfig();
+            config.Register();
 
             StartCoroutine(SetupCoroutine());
-        }
-
-        private IEnumerator SetupCoroutine()
-        {
-            while (!SL.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
-            SetupCanvas();
-
-            while (!ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
-            config.Register();
         }
 
         internal void Update()
@@ -84,8 +68,13 @@ namespace CombatHUD
             }
         }
 
-        private void SetupCanvas()
+        private IEnumerator SetupCoroutine()
         {
+            while (SL.Instance == null || !SL.Instance.IsInitDone())
+            {
+                yield return new WaitForSeconds(0.1f);
+            }
+
             Debug.Log(ModBase.ModName + " started, version: " + ModBase.ModVersion);
 
             var bundle = SL.Instance.LoadedBundles["combathud"];
@@ -97,35 +86,32 @@ namespace CombatHUD
 
                 // setup draw order
                 var canvas = HUDCanvas.GetComponent<Canvas>();
-
                 canvas.sortingOrder = 999; // higher = shown above other layers.
 
+                // setup the autonomous components
+
+                // ====== target manager ======
+                var targetMgrHolder = HUDCanvas.transform.Find("TargetManager_Holder");
+
+                var mgr_P1 = targetMgrHolder.transform.Find("TargetManager_P1").GetOrAddComponent<TargetManager>();
+                mgr_P1.Split_ID = 0;
+
+                var mgr_P2 = targetMgrHolder.transform.Find("TargetManager_P2").GetOrAddComponent<TargetManager>();
+                mgr_P2.Split_ID = 1;
+
+                // ====== player manager ======
+                var statusTimerHolder = HUDCanvas.transform.Find("PlayerStatusTimers");
+                statusTimerHolder.gameObject.AddComponent<PlayersManager>();
+
+                // ====== damage labels ======
+                var damageLabels = HUDCanvas.transform.Find("DamageLabels");
+                damageLabels.gameObject.AddComponent<DamageLabels>();
             }
             else
             {
                 Debug.LogError("[CombatHUD] Fatal error loading the AssetBundle. Make sure SideLoader is enabled, and the asset exists at Mods/SideLoader/CombatHUD/");
                 Destroy(this.gameObject);
-                return;
             }
-
-            // setup the autonomous components
-
-            // ====== target manager ======
-            var targetMgrHolder = HUDCanvas.transform.Find("TargetManager_Holder");
-
-            var mgr_P1 = targetMgrHolder.transform.Find("TargetManager_P1").GetOrAddComponent<TargetManager>();
-            mgr_P1.Split_ID = 0;
-
-            var mgr_P2 = targetMgrHolder.transform.Find("TargetManager_P2").GetOrAddComponent<TargetManager>();
-            mgr_P2.Split_ID = 1;
-
-            // ====== player manager ======
-            var statusTimerHolder = HUDCanvas.transform.Find("PlayerStatusTimers");
-            statusTimerHolder.gameObject.AddComponent<PlayersManager>();
-
-            // ====== damage labels ======
-            var damageLabels = HUDCanvas.transform.Find("DamageLabels");
-            damageLabels.gameObject.AddComponent<DamageLabels>();
         }
 
         private ModConfig SetupConfig()

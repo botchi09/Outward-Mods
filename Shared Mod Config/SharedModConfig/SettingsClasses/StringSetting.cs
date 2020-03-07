@@ -21,6 +21,8 @@ namespace SharedModConfig
         [XmlIgnore]
         private InputField m_text;
 
+        public override event SettingChanged OnSettingChanged;
+
         public override object GetValue()
         {
             return m_value ?? DefaultValue;
@@ -33,6 +35,8 @@ namespace SharedModConfig
             if (m_text != null)
             {
                 m_text.text = m_value;
+
+                OnSettingChanged?.Invoke();
             }
         }
 
@@ -45,9 +49,11 @@ namespace SharedModConfig
                     m_text = LinkedGameObject.GetComponentInChildren<InputField>();
                 }
 
-                if (!string.IsNullOrEmpty(m_text.text))
+                if (!string.IsNullOrEmpty(m_text.text) && m_text.text != m_value)
                 {
                     m_value = m_text.text;
+
+                    OnSettingChanged?.Invoke();
                 }
             }
         }

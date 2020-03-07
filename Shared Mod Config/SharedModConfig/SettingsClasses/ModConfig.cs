@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,26 +8,45 @@ using System.Xml.Serialization;
 
 namespace SharedModConfig
 {
-    [Serializable]
     public class ModConfig
     {
+        // Public, Serializable
         public string ModName;
         public double SettingsVersion;
         public List<BBSetting> Settings = new List<BBSetting>();
 
-        [XmlIgnore]
-        public GameObject m_linkedPanel;
+        // On Settings Loaded callback
+        public delegate void SettingsLoaded();
+        public event SettingsLoaded OnSettingsLoaded;
+
+        // internal use only
+        [XmlIgnore] private Dictionary<string, BBSetting> m_Settings = new Dictionary<string, BBSetting>();
+        [XmlIgnore] public GameObject m_linkedPanel;
 
         public void Register()
         {
-            ConfigManager.Instance.RegisterSettings(this);
+            foreach (var setting in Settings)
+            {
+                m_Settings.Add(setting.Name, setting);
+            }
+
+            ConfigManager.RegisterSettings(this);
+        }
+
+        public void INTERNAL_OnSettingsLoaded()
+        {
+            if (OnSettingsLoaded != null)
+            {
+                Debug.Log("OnSettingsLoaded for " + this.ModName);
+                OnSettingsLoaded.Invoke();
+            }
         }
 
         public object GetValue(string SettingName)
         {
-            if (Settings.Find(x => x.Name == SettingName) is BBSetting setting)
+            if (m_Settings.ContainsKey(SettingName))
             {
-                return setting.GetValue();
+                return m_Settings[SettingName].GetValue();
             }
             else
             {

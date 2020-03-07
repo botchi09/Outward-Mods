@@ -11,7 +11,7 @@ namespace CombatHUD
     public class ModBase : PartialityMod
     {
         public static string ModName = "CombatHUD";
-        public static string ModVersion = "4.1";
+        public static string ModVersion = "4.12";
         public static string ModAuthor = "Sinai";
 
         public ModBase()
