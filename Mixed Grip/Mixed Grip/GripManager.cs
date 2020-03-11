@@ -25,19 +25,17 @@ namespace MixedGrip
             // equip item hook for MixedGrip logic
             On.CharacterEquipment.EquipItem_1 += EquipItemHook;
         }
-
-        // ==================== UPDATE ===================== //
+        
+        internal void Start()
+        {
+            this.gameObject.AddComponent(new PhotonView() { viewID = 901 });
+            Debug.Log("Registered MixedGrip with ViewID " + this.photonView.viewID);
+        }
 
         internal void Update()
         {
             // make sure game is running
             if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) { return; }
-
-            // setup PhotonView (add when needed)
-            if (PhotonNetwork.inRoom && photonView == null)
-            {
-                gameObject.AddComponent(new PhotonView() { viewID = 901 });
-            }
 
             MixedGripUpdate();            
         }

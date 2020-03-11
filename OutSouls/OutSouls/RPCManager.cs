@@ -18,13 +18,10 @@ namespace OutSoulsMod
             Instance = this;
         }
 
-        internal void Update()
+        internal void Start()
         {
-            if (this.photonView == null && PhotonNetwork.inRoom)
-            {
-                this.gameObject.AddComponent<PhotonView>();
-                this.photonView.viewID = 903;
-            }
+            this.gameObject.AddComponent(new PhotonView() { viewID = 903 });
+            Debug.Log("Registered OutSouls with ViewID " + this.photonView.viewID);
         }
 
         //for calling directly

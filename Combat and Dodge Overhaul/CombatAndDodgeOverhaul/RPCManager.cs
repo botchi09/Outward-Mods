@@ -19,13 +19,10 @@ namespace CombatAndDodgeOverhaul
             Instance = this;
         }
 
-        internal void Update()
+        internal void Start()
         {
-            if (this.photonView == null && PhotonNetwork.inRoom)
-            {
-                this.gameObject.AddComponent<PhotonView>();
-                this.photonView.viewID = 902;
-            }
+            this.gameObject.AddComponent(new PhotonView() { viewID = 902 });
+            Debug.Log("Registered C&D Overhaul with ViewID " + this.photonView.viewID);
         }
 
         public void RequestSettings()

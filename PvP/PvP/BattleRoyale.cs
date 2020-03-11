@@ -10,7 +10,7 @@ namespace PvP
 {
     public class BattleRoyale : MonoBehaviour
     {
-        public PvPGlobal global;
+        public static BattleRoyale Instance;
 
         public bool IsGameplayStarting = false;
         public bool IsGameplayEnding = false;
@@ -33,9 +33,14 @@ namespace PvP
         //// area reset
         //public float LastAreaResetTime = 0f;
 
+        internal void Awake()
+        {
+            Instance = this;
+        }
+
         internal void Start()
         {
-            gameObject.AddComponent(new BattleRoyale_Hooks() { global = global, BRManager = this });
+            gameObject.AddComponent<BattleRoyale_Hooks>();
         }
         
         // important logic for battle royale mode (runs outside of gameplay update)
@@ -45,9 +50,9 @@ namespace PvP
             {
                 if (ForceNoSaves) { ForceNoSaves = false; }
                 if (IsGameplayStarting) { IsGameplayStarting = false; StopAllCoroutines(); }
-                if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+                if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
                 {
-                    global.CurrentGame = PvPGlobal.GameModes.NONE;
+                    PvPGlobal.Instance.CurrentGame = PvPGlobal.GameModes.NONE;
                 }
             }
 
@@ -55,16 +60,19 @@ namespace PvP
 
             if (IsGameplayEnding)
             {
-                if (global.gui.showGui == false) { global.gui.showGui = true; }
+                if (PvPGUI.Instance.showGui == false) 
+                { 
+                    PvPGUI.Instance.showGui = true; 
+                }
                 return;
             }
             
-            if (ForceNoSaves && global.CurrentGame == PvPGlobal.GameModes.NONE && !MenuManager.Instance.IsReturningToMainMenu)
+            if (ForceNoSaves && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE && !MenuManager.Instance.IsReturningToMainMenu)
             {
                 //Debug.Log("[BR] Update turning off ForceNoSaves");
                 ForceNoSaves = false;
             }
-            if (WasCheatsEnabled && !IsGameplayStarting && global.CurrentGame == PvPGlobal.GameModes.NONE)
+            if (WasCheatsEnabled && !IsGameplayStarting && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE)
             {
                 //OLogger.Warning("[BR] Enabling cheats!");
                 WasCheatsEnabled = false;
@@ -98,11 +106,11 @@ namespace PvP
         {
             if (PhotonNetwork.offlineMode)
             {
-                global.RPCStartBattleRoyale(skipLoad);
+                PvPGlobal.Instance.RPCStartBattleRoyale(skipLoad);
             }
             else
             {
-                global.photonView.RPC("RPCStartBattleRoyale", PhotonTargets.All, new object[] { skipLoad });
+                PvPGlobal.Instance.photonView.RPC("RPCStartBattleRoyale", PhotonTargets.All, new object[] { skipLoad });
             }
         }
 
@@ -144,10 +152,10 @@ namespace PvP
             // ======== finalize =======
 
             // each player calls this locally after setting up their scene
-            global.StartGameplayRPC((int)PvPGlobal.GameModes.BattleRoyale, "A Battle Royale has begun!");
+            PvPGlobal.Instance.StartGameplayRPC((int)PvPGlobal.GameModes.BattleRoyale, "A Battle Royale has begun!");
 
             // get enemy drop interval now (currentplayers list created). faster enemy spawns depending on remaining players. Min 15, max 45.
-            EnemyDropInterval = Mathf.Clamp(45 - (global.playerManager.GetRemainingPlayers().Count() * 2), 15, 45);
+            EnemyDropInterval = Mathf.Clamp(45 - (PlayerManager.Instance.GetRemainingPlayers().Count() * 2), 15, 45);
         }
        
         // =============== SCENE SETUP ==============
@@ -186,7 +194,7 @@ namespace PvP
                     // if they're a player, fix their TargetableFactions (may not have been set to include NONE faction yet, used for enemies)
                     if (_char.Faction == Character.Factions.Player)
                     {
-                        global.playerManager.ChangeFactions(_char, Character.Factions.Player); // this will do nothing but add Factions.NONE to targetable
+                        PlayerManager.Instance.ChangeFactions(_char, Character.Factions.Player); // this will do nothing but add Factions.NONE to targetable
                     }
 
                     //// setup starter pack
@@ -196,7 +204,7 @@ namespace PvP
             else
             {
                 //OLogger.Error("ERROR Stopping gameplay we are in the wrong scene?");
-                global.StopGameplay("An error has occured! We seem to be in the wrong scene.");
+                PvPGlobal.Instance.StopGameplay("An error has occured! We seem to be in the wrong scene.");
             }
         }
 
@@ -402,12 +410,12 @@ namespace PvP
 
         private void WorldHostUpdate()
         {
-            List<Character.Factions> teamsLeft = global.playerManager.GetRemainingTeams();
+            List<Character.Factions> teamsLeft = PlayerManager.Instance.GetRemainingTeams();
             if (teamsLeft.Count() < 2)
             {
                 string winners = teamsLeft[0].ToString();
                 if (!winners.EndsWith("s")) { winners += "s"; }
-                global.StopGameplay(winners + " have won!");
+                PvPGlobal.Instance.StopGameplay(winners + " have won!");
             }
 
             if (LastSupplyDropTime <= 0 || Time.time - LastSupplyDropTime > SupplyDropInterval)
@@ -454,22 +462,22 @@ namespace PvP
 
                         if (PhotonNetwork.offlineMode)
                         {
-                            global.SendSpawnEnemyRPC(c.UID.ToString(), loc.x, loc.y, loc.z);
+                            PvPGlobal.Instance.SendSpawnEnemyRPC(c.UID.ToString(), loc.x, loc.y, loc.z);
                         }
                         else
                         {
-                            global.photonView.RPC("SendSpawnEnemyRPC", PhotonTargets.All, new object[] { c.UID.ToString(), loc.x, loc.y, loc.z });
+                            PvPGlobal.Instance.photonView.RPC("SendSpawnEnemyRPC", PhotonTargets.All, new object[] { c.UID.ToString(), loc.x, loc.y, loc.z });
                         }
 
                         // send butcher message
                         if (c.Name.ToLower().Contains("butcher"))
                         {
-                            global.SendMessageToAll("The Butcher of Men has spawned!");
+                            PvPGlobal.Instance.SendMessageToAll("The Butcher of Men has spawned!");
                             EnemyCharacters.RemoveAll(x => x.UID == butcher.UID);
                         }
 
                         // change faction to NONE
-                        global.playerManager.ChangeFactions(c, Character.Factions.NONE);
+                        PlayerManager.Instance.ChangeFactions(c, Character.Factions.NONE);
                     }
                 }
             }
@@ -523,11 +531,11 @@ namespace PvP
             {
                 if (PhotonNetwork.offlineMode)
                 {
-                    global.RPCSendCleanup();
+                    PvPGlobal.Instance.RPCSendCleanup();
                 }
                 else
                 {
-                    global.photonView.RPC("RPCSendCleanup", PhotonTargets.All, new object[0]);
+                    PvPGlobal.Instance.photonView.RPC("RPCSendCleanup", PhotonTargets.All, new object[0]);
                 }
                 ActiveItemContainers.Clear();
                 ActiveBeamObjects.Clear();
@@ -583,11 +591,11 @@ namespace PvP
             {
                 if (PhotonNetwork.offlineMode)
                 {
-                    global.RPCSendCleanup();
+                    PvPGlobal.Instance.RPCSendCleanup();
                 }
                 else
                 {
-                    global.photonView.RPC("RPCSendCleanup", PhotonTargets.All, new object[0]);
+                    PvPGlobal.Instance.photonView.RPC("RPCSendCleanup", PhotonTargets.All, new object[0]);
                 }
 
                 yield return new WaitForSeconds(2f); // wait 2 seconds after destroying the active objects, so we dont start destroying the new ones!
@@ -606,7 +614,7 @@ namespace PvP
 
                     if (!PhotonNetwork.offlineMode)
                     {
-                        global.photonView.RPC("RPCGenerateStash", PhotonTargets.Others, new object[]
+                        PvPGlobal.Instance.photonView.RPC("RPCGenerateStash", PhotonTargets.Others, new object[]
                         {
                             stash.ItemID,
                             stash.UID,
@@ -626,13 +634,13 @@ namespace PvP
             }
             else
             {
-                global.SendMessageToAll("Supply Chests are spawning!");
+                PvPGlobal.Instance.SendMessageToAll("Supply Chests are spawning!");
 
                 // generate chest or ornate chest
                 List<Vector3> locations = Templates.BR_Templates.SupplyDropLocations[SceneManagerHelper.ActiveSceneName].ToList();
 
                 // 1 supply drop per 2 players. minimum of 2 drops.
-                int numOfDrops = (int)Math.Ceiling(global.playerManager.GetRemainingPlayers().Count() * 0.5f);
+                int numOfDrops = (int)Math.Ceiling(PlayerManager.Instance.GetRemainingPlayers().Count() * 0.5f);
                 numOfDrops = (int)Mathf.Clamp(numOfDrops, 2, locations.Count());
 
                 //Debug.Log("Generating " + numOfDrops + " supply drops from a locations list size of " + locations.Count());
@@ -669,7 +677,7 @@ namespace PvP
             chest.transform.position = position;
             if (!PhotonNetwork.offlineMode)
             {
-                global.photonView.RPC("RPCGenerateStash", PhotonTargets.Others, new object[]
+                PvPGlobal.Instance.photonView.RPC("RPCGenerateStash", PhotonTargets.Others, new object[]
                 {
                     chest.ItemID,
                     chest.UID,
@@ -701,11 +709,11 @@ namespace PvP
             // send RPC to sync the drop with other clients
             if (PhotonNetwork.offlineMode)
             {
-                global.RPCSendSupplyDrop(chest.UID, position.x, position.y, position.z);
+                PvPGlobal.Instance.RPCSendSupplyDrop(chest.UID, position.x, position.y, position.z);
             }
             else
             {
-                global.photonView.RPC("RPCSendSupplyDrop", PhotonTargets.All, new object[]
+                PvPGlobal.Instance.photonView.RPC("RPCSendSupplyDrop", PhotonTargets.All, new object[]
                 {
                         chest.UID,
                         position.x,

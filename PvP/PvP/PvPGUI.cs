@@ -10,7 +10,9 @@ namespace PvP
 {
     public class PvPGUI : MonoBehaviour
     {
-        public PvPGlobal global;
+        public static PvPGUI Instance;
+
+        private static readonly int WINDOW_ID = 6313531;
 
         public Rect m_windowRect = Rect.zero;
         public Vector2 scroll = Vector2.zero;
@@ -24,6 +26,16 @@ namespace PvP
         public bool lastMenuToggle;
 
         public bool ConfirmingBattleRoyale = false;
+
+        internal void Awake()
+        {
+            Instance = this;
+        }
+
+        internal void Start()
+        {
+            showGui = PvPGlobal.Instance.settings.Show_Menu_On_Startup;
+        }
 
         internal void Update()
         {
@@ -45,7 +57,7 @@ namespace PvP
         {
             Matrix4x4 orig = GUI.matrix;
 
-            if (global.settings.Enable_Menu_Scaling)
+            if (PvPGlobal.Instance.settings.Enable_Menu_Scaling)
             {
                 GUI.matrix = m_scaledMatrix;
             }
@@ -58,9 +70,9 @@ namespace PvP
             {
                 if (!ConfirmingBattleRoyale && showGui)
                 {
-                    m_windowRect = GUI.Window(6331531, m_windowRect, DrawWindow, "PvP " + global._base.version.ToString("0.00"));
+                    m_windowRect = GUI.Window(WINDOW_ID, m_windowRect, DrawWindow, "PvP " + ModLoader.Instance.version.ToString("0.00"));
                 }
-                if (ConfirmingBattleRoyale || global.BRManager.IsGameplayEnding)
+                if (ConfirmingBattleRoyale || BattleRoyale.Instance.IsGameplayEnding)
                 {
                     float x = Screen.width / 2 - 200;
                     float y;
@@ -76,17 +88,16 @@ namespace PvP
                     Rect smallRect = new Rect(x, y, 400, 130);
                     if (ConfirmingBattleRoyale)
                     {
-                        GUI.Window(6331531, smallRect, BattleRoyaleConfirmStart, "Are you sure?");
+                        GUI.Window(WINDOW_ID, smallRect, BattleRoyaleConfirmStart, "Are you sure?");
                     }
-                    else if (global.BRManager.IsGameplayEnding)
+                    else if (BattleRoyale.Instance.IsGameplayEnding)
                     {
-                        GUI.Window(6331531, smallRect, BattleRoyaleGameEnd, "Play again?");
+                        GUI.Window(WINDOW_ID, smallRect, BattleRoyaleGameEnd, "Play again?");
                     }
                 }
-                
             }
 
-            if (global.CurrentGame != PvPGlobal.GameModes.NONE)
+            if (PvPGlobal.Instance.CurrentGame != PvPGlobal.GameModes.NONE)
             {
                 CurrentGameWindow();
             }
@@ -145,12 +156,12 @@ namespace PvP
             {
                 if (!PhotonNetwork.isNonMasterClientInRoom) // only host can start games
                 {
-                    if (global.CurrentGame == PvPGlobal.GameModes.NONE && !global.BRManager.IsGameplayEnding)
+                    if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE && !BattleRoyale.Instance.IsGameplayEnding)
                     {
                         GUILayout.BeginHorizontal();
                         if (GUILayout.Button("Begin Deathmatch"))
                         {
-                            global.StartGameplay((int)PvPGlobal.GameModes.Deathmatch, "A Deathmatch has begun!");
+                            PvPGlobal.Instance.StartGameplay((int)PvPGlobal.GameModes.Deathmatch, "A Deathmatch has begun!");
                         }
                         if (GUILayout.Button("Begin Battle Royale"))
                         {
@@ -162,7 +173,7 @@ namespace PvP
                     {
                         if (GUILayout.Button("End Gameplay"))
                         {
-                            global.StopGameplay("The host has ended the game.");
+                            PvPGlobal.Instance.StopGameplay("The host has ended the game.");
                         }
                     }
                 }
@@ -187,12 +198,12 @@ namespace PvP
 
                     if (!PhotonNetwork.isNonMasterClientInRoom || ps.ControlledCharacter.IsLocalPlayer)
                     {
-                        if (ps.ControlledCharacter.Faction != Character.Factions.Player && global.CurrentGame == PvPGlobal.GameModes.NONE)
+                        if (ps.ControlledCharacter.Faction != Character.Factions.Player && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE)
                         {
                             if (GUILayout.Button("<", GUILayout.Width(30)))
                             {
                                 var newFaction = (Character.Factions)((int)ps.ControlledCharacter.Faction - 1);
-                                global.playerManager.ChangeFactions(ps.ControlledCharacter, newFaction);
+                                PlayerManager.Instance.ChangeFactions(ps.ControlledCharacter, newFaction);
                             }
                         }
                         else { GUILayout.Space(35); }
@@ -202,21 +213,21 @@ namespace PvP
 
                     if (!PhotonNetwork.isNonMasterClientInRoom || ps.ControlledCharacter.IsLocalPlayer)
                     {
-                        if (ps.ControlledCharacter.Faction != Character.Factions.Golden && global.CurrentGame == PvPGlobal.GameModes.NONE)
+                        if (ps.ControlledCharacter.Faction != Character.Factions.Golden && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE)
                         {
                             if (GUILayout.Button(">", GUILayout.Width(30)))
                             {
                                 var newFaction = (Character.Factions)((int)ps.ControlledCharacter.Faction + 1);
-                                global.playerManager.ChangeFactions(ps.ControlledCharacter, newFaction);
+                                PlayerManager.Instance.ChangeFactions(ps.ControlledCharacter, newFaction);
                             }
                         }
                         else { GUILayout.Space(35); }
 
-                        if (ps.ControlledCharacter.IsDead && global.CurrentGame == PvPGlobal.GameModes.NONE)
+                        if (ps.ControlledCharacter.IsDead && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.NONE)
                         {
                             if (GUILayout.Button("Resurrect", GUILayout.Width(75)))
                             {
-                                global.SendResurrect(ps.ControlledCharacter);
+                                PvPGlobal.Instance.SendResurrect(ps.ControlledCharacter);
                             }
                         }
                     }
@@ -236,8 +247,8 @@ namespace PvP
         {
             GUILayout.BeginVertical(GUI.skin.box);
 
-            global.settings.Show_Menu_On_Startup = GUILayout.Toggle(global.settings.Show_Menu_On_Startup, "Show Menu On Startup");
-            global.settings.Enable_Menu_Scaling = GUILayout.Toggle(global.settings.Enable_Menu_Scaling, "Enable Menu Scaling");
+            PvPGlobal.Instance.settings.Show_Menu_On_Startup = GUILayout.Toggle(PvPGlobal.Instance.settings.Show_Menu_On_Startup, "Show Menu On Startup");
+            PvPGlobal.Instance.settings.Enable_Menu_Scaling = GUILayout.Toggle(PvPGlobal.Instance.settings.Enable_Menu_Scaling, "Enable Menu Scaling");
             GUILayout.Space(15);
 
             //GUILayout.BeginHorizontal();
@@ -281,14 +292,14 @@ namespace PvP
             {
                 ConfirmingBattleRoyale = false;
 
-                if (global.BRManager.CheckCanStart())
+                if (BattleRoyale.Instance.CheckCanStart())
                 {
-                    global.BRManager.StartBattleRoyale(false);
+                    BattleRoyale.Instance.StartBattleRoyale(false);
                     showGui = false;
                 }
                 else
                 {
-                    global.SendUIMessageLocal(CharacterManager.Instance.GetFirstLocalCharacter(), "There are not enough teams to start!");
+                    PvPGlobal.Instance.SendUIMessageLocal(CharacterManager.Instance.GetFirstLocalCharacter(), "There are not enough teams to start!");
                 }
             }
 
@@ -306,8 +317,8 @@ namespace PvP
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Play Again"))
             {
-                global.BRManager.StartBattleRoyale(true);
-                global.BRManager.IsGameplayEnding = false;
+                BattleRoyale.Instance.StartBattleRoyale(true);
+                BattleRoyale.Instance.IsGameplayEnding = false;
                 showGui = false;
             }
 
@@ -315,15 +326,15 @@ namespace PvP
 
             if (GUILayout.Button("End Lobby"))
             {
-                global.BRManager.IsGameplayEnding = false;
+                BattleRoyale.Instance.IsGameplayEnding = false;
                 showGui = false;
                 if (PhotonNetwork.offlineMode)
                 {
-                    global.EndBattleRoyaleRPC();
+                    PvPGlobal.Instance.EndBattleRoyaleRPC();
                 }
                 else
                 {
-                    global.photonView.RPC("EndBattleRoyaleRPC", PhotonTargets.All, new object[0]);
+                    PvPGlobal.Instance.photonView.RPC("EndBattleRoyaleRPC", PhotonTargets.All, new object[0]);
                 }
             }
 
@@ -335,20 +346,20 @@ namespace PvP
         {
             GUILayout.BeginArea(new Rect(15, 15, 240, Screen.height * 0.7f));
 
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale && global.BRManager.IsGameplayStarting)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale && BattleRoyale.Instance.IsGameplayStarting)
             {
                 GUILayout.Label("A Battle Royale is starting...");
             }
             else
             {
                 GUI.skin.label.fontSize *= 2;
-                TimeSpan t = TimeSpan.FromSeconds(Time.time - global.GameStartTime);
+                TimeSpan t = TimeSpan.FromSeconds(Time.time - PvPGlobal.Instance.GameStartTime);
                 GUILayout.Label(t.Minutes.ToString("0") + ":" + t.Seconds.ToString("00"), GUILayout.Height(40));
                 GUI.skin.label.fontSize /= 2;
 
                 GUILayout.Label("Current Teams:");
 
-                foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in global.CurrentPlayers)
+                foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in PvPGlobal.Instance.CurrentPlayers)
                 {
                     GUI.color = TeamColors[entry.Key];
                     GUILayout.Label(entry.Key.ToString() + ":");

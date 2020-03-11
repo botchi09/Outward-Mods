@@ -16,11 +16,11 @@ namespace PvP
     // PARTIALITY LOADER
     public class ModLoader : PartialityMod
     {
+        public static ModLoader Instance;
+
         public GameObject obj;
         public string ID = "PvP";
         public double version = 1.3;
-
-        public static PvPGlobal Instance;
 
         public ModLoader()
         {
@@ -31,14 +31,14 @@ namespace PvP
 
         public override void OnEnable()
         {
+            Instance = this;
+
             base.OnEnable();
 
             obj = new GameObject(ID);
             GameObject.DontDestroyOnLoad(obj);
 
-            Instance = obj.AddComponent<PvPGlobal>();
-            Instance._base = this;
-            Instance.Init();
+            obj.AddComponent<PvPGlobal>();
         }
 
         public override void OnDisable()
@@ -50,8 +50,6 @@ namespace PvP
     //SETTINGS
     public class Settings
     {
-        public int Multiplayer_Limit = 2;
-
         public bool Enable_Menu_Scaling = false;
         public bool Show_Menu_On_Startup = true;
     }
@@ -59,14 +57,10 @@ namespace PvP
     // PVP GLOBAL SCRIPT
     public class PvPGlobal : Photon.MonoBehaviour
     {
-        public ModLoader _base;
+        public static PvPGlobal Instance;
+
         public Settings settings = new Settings();
         private static readonly string savePath = @"Mods\PvP.json";
-
-        public PvPGUI gui;
-        public PlayerManager playerManager;
-        public BattleRoyale BRManager;
-        public DeathMatch DMManager;
 
         public string MenuKey = "PvP Menu";
 
@@ -81,28 +75,29 @@ namespace PvP
             BattleRoyale
         }
 
-        public void Init()
+        internal void Awake()
         {
+            Instance = this;
+        }
+
+        internal void Start()
+        {
+            this.gameObject.AddComponent(new PhotonView() { viewID = 904 });
+            Debug.Log("Registered PvP with ViewID " + this.photonView.viewID);
+
             LoadSettings();
 
-            gui = gameObject.AddComponent(new PvPGUI() { global = this, showGui = settings.Show_Menu_On_Startup });
-            playerManager = gameObject.AddComponent(new PlayerManager() { global = this });
-            playerManager.Init();
-            BRManager = gameObject.AddComponent(new BattleRoyale { global = this });
-            DMManager = gameObject.AddComponent(new DeathMatch { global = this });
+            gameObject.AddComponent<PvPGUI>();
+            gameObject.AddComponent<PlayerManager>();
+            gameObject.AddComponent<BattleRoyale>();
+            gameObject.AddComponent<DeathMatch>();
 
             AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
-
-            //// Multiplayer hooks
-            //On.PauseMenu.Show += ShowPatch;
-            //On.PauseMenu.Update += UpdatePatch;
 
             // Custom Gameplay hooks
             On.InteractionRevive.OnActivate += DisableReviveInteractionHook;
             On.InteractionRevive.ProcessText += ReviveTextHook;
         }
-
-        // =================== MASTER UPDATE ========================
 
         internal void Update()
         {
@@ -116,32 +111,9 @@ namespace PvP
             }
 
             // make sure game is running
-            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) { return; }
-
-            // setup PhotonView (add or remove when needed)
-            if (PhotonNetwork.inRoom && photonView == null)
-            {
-                gameObject.AddComponent(new PhotonView() { viewID = 994 });
-            }
-
-            // handle custom multiplayer limit 
-            if (!PhotonNetwork.offlineMode && PhotonNetwork.isMasterClient)
-            {
-                // if the room limit is not set to our custom value, do that.
-                if (PhotonNetwork.room.maxPlayers != settings.Multiplayer_Limit)
-                {
-                    PhotonNetwork.room.maxPlayers = settings.Multiplayer_Limit;
-                }
-
-                // handle logic for opening / closing room based on custom limit.
-                if (!PhotonNetwork.room.open && PhotonNetwork.room.playerCount < settings.Multiplayer_Limit)
-                {
-                    PhotonNetwork.room.open = true;
-                }
-                else if (PhotonNetwork.room.open && PhotonNetwork.room.playerCount >= settings.Multiplayer_Limit)
-                {
-                    PhotonNetwork.room.open = false;
-                }
+            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) 
+            { 
+                return; 
             }
 
             // handle player input 
@@ -149,7 +121,7 @@ namespace PvP
             {
                 if (m_playerInputManager[ps.PlayerID].GetButtonDown(MenuKey))
                 {
-                    gui.showGui = !gui.showGui;
+                    PvPGUI.Instance.showGui = !PvPGUI.Instance.showGui;
                 }
             }
 
@@ -179,17 +151,17 @@ namespace PvP
         [PunRPC]
         public void StartGameplayRPC(int _mode, string messageToPlayers = "")
         {
-            if (gui.showGui) { gui.showGui = false; }
+            if (PvPGUI.Instance.showGui) { PvPGUI.Instance.showGui = false; }
 
             if (_mode == (int)GameModes.BattleRoyale)
             {
                 // actual moment that gameplay starts for the players
-                BRManager.IsGameplayStarting = false;
-                BRManager.LastSupplyDropTime = -1;
-                BRManager.LastEnemySpawnTime = Time.time;
-                BRManager.SupplyDropCounter = 0;
-                BRManager.ActiveItemContainers.Clear();
-                BRManager.ActiveBeamObjects.Clear();
+                BattleRoyale.Instance.IsGameplayStarting = false;
+                BattleRoyale.Instance.LastSupplyDropTime = -1;
+                BattleRoyale.Instance.LastEnemySpawnTime = Time.time;
+                BattleRoyale.Instance.SupplyDropCounter = 0;
+                BattleRoyale.Instance.ActiveItemContainers.Clear();
+                BattleRoyale.Instance.ActiveBeamObjects.Clear();
             }
 
             // get the current teams to a list. send message to local players.
@@ -220,14 +192,14 @@ namespace PvP
         {
             if (CurrentGame == GameModes.BattleRoyale)
             {
-                if (!BRManager.IsGameplayStarting)
+                if (!BattleRoyale.Instance.IsGameplayStarting)
                 {
-                    BRManager.UpdateBR();
+                    BattleRoyale.Instance.UpdateBR();
                 }
             }
             else if (CurrentGame == GameModes.Deathmatch)
             {
-                DMManager.UpdateDM();
+                DeathMatch.Instance.UpdateDM();
             }
         }
 
@@ -251,7 +223,7 @@ namespace PvP
             if (CurrentGame == GameModes.BattleRoyale)
             {
                 //OLogger.Warning("Todo restore things for BR on game end?");
-                BRManager.EndBattleRoyale();
+                BattleRoyale.Instance.EndBattleRoyale();
             }
 
             CurrentGame = GameModes.NONE;
@@ -285,8 +257,8 @@ namespace PvP
         {
             if (SceneManagerHelper.ActiveSceneName == "Monsoon") { skipLoad = true; }
 
-            BRManager.IsGameplayStarting = true;
-            BRManager.ForceNoSaves = true;
+            BattleRoyale.Instance.IsGameplayStarting = true;
+            BattleRoyale.Instance.ForceNoSaves = true;
             CurrentGame = GameModes.BattleRoyale;
 
             if (!skipLoad)
@@ -301,7 +273,7 @@ namespace PvP
             if (Global.CheatsEnabled)
             {
                 //OLogger.Warning("Disabling cheats!");
-                BRManager.WasCheatsEnabled = true;
+                BattleRoyale.Instance.WasCheatsEnabled = true;
                 Global.CheatsEnabled = false;
 
                 foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
@@ -311,13 +283,13 @@ namespace PvP
                 }
             }
 
-            StartCoroutine(BRManager.SetupAfterSceneLoad(skipLoad));
+            StartCoroutine(BattleRoyale.Instance.SetupAfterSceneLoad(skipLoad));
         }
 
         [PunRPC]
         public void SendSpawnEnemyRPC(string uid, float x, float y, float z)
         {
-            if (BRManager.EnemyCharacters.Find(w => w.UID == uid) is Character c)
+            if (BattleRoyale.Instance.EnemyCharacters.Find(w => w.UID == uid) is Character c)
             {
                 c.gameObject.SetActive(true);
 
@@ -335,14 +307,14 @@ namespace PvP
                 }
                 At.SetValue(new Stat(value), typeof(CharacterStats), c.Stats, "m_maxHealthStat");
 
-                //BRManager.FixEnemyStats(c.Stats);
+                //BattleRoyale.Instance..FixEnemyStats(c.Stats);
 
                 //foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(w => w.IsLocalPlayer))
                 //{
                 //    SendUIMessageLocal(ps.ControlledCharacter, c.Name + " has spawned!");
                 //}
 
-                //BRManager.EnemyCharacters.Remove(c);
+                //BattleRoyale.Instance..EnemyCharacters.Remove(c);
             }
         }
 
@@ -360,13 +332,13 @@ namespace PvP
         [PunRPC]
         public void RPCSendSupplyDrop(string itemUID, float x, float y, float z)
         {
-            StartCoroutine(BRManager.SupplyDropLocalCoroutine(itemUID, new Vector3(x, y, z)));
+            StartCoroutine(BattleRoyale.Instance.SupplyDropLocalCoroutine(itemUID, new Vector3(x, y, z)));
         }
 
         [PunRPC]
         public void RPCSendCleanup()
         {
-            BRManager.CleanupSupplyObjects();
+            BattleRoyale.Instance.CleanupSupplyObjects();
         }
 
         [PunRPC]
@@ -376,7 +348,7 @@ namespace PvP
             chest.UID = UID;
             chest.SaveType = Item.SaveTypes.Savable;
             chest.transform.position = new Vector3(x, y, z);
-            BRManager.ActiveItemContainers.Add(chest.gameObject);
+            BattleRoyale.Instance.ActiveItemContainers.Add(chest.gameObject);
         }
 
         // ======================= SMALL GAMEPLAY FUNCTIONS ============================== //
@@ -422,7 +394,7 @@ namespace PvP
                 c.DetectabilityEmitter.Faction = faction;
                 //c.BroadcastMessage("ReprocessEffects", SendMessageOptions.DontRequireReceiver);
 
-                var list = playerManager.AllFactions.Where(x => (int)x != (int)faction).ToList();
+                var list = PlayerManager.Instance.AllFactions.Where(x => (int)x != (int)faction).ToList();
                 c.TargetingSystem.TargetableFactions = list.ToArray();
 
                 if (!alliedToSame)
@@ -499,15 +471,18 @@ namespace PvP
 
         private void LoadSettings()
         {
+            bool flag = false;
             if (File.Exists(savePath))
             {
                 if (JsonUtility.FromJson<Settings>(File.ReadAllText(savePath)) is Settings s2)
                 {
                     settings = s2;
+                    flag = true;
                 }
             }
-            else
+            if (!flag)
             {
+                settings = new Settings();
                 SaveSettings();
             }
         }

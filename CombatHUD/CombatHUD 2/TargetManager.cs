@@ -88,7 +88,7 @@ namespace CombatHUD
             }
             else
             {
-                if (m_LinkedCharacter.TargetingSystem.Locked)
+                if (m_LinkedCharacter.TargetingSystem.Locked && m_LinkedCharacter.TargetingSystem.LockedCharacter != null)
                 {
                     UpdateTarget();
                 }

@@ -11,9 +11,6 @@ namespace PvP
 {
     public class BattleRoyale_Hooks : MonoBehaviour
     {
-        public PvPGlobal global;
-        public BattleRoyale BRManager;
-
         internal void Start()
         {
             // DROP STUFF ON DEATH
@@ -45,7 +42,7 @@ namespace PvP
 
         private void CharacterDieHook(On.Character.orig_Die orig, Character self, Vector3 _hitVec, bool _loadedDead = false)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 if (!self.IsAI)
                 {
@@ -68,7 +65,7 @@ namespace PvP
                         {
                             lastDealers.Clear();
                             At.SetValue(lastDealers, typeof(Character), self, "m_lastDealers");
-                            global.SendMessageToAll(lastDealer.Name + " has defeated " + self.Name);
+                            PvPGlobal.Instance.SendMessageToAll(lastDealer.Name + " has defeated " + self.Name);
                         }
                     }
 
@@ -92,17 +89,17 @@ namespace PvP
                         {
                             if (self.Name.ToLower().Contains("butcher"))
                             {
-                                BRManager.AddItemsToContainer(Templates.BR_Templates.Skills_High, 3, self.Inventory.Pouch.transform);
-                                BRManager.AddItemsToContainer(Templates.BR_Templates.Weapons_High, 1, self.Inventory.Pouch.transform);
+                                BattleRoyale.Instance.AddItemsToContainer(Templates.BR_Templates.Skills_High, 3, self.Inventory.Pouch.transform);
+                                BattleRoyale.Instance.AddItemsToContainer(Templates.BR_Templates.Weapons_High, 1, self.Inventory.Pouch.transform);
                             }
                             else if (self.Name == "Immaculate" || self.name == "Shell Horror")
                             {
-                                BRManager.AddItemsToContainer(Templates.BR_Templates.Skills_High, 1, self.Inventory.Pouch.transform);
-                                BRManager.AddItemsToContainer(Templates.BR_Templates.Skills_Low, 2, self.Inventory.Pouch.transform);
+                                BattleRoyale.Instance.AddItemsToContainer(Templates.BR_Templates.Skills_High, 1, self.Inventory.Pouch.transform);
+                                BattleRoyale.Instance.AddItemsToContainer(Templates.BR_Templates.Skills_Low, 2, self.Inventory.Pouch.transform);
                             }
                             else
                             {
-                                BRManager.AddItemsToContainer(Templates.BR_Templates.Skills_Low, 3, self.Inventory.Pouch.transform);
+                                BattleRoyale.Instance.AddItemsToContainer(Templates.BR_Templates.Skills_Low, 3, self.Inventory.Pouch.transform);
                             }
                         }
                     }
@@ -127,7 +124,7 @@ namespace PvP
                 return orig(self, _item, _stackIfPossible);
             }
 
-            if (global.BRManager.IsGameplayStarting || global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (BattleRoyale.Instance.IsGameplayStarting || PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 if (_item is Skill && self.OwnerCharacter != null && !self.OwnerCharacter.IsAI)
                 {
@@ -160,7 +157,7 @@ namespace PvP
         // fix for activation conditions / consumption
         private void ConsumeItemsHook(On.Skill.orig_ConsumeRequiredItems orig, Skill self)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 // do nothing
                 return;
@@ -171,7 +168,7 @@ namespace PvP
 
         private bool AdditionalConditionsHook(On.Skill.orig_HasAllAdditionalConditions orig, Skill self, bool _tryingToActive)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 return true;
             }
@@ -183,7 +180,7 @@ namespace PvP
 
         private bool RequiredItemsHook(On.Skill.orig_OwnerHasAllRequiredItems orig, Skill self, bool _tryingToActive)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 // override sigils
                 if (self.ItemID == 8200030 || self.ItemID == 8200031 || self.ItemID == 8200032)
@@ -197,7 +194,7 @@ namespace PvP
 
         private void RemoveStatusHook(On.RemoveStatusEffect.orig_ActivateLocally orig, RemoveStatusEffect self, Character _affectedCharacter, object[] _infos)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 // do nothing
                 return;
@@ -207,7 +204,7 @@ namespace PvP
 
         private void RemoveImbueHook(On.RemoveImbueEffects.orig_ActivateLocally orig, RemoveImbueEffects self, Character _affectedCharacter, object[] _infos)
         {
-            if (global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 // do nothing
                 return;
@@ -219,11 +216,11 @@ namespace PvP
 
         //private void DisconnectedHook(On.NetworkLevelLoader.orig_OnDisconnectedFromPhoton orig, NetworkLevelLoader self)
         //{
-        //    if (!BRManager.IsGameplayStarting && global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+        //    if (!BattleRoyale.Instance.IsGameplayStarting && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
         //    {
         //        //OLogger.Warning("[BR] TODO! Cleanup / fix on leave room! Setting ForceNoSaves to false etc");
-        //        global.StopGameplay("Connection lost! Ending the game...");
-        //        global.CurrentGame = PvPGlobal.GameModes.NONE;
+        //        PvPGlobal.Instance.StopGameplay("Connection lost! Ending the game...");
+        //        PvPGlobal.Instance.CurrentGame = PvPGlobal.GameModes.NONE;
         //        MenuManager.Instance.BackToMainMenu();
         //    }
         //    else
@@ -234,7 +231,7 @@ namespace PvP
 
         private void LocalCharStartedHook(On.SaveManager.orig_LocalCharStarted orig, SaveManager self, Character _char)
         {
-            if (!BRManager.ForceNoSaves)
+            if (!BattleRoyale.Instance.ForceNoSaves)
             {
                 orig(self, _char);
             }
@@ -246,7 +243,7 @@ namespace PvP
 
         private void NetworkLevelSaveHook(On.NetworkLevelLoader.orig_Save orig, NetworkLevelLoader self)
         {
-            if (!BRManager.ForceNoSaves)
+            if (!BattleRoyale.Instance.ForceNoSaves)
             {
                 orig(self);
             }
@@ -258,7 +255,7 @@ namespace PvP
 
         private void NetworkLevelSave_1Hook(On.NetworkLevelLoader.orig_Save_1 orig, NetworkLevelLoader self, bool _async, bool _forceSaveEnvironment = false)
         {
-            if (!BRManager.ForceNoSaves)
+            if (!BattleRoyale.Instance.ForceNoSaves)
             {
                 orig(self, _async, _forceSaveEnvironment);
             }
@@ -270,7 +267,7 @@ namespace PvP
 
         private void SaveManagerUpdateHook(On.SaveManager.orig_Update orig, SaveManager self)
         {
-            if (!BRManager.ForceNoSaves)
+            if (!BattleRoyale.Instance.ForceNoSaves)
             {
                 orig(self);
             }

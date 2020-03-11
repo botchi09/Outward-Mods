@@ -19,13 +19,12 @@ namespace NecromancerSkills
 
         public static RPCManager Instance;
 
-        internal void Update()
+        internal void Start()
         {
-            if (PhotonNetwork.inRoom && this.photonView == null)
-            {
-                this.gameObject.AddComponent(new PhotonView() { viewID = 900 });
-                Instance = this;
-            }
+            Instance = this;
+
+            this.gameObject.AddComponent(new PhotonView() { viewID = 900 });
+            Debug.Log("Registered NecromancySkills with ViewID " + this.photonView.viewID);
         }
 
         // ===================== SUMMON MANAGER RPC ===================== // 

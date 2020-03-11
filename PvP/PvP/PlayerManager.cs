@@ -9,14 +9,16 @@ namespace PvP
 {
     public class PlayerManager : MonoBehaviour
     {
-        public PvPGlobal global;
+        public static PlayerManager Instance;
 
         //public List<Character> PlayerCharacters = new List<Character>();
 
         public List<Character.Factions> AllFactions;
 
-        public void Init()
+        internal void Awake()
         {
+            Instance = this;
+
             AllFactions = new List<Character.Factions>();
             for (int i = 0; i < (int)Character.Factions.COUNT; i++)
             {
@@ -30,7 +32,7 @@ namespace PvP
 
         private void TrapProcessHook(On.DeployableTrap.orig_ProcessEffect orig, DeployableTrap self, Effect _effect)
         {
-            if (_effect is Shooter shooter && global.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
+            if (_effect is Shooter shooter && PvPGlobal.Instance.CurrentGame == PvPGlobal.GameModes.BattleRoyale)
             {
                 shooter.Setup(AllFactions.ToArray(), (!(self.FX_HolderTrans != null)) ? self.transform : self.FX_HolderTrans);
             }
@@ -47,7 +49,7 @@ namespace PvP
                 return;
             }
 
-            if (global.CurrentGame != PvPGlobal.GameModes.NONE)
+            if (PvPGlobal.Instance.CurrentGame != PvPGlobal.GameModes.NONE)
             {
                 if (self.GetComponentInParent<DeployableTrap>() is DeployableTrap trap)
                 {
@@ -94,18 +96,18 @@ namespace PvP
         {
             if (!PhotonNetwork.offlineMode)
             { // int factionInt, string UID, bool alliedToSame = true
-                global.photonView.RPC("SendChangeFactionsRPC", PhotonTargets.All, new object[] { (int)faction, c.UID.ToString(), true });
+                PvPGlobal.Instance.photonView.RPC("SendChangeFactionsRPC", PhotonTargets.All, new object[] { (int)faction, c.UID.ToString(), true });
             }
             else
             {
-                global.SendChangeFactionsRPC((int)faction, c.UID.ToString());
+                PvPGlobal.Instance.SendChangeFactionsRPC((int)faction, c.UID.ToString());
             }
         }
 
         public List<Character.Factions> GetRemainingTeams()
         {
             List<Character.Factions> remainingTeams = new List<Character.Factions>();
-            foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in global.CurrentPlayers)
+            foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in PvPGlobal.Instance.CurrentPlayers)
             {
                 bool anyAlive = false;
                 foreach (PlayerSystem ps in entry.Value)
@@ -127,9 +129,9 @@ namespace PvP
         {
             List<Character> remainingPlayers = new List<Character>();
 
-            foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in global.CurrentPlayers)
+            foreach (KeyValuePair<Character.Factions, List<PlayerSystem>> entry in PvPGlobal.Instance.CurrentPlayers)
             {
-                foreach (PlayerSystem ps in global.CurrentPlayers[entry.Key])
+                foreach (PlayerSystem ps in PvPGlobal.Instance.CurrentPlayers[entry.Key])
                 {
                     if (ps.ControlledCharacter != null && !ps.ControlledCharacter.IsDead)
                         remainingPlayers.Add(ps.ControlledCharacter);

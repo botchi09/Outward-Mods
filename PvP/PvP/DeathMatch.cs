@@ -9,22 +9,27 @@ namespace PvP
 {
     public class DeathMatch : MonoBehaviour
     {
-        public PvPGlobal global;
+        public static DeathMatch Instance;
+
+        internal void Awake()
+        {
+            Instance = this;
+        }
 
         public void UpdateDM()
         {
-            List<Character.Factions> teamsLeft = global.playerManager.GetRemainingTeams();
+            List<Character.Factions> teamsLeft = PlayerManager.Instance.GetRemainingTeams();
             if (teamsLeft.Count == 1)
             {
                 // winner
                 string winner = teamsLeft[0].ToString();
                 if (winner.EndsWith("s")) { winner = winner.Substring(0, winner.Length - 1); }
-                global.StopGameplay(winner + "s have won!");
+                PvPGlobal.Instance.StopGameplay(winner + "s have won!");
             }
             else if (teamsLeft.Count <= 0)
             {
                 // ???????
-                global.StopGameplay("Game ended because there are no active teams!");
+                PvPGlobal.Instance.StopGameplay("Game ended because there are no active teams!");
             }
         }
     }
