@@ -171,12 +171,15 @@ namespace CombatAndDodgeOverhaul
 
             this.m_currentSyncInfos = new ModConfig
             {
+                ModName = "CombatOverhaul_Sync",
+                SettingsVersion = 1.0,
                 Settings = new List<BBSetting> 
                 {
                     new BoolSetting
                     {
                         Name = Settings.All_Enemies_Allied,
-                        m_value = enemiesAllied
+                        m_value = enemiesAllied,
+                        DefaultValue = false,
                     },
                     new BoolSetting
                     {
@@ -210,6 +213,14 @@ namespace CombatAndDodgeOverhaul
                     },
                 }
             };
+
+            // manually fix the settings dictionary since we are not using ModConfig.Register()
+            var dict = new Dictionary<string, BBSetting>();
+            foreach (var setting in m_currentSyncInfos.Settings)
+            {
+                dict.Add(setting.Name, setting);
+            }
+            At.SetValue(dict, typeof(ModConfig), m_currentSyncInfos, "m_Settings");
 
             if (modsEnabled)
             {
