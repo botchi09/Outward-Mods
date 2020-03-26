@@ -33,7 +33,7 @@ namespace BetterTargeting
     {
         public static LockOnFix Instance;
 
-		public static readonly string ToggleTarget = "Toggle Target";
+		public static readonly string ToggleKey = "Toggle Target";
 
         internal void Awake()
         {
@@ -41,7 +41,7 @@ namespace BetterTargeting
 
             On.LocalCharacterControl.UpdateTargeting += UpdateTargetingHook;
 
-			AddAction(ToggleTarget, KeybindingsCategory.Actions, ControlType.Both, 5, InputActionType.Button);
+			AddAction(ToggleKey, KeybindingsCategory.Actions, ControlType.Both, 5, InputActionType.Button);
         }
 
 		internal void Update()
@@ -50,7 +50,7 @@ namespace BetterTargeting
 			{
 				var character = SplitScreenManager.Instance.LocalPlayers[i].AssignedCharacter;
 
-				if (character && m_playerInputManager[i].GetButtonDown(ToggleTarget))
+				if (character && m_playerInputManager[i].GetButtonDown(ToggleKey))
 				{
 					CustomToggleTarget(character);
 				}
@@ -86,8 +86,11 @@ namespace BetterTargeting
 					LockingPoint lockingPoint = null;
 					float num = float.MaxValue;
 
-					foreach (Collider collider in array.Where(x => x != character.TargetingSystem.LockingPoint.GetComponent<Collider>()))
+					// foreach collider that is not our current target
+					var currentCollider = character.TargetingSystem.LockingPoint.GetComponent<Collider>();
+					foreach (Collider collider in array.Where(x => x != currentCollider))
 					{
+						// this is my custom bit. Find the target with the smallest angle relative to our camera direction.
 						var angle = Vector2.Angle(cam, collider.transform.position);
 						if (angle < num || lockingPoint == null)
 						{
@@ -114,7 +117,7 @@ namespace BetterTargeting
 						character.TargetingSystem.LockingPointOffset = Vector2.zero;
 						character.CharacterCamera.LookAtTransform = character.TargetingSystem.LockingPointTrans;
 					}
-					else // otherwise we did not find a new target. Release the target.
+					else // otherwise we did not find a new target. Release the current target.
 					{
 						At.Call(character.CharacterControl as LocalCharacterControl, "ReleaseTarget", new object[0]);
 					}
@@ -122,6 +125,7 @@ namespace BetterTargeting
 			}
 		}
 
+		// a big hook where we pretty much just change one little bit of code.
         private void UpdateTargetingHook(On.LocalCharacterControl.orig_UpdateTargeting orig, LocalCharacterControl self)
         {
 			var m_character = At.GetValue(typeof(CharacterControl), self as CharacterControl, "m_character") as Character;
@@ -205,15 +209,18 @@ namespace BetterTargeting
 
 					if (Time.time - m_lastTargetSwitchTime > 0.3f)
 					{
-						Vector2 m_previousInput = (Vector2)At.GetValue(typeof(LocalCharacterControl), self, "m_previousInput");
-						float magnitude2 = (vector - m_previousInput).magnitude;
+						// this pesky little bastard is what auto switches targets. Bad.
 
-						if (magnitude2 >= 0.45f && magnitude > 0.6f)
-						{
-							//// this pesky little bastard is what auto switches targets. Bad.
-							//At.Call(self, "SwitchTarget", new object[] { vector });
-						}
-						else if (m_character.CurrentWeapon is ProjectileWeapon)
+						//Vector2 m_previousInput = (Vector2)At.GetValue(typeof(LocalCharacterControl), self, "m_previousInput");
+						//float magnitude2 = (vector - m_previousInput).magnitude;
+
+						//if (magnitude2 >= 0.45f && magnitude > 0.6f)
+						//{
+						//	At.Call(self, "SwitchTarget", new object[] { vector });
+						//}
+
+						// this is for bows
+						if (m_character.CurrentWeapon is ProjectileWeapon)
 						{
 							var m_timeOfLastAimOffset = (float)At.GetValue(typeof(LocalCharacterControl), self, "m_timeOfLastAimOffset");
 							var m_timeToNextAimOffset = (float)At.GetValue(typeof(LocalCharacterControl), self, "m_timeToNextAimOffset");
