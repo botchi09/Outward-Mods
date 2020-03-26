@@ -20,7 +20,7 @@ namespace CombatAndDodgeOverhaul
             Instance = this;
 
             // allow dodge cancelling
-            On.Character.DodgeInput_1 += DodgeHookFunc;
+            On.Character.DodgeInput_1 += DodgeHook;
             On.Character.HasHit += HasHitHook;
 
             // bag dodge stuff
@@ -52,9 +52,9 @@ namespace CombatAndDodgeOverhaul
         }
 
         // Dodge Cancelling Hook
-        private void DodgeHookFunc(On.Character.orig_DodgeInput_1 orig, Character self, Vector3 _direction)
+        private void DodgeHook(On.Character.orig_DodgeInput_1 orig, Character self, Vector3 _direction)
         {
-            // only use this hook for local players. return orig everything else, or if the setting is disabled.
+            // only use this hook for local players. return orig everything else
             if (self.IsAI || !self.IsPhotonPlayerLocal)
             {
                 orig(self, _direction);
@@ -62,11 +62,12 @@ namespace CombatAndDodgeOverhaul
             }
 
             float staminaCost = (float)OverhaulGlobal.config.GetValue(Settings.Custom_Dodge_Cost);
-            if (self.Inventory.SkillKnowledge.GetItemFromItemID(8205130))
+            if (self.Inventory.SkillKnowledge.GetItemFromItemID(8205130)) // feather dodge
             {
                 staminaCost *= 0.5f;
             }
 
+            // if dodge cancelling is NOT enabled, just do a normal dodge check.
             if (!(bool)OverhaulGlobal.config.GetValue(Settings.Dodge_Cancelling))
             {
                 if (At.GetValue(typeof(Character), self, "m_currentlyChargingAttack") is bool m_currentlyChargingAttack
@@ -87,7 +88,7 @@ namespace CombatAndDodgeOverhaul
                     }
                 }
             }
-            else
+            else // cancelling enabled. check if we should allow the dodge
             {
                 if (PlayerLastHitTimes.ContainsKey(self.UID) && Time.time - PlayerLastHitTimes[self.UID] < (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterHit))
                 {
@@ -115,7 +116,23 @@ namespace CombatAndDodgeOverhaul
                 {
                     SendDodge(self, staminaCost, _direction);
                 }
+
+                // send a fix to force m_dodging to false after a short delay.
+                // this is a fix for if the player dodges while airborne, the game wont reset their m_dodging to true when they land.
+                StartCoroutine(DodgeLateFix(self));
             }
+        }
+
+        private IEnumerator DodgeLateFix(Character character)
+        {
+            yield return new WaitForSeconds(0.25f);
+
+            while (!character.NextIsLocomotion)
+            {
+                yield return null;
+            }
+
+            At.SetValue(false, typeof(Character), character, "m_dodging");
         }
 
         private void SendDodge(Character self, float staminaCost, Vector3 _direction)

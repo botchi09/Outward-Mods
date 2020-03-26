@@ -140,7 +140,7 @@ namespace NecromancerSkills
                 // row 3
                 var row3 = necroTree.transform.Find("Row3");
                 CustomSkills.DestroyChildren(row3);
-                var transcendence = CustomSkills.CreateSkillSlot(row3, "Transcendence", 8890104, 600, frenzy, false, 2);
+                var transcendence = CustomSkills.CreateSkillSlot(row3, "Transcendence", 8890104, 600, frenzy, true, 2);
 
                 // row 4
                 var row4 = necroTree.transform.Find("Row4");

@@ -13,8 +13,8 @@ namespace MPLimitRemover
 {
     public class ModBase : PartialityMod
     {
-        public string ID = "MP Limit Remover";
-        public double version = 2.21;
+        public string ID = "Custom Player Limit";
+        public double version = 2.22;
 
         public ModBase()
         {
@@ -46,7 +46,7 @@ namespace MPLimitRemover
 
         internal void Awake()
         {
-            // fix pause menu
+            // fixes
             On.PauseMenu.Show += ShowPatch;
             On.PauseMenu.Update +=UpdatePatch;
             On.RestingMenu.UpdatePanel += RestingPanelPatch;
@@ -55,17 +55,6 @@ namespace MPLimitRemover
         internal void Start()
         {
             config = SetupConfig();
-
-            StartCoroutine(SetupCoroutine());
-        }
-
-        private IEnumerator SetupCoroutine()
-        {
-            while (!ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
             config.Register();
         }
 
@@ -114,6 +103,8 @@ namespace MPLimitRemover
             }
             else
             {
+                var m_sldOtherPlayerCursors = At.GetValue(typeof(RestingMenu), self, "m_sldOtherPlayerCursors") as Slider[];
+
                 for (int i = 0; i < m_otherPlayerUIDs.Count; i++)
                 {
                     Character characterFromPlayer = CharacterManager.Instance.GetCharacterFromPlayer(m_otherPlayerUIDs[i]);
@@ -128,9 +119,7 @@ namespace MPLimitRemover
                             flag = false;
                         }
 
-                        var m_sldOtherPlayerCursors = At.GetValue(typeof(RestingMenu), self, "m_sldOtherPlayerCursors") as Slider[];
-
-                        if (m_sldOtherPlayerCursors.Length - 1 <= i)
+                        if (m_sldOtherPlayerCursors.Length - 1 >= i)
                         {
                             m_sldOtherPlayerCursors[i].value = (float)characterFromPlayer.CharacterResting.TotalRestTime;
                         }

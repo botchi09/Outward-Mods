@@ -38,12 +38,11 @@ namespace OutwardExplorer
         public string inspectorJsonDump = "";
         public string currentJsonPath = @"Mods\Dump.json";
         public bool inspectingPrefab = false;
-        public Dictionary<string, KeyValuePair<FieldInfo, Type>> inspectorFields;
-        public Dictionary<string, string> inspectorEdits;
+        public Dictionary<string, KeyValuePair<FieldInfo, Type>> inspectorFields = new Dictionary<string, KeyValuePair<FieldInfo, Type>>();
+        public Dictionary<string, string> inspectorEdits = new Dictionary<string, string>();
 
         // quest helper
-        public Dictionary<string, QuestEventSignature> questEvents;
-        public List<SendQuestEventInteraction> questInteractions;
+        public Dictionary<string, QuestEventSignature> questEvents = new Dictionary<string, QuestEventSignature>();
 
         internal void Awake()
         {
@@ -51,6 +50,10 @@ namespace OutwardExplorer
             SceneManager.sceneLoaded += OnSceneChange;
 
             Application.logMessageReceived += Application_logMessageReceived;
+
+            On.QuestEventDictionary.Load += QuestLoad;
+            On.SendQuestEventInteraction.OnActivate += SendQuestInteractionHook;
+            On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += SendQuestEventHook;
         }
 
         internal void Start()
@@ -67,10 +70,6 @@ namespace OutwardExplorer
             // prefab explorer
             allPrefabs = new Dictionary<string, GameObject>();
 
-            //// misc tools
-            questEvents = new Dictionary<string, QuestEventSignature>();
-            questInteractions = new List<SendQuestEventInteraction>();
-
             ExplorerGUIHelper.Instance.miscEdits = new string[2];
             for (int i = 0; i < ExplorerGUIHelper.Instance.miscEdits.Length; i++)
                 ExplorerGUIHelper.Instance.miscEdits[i] = "";
@@ -80,11 +79,6 @@ namespace OutwardExplorer
             ExplorerGUIHelper.Instance.objectTransformEdits = new string[5]; // x/y/z/rot/scale
             for (int i = 0; i < ExplorerGUIHelper.Instance.objectTransformEdits.Length; i++)
                 ExplorerGUIHelper.Instance.objectTransformEdits[i] = "";
-
-            // some debug hooks for quests
-            //On.QuestEventDictionary.Load += QuestLoad;
-            On.SendQuestEventInteraction.OnActivate += SendQuestInteractionHook;
-            On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += SendQuestEventHook;
 
             OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
         }

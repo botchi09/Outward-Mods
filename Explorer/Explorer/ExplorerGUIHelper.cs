@@ -74,7 +74,7 @@ namespace OutwardExplorer
 
             NavButton("Explorer", 0);
             NavButton("Prefab Manager", 1);
-            //NavButton("Quest Events", 2);
+            NavButton("Quest Events", 2);
             // NavButton("Dumps", 3);
 
             GUILayout.EndHorizontal();
@@ -92,8 +92,8 @@ namespace OutwardExplorer
                 else if (guiPage == 1)
                     PrefabManagerPage();
 
-                //else if (guiPage == 2)
-                //    MiscPage();
+                else if (guiPage == 2)
+                    MiscPage();
             }
             catch
             {
@@ -418,100 +418,100 @@ namespace OutwardExplorer
         public Vector2 questScroll2;
         public string stackEdit = "";
 
-        //private void MiscPage()
-        //{
-        //    // page 4 - other
+        private void MiscPage()
+        {
+            // page 4 - other
 
-        //    // dictionary (all events)
-        //    questScroll1 = GUILayout.BeginScrollView(questScroll1, GUI.skin.box, GUILayout.Height(300));
+            // dictionary (all events)
+            questScroll1 = GUILayout.BeginScrollView(questScroll1, GUI.skin.box, GUILayout.Height(300));
 
-        //    GUILayout.BeginHorizontal();
-        //    GUILayout.Label("Search:", GUILayout.Width(80));
-        //    miscEdits[0] = GUILayout.TextField(miscEdits[0], GUILayout.Width(250));
-        //    string s = miscEdits[0];
-        //    GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search:", GUILayout.Width(80));
+            miscEdits[0] = GUILayout.TextField(miscEdits[0], GUILayout.Width(250));
+            string s = miscEdits[0];
+            GUILayout.EndHorizontal();
 
-        //    if (currentSig != null)
-        //    {
-        //        if (GUILayout.Button("Back", GUILayout.Width(60)))
-        //        {
-        //            currentSig = null;
-        //        }
-        //        if (currentSig != null)
-        //        {
-        //            GUILayout.Label("Name: " + currentSig.EventName);
-        //            GUILayout.Label("Description: " + currentSig.Description);
+            if (currentSig != null)
+            {
+                if (GUILayout.Button("Back", GUILayout.Width(60)))
+                {
+                    currentSig = null;
+                }
+                if (currentSig != null)
+                {
+                    GUILayout.Label("Name: " + currentSig.EventName);
+                    GUILayout.Label("Description: " + currentSig.Description);
 
-        //            GUILayout.Space(20);
+                    GUILayout.Space(20);
 
-        //            if (stackEdit == "") { stackEdit = "1"; }
+                    if (stackEdit == "") { stackEdit = "1"; }
 
-        //            GUILayout.BeginHorizontal();
-        //            GUILayout.Label("Stack value: ", GUILayout.Width(100));
-        //            stackEdit = GUILayout.TextField(stackEdit, GUILayout.Width(50));
-        //            GUILayout.EndHorizontal();
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Stack value: ", GUILayout.Width(100));
+                    stackEdit = GUILayout.TextField(stackEdit, GUILayout.Width(50));
+                    GUILayout.EndHorizontal();
 
-        //            int stackValue = 1;
-        //            if (int.TryParse(stackEdit, out int i)) { stackValue = i; }
+                    int stackValue = 1;
+                    if (int.TryParse(stackEdit, out int i)) { stackValue = i; }
 
-        //            GUILayout.BeginHorizontal();
-        //            if (GUILayout.Button("Try add event to local player"))
-        //            {
-        //                if (CharacterManager.Instance != null && CharacterManager.Instance.GetFirstLocalCharacter() != null)
-        //                {
-        //                    QuestEventManager.Instance.AddEvent(currentSig, stackValue);
-        //                }
-        //            }
+                    GUILayout.BeginHorizontal();
+                    if (GUILayout.Button("Try add event to local player"))
+                    {
+                        if (CharacterManager.Instance != null && CharacterManager.Instance.GetFirstLocalCharacter() != null)
+                        {
+                            QuestEventManager.Instance.AddEvent(currentSig, stackValue);
+                        }
+                    }
 
-        //            if (GUILayout.Button("Try remove event"))
-        //            {
-        //                if (CharacterManager.Instance != null && CharacterManager.Instance.GetFirstLocalCharacter() != null)
-        //                {
-        //                    QuestEventManager.Instance.RemoveEvent(currentSig.EventUID);
-        //                }
-        //            }
-        //            GUILayout.EndHorizontal();
-        //        }
-        //    }
-        //    else if (s != "")
-        //    {
-        //        if (ExplorerScript.Instance.questEvents != null && ExplorerScript.Instance.questEvents.Count > 0)
-        //        {
-        //            int max = 0;
-        //            foreach (KeyValuePair<string, QuestEventSignature> entry in ExplorerScript.Instance.questEvents.Where(x => x.Key.ToLower().Contains(s.ToLower())))
-        //            {
-        //                max++;
+                    if (GUILayout.Button("Try remove event"))
+                    {
+                        if (CharacterManager.Instance != null && CharacterManager.Instance.GetFirstLocalCharacter() != null)
+                        {
+                            QuestEventManager.Instance.RemoveEvent(currentSig.EventUID);
+                        }
+                    }
+                    GUILayout.EndHorizontal();
+                }
+            }
+            else if (s != "")
+            {
+                if (ExplorerScript.Instance.questEvents != null && ExplorerScript.Instance.questEvents.Count > 0)
+                {
+                    int max = 0;
+                    foreach (KeyValuePair<string, QuestEventSignature> entry in ExplorerScript.Instance.questEvents.Where(x => x.Key.ToLower().Contains(s.ToLower())))
+                    {
+                        max++;
 
-        //                if (max > 250)
-        //                    break;
+                        if (max > 250)
+                            break;
 
-        //                GUILayout.BeginHorizontal();
-        //                GUILayout.Label(entry.Value.EventName);
-        //                if (GUILayout.Button("Inspect"))
-        //                {
-        //                    currentSig = entry.Value;
-        //                }
-        //                GUILayout.EndHorizontal();
-        //            }
-        //        }
-                
-        //    }
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label(entry.Value.EventName);
+                        if (GUILayout.Button("Inspect"))
+                        {
+                            currentSig = entry.Value;
+                        }
+                        GUILayout.EndHorizontal();
+                    }
+                }
 
-        //    GUILayout.EndScrollView();
+            }
 
-        //    // ------------------- other misc ---------------------- //
+            GUILayout.EndScrollView();
+
+            // ------------------- other misc ---------------------- //
 
 
-        //    // recipes
+            // recipes
 
-        //    //if (GUILayout.Button("Learn all recipes"))
-        //    //{
-        //    //    LearnAllRecipes();
-        //    //}
+            //if (GUILayout.Button("Learn all recipes"))
+            //{
+            //    LearnAllRecipes();
+            //}
 
-        //    //GUILayout.Space(20);
+            //GUILayout.Space(20);
 
-        //}
+        }
 
         // -------------------------- OTHER FUNCTIONS ------------------------------ //
 

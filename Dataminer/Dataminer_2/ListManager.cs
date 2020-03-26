@@ -18,8 +18,8 @@ namespace Dataminer
         // Tag Sources
         public static Dictionary<string, List<string>> TagSources = new Dictionary<string, List<string>>();
 
-        // Item Loot Sources (spawns and loot containers)
-        public static Dictionary<string, ItemSource> ItemLootSources = new Dictionary<string, ItemSource>();
+        //// Item Loot Sources (spawns and loot containers)
+        //public static Dictionary<string, ItemSource> ItemLootSources = new Dictionary<string, ItemSource>();
 
         // Container Summaries
         public static Dictionary<string, ContainerSummary> ContainerSummaries = new Dictionary<string, ContainerSummary>();
@@ -72,14 +72,14 @@ namespace Dataminer
             }
         }
 
-        public static void AddContainerSummary(string name, string location, List<string> dropTables)
+        public static void AddContainerSummary(string name, string location, List<string> dropTables, string scene)
         {
             if (ContainerSummaries.ContainsKey(name))
             {
                 var summary = ContainerSummaries[name];
 
                 bool addLocation = true;
-                foreach (var loc in summary.Locations_Found)
+                foreach (var loc in summary.All_Locations)
                 {
                     if (loc.Name == location)
                     {
@@ -90,19 +90,11 @@ namespace Dataminer
                 }
                 if (addLocation)
                 {
-                    summary.Locations_Found.Add(new SceneSummary.QuantityHolder
+                    summary.All_Locations.Add(new SceneSummary.QuantityHolder
                     {
                         Name = location,
                         Quantity = 1
                     });
-                }
-
-                foreach (string table in dropTables)
-                {
-                    if (!summary.All_DropTables.Contains(table))
-                    {
-                        summary.All_DropTables.Add(table);
-                    }
                 }
             }
             else
@@ -110,7 +102,7 @@ namespace Dataminer
                 ContainerSummaries.Add(name, new ContainerSummary
                 {
                     Name = name,
-                    Locations_Found = new List<SceneSummary.QuantityHolder>
+                    All_Locations = new List<SceneSummary.QuantityHolder>
                     {
                         new SceneSummary.QuantityHolder
                         {
@@ -118,8 +110,35 @@ namespace Dataminer
                             Quantity = 1
                         }
                     },
-                    All_DropTables = dropTables ?? new List<string>()
+                    DropTables = new List<ContainerDroptableSummary>()
                 });
+            }
+            foreach (var table in dropTables)
+            {
+                bool addNew = true;
+                foreach (var holder in ContainerSummaries[name].DropTables)
+                {
+                    if (holder.DropTableName == table)
+                    {
+                        addNew = false;
+                        if (!holder.Locations.Contains(scene))
+                        {
+                            holder.Locations.Add(scene);
+                        }
+                        break;
+                    }
+                }
+                if (addNew)
+                {
+                    ContainerSummaries[name].DropTables.Add(new ContainerDroptableSummary
+                    {
+                        DropTableName = table,
+                        Locations = new List<string>
+                        {
+                            scene
+                        }
+                    });
+                }
             }
         }
 
@@ -151,16 +170,16 @@ namespace Dataminer
             }
             File.WriteAllLines(Folders.Lists + "/TagSources.txt", TagTable.ToArray());
 
-            // ========== Item Sources ==========
-            List<string> ItemSourcesTable = new List<string>();
-            foreach (var entry in ItemLootSources)
-            {
-                string dir = Folders.Lists + "/ItemSources";
-                Dataminer.SerializeXML(dir, entry.Key, entry.Value, typeof(ItemSource));
+            //// ========== Item Sources ==========
+            //List<string> ItemSourcesTable = new List<string>();
+            //foreach (var entry in ItemLootSources)
+            //{
+            //    string dir = Folders.Lists + "/ItemSources";
+            //    Dataminer.SerializeXML(dir, entry.Key, entry.Value, typeof(ItemSource));
 
-                ItemSourcesTable.Add(entry.Key + "	" + entry.Value.ItemName);
-            }
-            File.WriteAllLines(Folders.Lists + "/ItemSources.txt", ItemSourcesTable.ToArray());
+            //    ItemSourcesTable.Add(entry.Key + "	" + entry.Value.ItemName);
+            //}
+            //File.WriteAllLines(Folders.Lists + "/ItemSources.txt", ItemSourcesTable.ToArray());
 
             // ========== Container Sources ==========
             foreach (var entry in ContainerSummaries)

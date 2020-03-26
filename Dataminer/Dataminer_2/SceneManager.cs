@@ -194,7 +194,11 @@ namespace Dataminer
                     {
                         var lootContainer = LootContainerHolder.ParseLootContainer(item as TreasureChest);
                         AddQuantity(lootContainer.Name, summary.Loot_Containers);
-                        ListManager.AddContainerSummary(lootContainer.Name, ListManager.GetSceneSummaryKey(item.transform.position), lootContainer.DropTables);
+
+                        ListManager.AddContainerSummary(lootContainer.Name, 
+                            ListManager.GetSceneSummaryKey(item.transform.position), 
+                            lootContainer.DropTables, 
+                            Instance.GetCurrentLocation(item.transform.position));
 
                         if (!summary.UniqueContainerList.Contains(lootContainer.Name + "_" + lootContainer.UID))
                             summary.UniqueContainerList.Add(lootContainer.Name + "_" + lootContainer.UID);
@@ -203,7 +207,10 @@ namespace Dataminer
                     {
                         var gatherableHolder = GatherableHolder.ParseGatherable(item as Gatherable);
                         AddQuantity(gatherableHolder.Name, summary.Gatherables);
-                        ListManager.AddContainerSummary(gatherableHolder.Name, ListManager.GetSceneSummaryKey(item.transform.position), gatherableHolder.DropTables);
+                        ListManager.AddContainerSummary(gatherableHolder.Name, 
+                            ListManager.GetSceneSummaryKey(item.transform.position), 
+                            gatherableHolder.DropTables,
+                            Instance.GetCurrentLocation(item.transform.position));
                     }
                     else
                     {
@@ -238,7 +245,7 @@ namespace Dataminer
                         });
                     }
 
-                    AddItemSpawnSource(item.ItemID, item.Name, item.transform.position);
+                    //AddItemSpawnSource(item.ItemID, item.Name, item.transform.position);
                 }
             }
         }
@@ -320,27 +327,27 @@ namespace Dataminer
         #endregion
 
         #region SMALL HELPERS
-        // Small helper functions
-        private static void AddItemSpawnSource(int item_ID, string item_Name, Vector3 pos)
-        {
-            if (ListManager.ItemLootSources.ContainsKey(item_ID.ToString()))
-            {
-                ListManager.ItemLootSources[item_ID.ToString()].Spawn_Sources.Add(ListManager.GetSceneSummaryKey(pos));
-            }
-            else
-            {
-                ListManager.ItemLootSources.Add(item_ID.ToString(), new ItemSource
-                {
-                    ItemID = item_ID,
-                    ItemName = item_Name,
-                    Container_Sources = new List<string>(),
-                    Spawn_Sources = new List<string>
-                    {
-                        ListManager.GetSceneSummaryKey(pos)
-                    }
-                });
-            }
-        }
+        //// Small helper functions
+        //private static void AddItemSpawnSource(int item_ID, string item_Name, Vector3 pos)
+        //{
+        //    if (ListManager.ItemLootSources.ContainsKey(item_ID.ToString()))
+        //    {
+        //        ListManager.ItemLootSources[item_ID.ToString()].Spawn_Sources.Add(ListManager.GetSceneSummaryKey(pos));
+        //    }
+        //    else
+        //    {
+        //        ListManager.ItemLootSources.Add(item_ID.ToString(), new ItemSource
+        //        {
+        //            ItemID = item_ID,
+        //            ItemName = item_Name,
+        //            Container_Sources = new List<string>(),
+        //            Spawn_Sources = new List<string>
+        //            {
+        //                ListManager.GetSceneSummaryKey(pos)
+        //            }
+        //        });
+        //    }
+        //}
 
         private static void AddQuantity(string name, List<SceneSummary.QuantityHolder> list)
         {

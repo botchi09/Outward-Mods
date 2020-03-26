@@ -96,12 +96,12 @@ namespace Dataminer
                                     Dice_Range = dropChance.MaxDiceRollValue - dropChance.MinDiceRollValue
                                 });
 
-                                if (!string.IsNullOrEmpty(containerName))
-                                {
-                                    int id = dropChance.DroppedItem.ItemID;
-                                    var pos = dropper.transform.position;
-                                    AddItemSource(id, dropChance.DroppedItem.Name, containerName, pos);
-                                }
+                                //if (!string.IsNullOrEmpty(containerName))
+                                //{
+                                //    int id = dropChance.DroppedItem.ItemID;
+                                //    var pos = dropper.transform.position;
+                                //    AddItemSource(id, dropChance.DroppedItem.Name, containerName, pos);
+                                //}
                             }
                         }
                     }
@@ -146,33 +146,33 @@ namespace Dataminer
                     Max_Quantity = max_Qty
                 });
 
-                if (!string.IsNullOrEmpty(containerName))
-                {
-                    AddItemSource(item_ID, item_Name, containerName, pos);
-                }
+                //if (!string.IsNullOrEmpty(containerName))
+                //{
+                //    AddItemSource(item_ID, item_Name, containerName, pos);
+                //}
             }
         }
 
-        private static void AddItemSource(int item_ID, string item_Name, string containerName, Vector3 pos)
-        {
-            if (ListManager.ItemLootSources.ContainsKey(item_ID.ToString()))
-            {
-                ListManager.ItemLootSources[item_ID.ToString()].Container_Sources.Add(containerName + " (" + ListManager.GetSceneSummaryKey(pos) + ")");
-            }
-            else
-            {
-                ListManager.ItemLootSources.Add(item_ID.ToString(), new ItemSource
-                {
-                    ItemID = item_ID,
-                    ItemName = item_Name,
-                    Container_Sources = new List<string>
-                        {
-                            containerName + " (" + ListManager.GetSceneSummaryKey(pos) + ")"
-                        },
-                    Spawn_Sources = new List<string>()
-                });
-            }
-        }
+        //private static void AddItemSource(int item_ID, string item_Name, string containerName, Vector3 pos)
+        //{
+        //    if (ListManager.ItemLootSources.ContainsKey(item_ID.ToString()))
+        //    {
+        //        ListManager.ItemLootSources[item_ID.ToString()].Container_Sources.Add(containerName + " (" + ListManager.GetSceneSummaryKey(pos) + ")");
+        //    }
+        //    else
+        //    {
+        //        ListManager.ItemLootSources.Add(item_ID.ToString(), new ItemSource
+        //        {
+        //            ItemID = item_ID,
+        //            ItemName = item_Name,
+        //            Container_Sources = new List<string>
+        //                {
+        //                    containerName + " (" + ListManager.GetSceneSummaryKey(pos) + ")"
+        //                },
+        //            Spawn_Sources = new List<string>()
+        //        });
+        //    }
+        //}
 
         public class DropGeneratorHolder
         {

@@ -7,7 +7,6 @@ namespace Dataminer
 {
     public class WeaponDamageHolder : PunctualDamageHolder
     {
-        // todo
         public string OverrideType;
 
         public float Damage_Multiplier;
@@ -17,6 +16,9 @@ namespace Dataminer
         public float Impact_Multiplier;
         public float Impact_Multiplier_Kback;
         public float Impact_Multiplier_Kdown;
+
+        public float DurabilityLoss;
+        public float DurabilityLossPercent;
 
         public static WeaponDamageHolder ParseWeaponDamage(WeaponDamage weaponDamage, PunctualDamageHolder punctualDamageHolder)
         {
@@ -28,7 +30,9 @@ namespace Dataminer
                 Damage_Multiplier_Kdown = weaponDamage.WeaponDamageMultKDown,
                 Impact_Multiplier = weaponDamage.WeaponKnockbackMult,
                 Impact_Multiplier_Kback = weaponDamage.WeaponKnockbackMultKBack,
-                Impact_Multiplier_Kdown = weaponDamage.WeaponKnockbackMultKDown
+                Impact_Multiplier_Kdown = weaponDamage.WeaponKnockbackMultKDown,
+                DurabilityLoss = weaponDamage.WeaponDurabilityLoss,
+                DurabilityLossPercent = weaponDamage.WeaponDurabilityLossPercent
             };
 
             At.InheritBaseValues(weaponDamageHolder, punctualDamageHolder);

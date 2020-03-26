@@ -225,12 +225,18 @@ namespace MixedGrip
         // hook for swapping 2H weapons to 1H on equip item, if the logic calls for it.
         private void EquipItemHook(On.CharacterEquipment.orig_EquipItem_1 orig, CharacterEquipment self, Equipment _itemToEquip, bool _playAnim = false)
         {
-            if (!(bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip)) { orig(self, _itemToEquip, _playAnim); return; }
-
             Character c = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
 
+            if (!(bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip)
+                || (_itemToEquip is Weapon weapon && (weapon.Type == Weapon.WeaponType.Bow || weapon.IsSummonedEquipment))
+                || (c.CurrentWeapon != null && (c.CurrentWeapon.Type == Weapon.WeaponType.Bow || c.CurrentWeapon.IsSummonedEquipment)))
+            { 
+                orig(self, _itemToEquip, _playAnim); 
+                return; 
+            }
+
             bool anySwap = false;
-            if (!c.IsAI && ((int)_itemToEquip.EquipSlot == 5 || (int)_itemToEquip.EquipSlot == 6) && !_itemToEquip.IsSummonedEquipment && !_itemToEquip.TwoHandedLeft)
+            if (!c.IsAI && ((int)_itemToEquip.EquipSlot == 5 || (int)_itemToEquip.EquipSlot == 6))
             {
                 if (_itemToEquip.TwoHanded && c.LeftHandEquipment != null)
                 {

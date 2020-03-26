@@ -9,7 +9,6 @@ using System.Reflection;
 using UnityEngine.UI;
 //using SinAPI;
 using System.IO;
-using static CustomKeybindings;
 
 namespace PvP
 {
@@ -62,7 +61,7 @@ namespace PvP
         public Settings settings = new Settings();
         private static readonly string savePath = @"Mods\PvP.json";
 
-        public string MenuKey = "PvP Menu";
+        private static string MenuKey = "PvP Menu";
 
         public GameModes CurrentGame = GameModes.NONE;
         public float GameStartTime = 0f;
@@ -78,6 +77,10 @@ namespace PvP
         internal void Awake()
         {
             Instance = this;
+
+            Debug.Log("adding custom PvP keybinding");
+
+            CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5);
         }
 
         internal void Start()
@@ -91,8 +94,6 @@ namespace PvP
             gameObject.AddComponent<PlayerManager>();
             gameObject.AddComponent<BattleRoyale>();
             gameObject.AddComponent<DeathMatch>();
-
-            AddAction(MenuKey, KeybindingsCategory.Menus, ControlType.Both, 5, InputActionType.Button);
 
             // Custom Gameplay hooks
             On.InteractionRevive.OnActivate += DisableReviveInteractionHook;
@@ -119,7 +120,7 @@ namespace PvP
             // handle player input 
             foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.IsLocalPlayer))
             {
-                if (m_playerInputManager[ps.PlayerID].GetButtonDown(MenuKey))
+                if (CustomKeybindings.m_playerInputManager[ps.PlayerID].GetButtonDown(MenuKey))
                 {
                     PvPGUI.Instance.showGui = !PvPGUI.Instance.showGui;
                 }

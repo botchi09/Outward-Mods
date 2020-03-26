@@ -9,6 +9,7 @@ using NodeCanvas.Framework;
 using NodeCanvas.Tasks;
 using NodeCanvas.Tasks.Actions;
 using System.IO;
+using System.Reflection;
 using SharedModConfig;
 
 namespace SharedCoopRewards
