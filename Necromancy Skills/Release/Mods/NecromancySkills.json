@@ -4,6 +4,10 @@
     "Summon_MaxSummons_NoArmyOfDeath": 1,
     "Summon_MaxSummons_WithArmyOfDeath": 3,
     "ShootTendrils_Heal_NoPlagueAura": 2.5,
+	"Summon_MaxHealth": 75,
+	"Summon_HealthLoss": -0.75,
+	"StrongSummon_MaxHealth": 250,
+	"StrongSummon_HealthLoss": -2.5
     "ShootTendrils_Damage_NoPlagueAura": [
         {
             "Type": 2,

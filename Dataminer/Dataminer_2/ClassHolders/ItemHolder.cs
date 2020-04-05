@@ -17,6 +17,10 @@ namespace Dataminer
         public string Description;
         public int LegacyItemID;
 
+        //public List<string> VisualPrefabTextures = new List<string>();
+        //public List<string> SpecialVisualPrefabTextures = new List<string>();
+        //public List<string> SpecialFemaleVisualPrefabTextures = new List<string>();
+
         public ItemStatsHolder StatsHolder;
 
         public List<string> Tags = new List<string>();
@@ -35,6 +39,40 @@ namespace Dataminer
                 ItemID = item.ItemID,
                 LegacyItemID = item.LegacyItemID,
             };
+
+            // ====== parse visual prefab textures =====
+
+            //if (item.VisualPrefab != null)
+            //{
+            //    if (item.VisualPrefab.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer skinnedMesh)
+            //    {
+            //        ParsePrefabTextures(skinnedMesh.material, itemHolder.VisualPrefabTextures);
+            //    }
+            //    else
+            //    {
+            //        foreach (Transform child in item.VisualPrefab)
+            //        {
+            //            if (child.GetComponent<BoxCollider>() && child.GetComponent<MeshRenderer>() is MeshRenderer mesh)
+            //            {
+            //                ParsePrefabTextures(mesh.material, itemHolder.VisualPrefabTextures);
+
+            //                break;
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if (item.SpecialVisualPrefabDefault != null && item.SpecialVisualPrefabDefault.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer specialMesh)
+            //{
+            //    ParsePrefabTextures(specialMesh.material, itemHolder.SpecialVisualPrefabTextures);
+            //}
+
+            //if (item.SpecialVisualPrefabFemale != null && item.SpecialVisualPrefabFemale.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer femaleMesh)
+            //{
+            //    ParsePrefabTextures(femaleMesh.material, itemHolder.SpecialFemaleVisualPrefabTextures);
+            //}
+
+            // == parse item type ==
 
             if (item.GetType() != typeof(Item))
             {
@@ -95,6 +133,34 @@ namespace Dataminer
             else
             {
                 return itemHolder;
+            }
+        }
+
+        private static void ParsePrefabTextures(Material mat, List<string> list)
+        {
+            if (mat.mainTexture != null)
+            {
+                list.Add(mat.mainTexture.name);
+            }
+
+            if (mat.GetTexture("_NormTex") is Texture norm)
+            {
+                list.Add(norm.name);
+            }
+
+            if (mat.GetTexture("_GenTex") is Texture gen)
+            {
+                list.Add(gen.name);
+            }
+
+            if (mat.GetTexture("_SpecColorTex") is Texture speccolor)
+            {
+                list.Add(speccolor.name);
+            }
+
+            if (mat.GetTexture("_EmissionTex") is Texture emission)
+            {
+                list.Add(emission.name);
             }
         }
 

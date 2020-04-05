@@ -25,7 +25,7 @@ namespace NecromancerSkills
             tendrils.MobileCastMovementMult = 0.3f;
 
             // clear existing effects
-            SideLoader.CustomSkills.DestroyChildren(tendrils.transform);
+            SideLoader.CustomItems.DestroyChildren(tendrils.transform);
 
             // ============= normal effects =============== //
 

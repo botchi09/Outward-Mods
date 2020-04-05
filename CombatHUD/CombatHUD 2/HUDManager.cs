@@ -26,7 +26,7 @@ namespace CombatHUD
             config = SetupConfig();
             config.Register();
 
-            StartCoroutine(SetupCoroutine());
+            SL.OnPacksLoaded += Setup;
         }
     
         internal void Update()
@@ -68,16 +68,19 @@ namespace CombatHUD
             }
         }
 
-        private IEnumerator SetupCoroutine()
+        private void Setup()
         {
-            while (SL.Instance == null || !SL.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
             Debug.Log(ModBase.ModName + " started, version: " + ModBase.ModVersion);
 
-            var bundle = SL.Instance.LoadedBundles["combathud"];
+            var pack = SL.Packs["CombatHUD"];
+
+            if (pack == null)
+            {
+                Debug.LogError("Could not find folder Mods/SideLoader/CombatHUD! Please make sure it exists!");
+                return;
+            }
+
+            var bundle = pack.AssetBundles["combathud"];
 
             if (bundle.LoadAsset("HUDCanvas") is GameObject canvasAsset)
             {

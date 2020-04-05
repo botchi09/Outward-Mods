@@ -411,13 +411,13 @@ namespace Dataminer
         // disable AI aggression
         private void AIEnemyDetectionHook(On.AICEnemyDetection.orig_Update orig, AICEnemyDetection self)
         {
-            if (!m_parsing)
-                orig(self);
+            //if (!m_parsing)
+            //    orig(self);
         }
         private void AISwitchStateHook(On.AIESwitchState.orig_SwitchState orig, AIESwitchState self)
         {
-            if (!m_parsing)
-                orig(self);
+            //if (!m_parsing)
+            //    orig(self);
         }
         #endregion
     }

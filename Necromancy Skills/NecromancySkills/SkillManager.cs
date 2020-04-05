@@ -17,27 +17,22 @@ namespace NecromancerSkills
         public static SkillManager Instance;
 
         public static SkillSchool NecromancyTree;
-        private bool doneInit = false;
 
-        internal void Update()
-        {
-            if (!doneInit && CharacterManager.Instance != null && SL.Instance.InitDone > 0)
-            {
-                Init();
-                doneInit = true;
-            }
-        }
-
-        public void Init()
+        internal void Awake()
         {
             Instance = this;
 
-            SetupSkills(); // setup the actual skills
-
-            SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)
+            SL.OnPacksLoaded += Setup;
 
             // temporary hook
             On.Skill.HasBaseRequirements += ActivationConditionHook;
+        }
+
+        private void Setup()
+        {
+            SetupSkills(); // setup the actual skills
+
+            SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)
         }
 
         // hooks. temporary fixes for custom activation conditions, a better implementation would be creating a custom SummonSkill : Skill class.
@@ -80,14 +75,16 @@ namespace NecromancerSkills
         #region Passive Skills
         private void SetupPassives()
         {
-            // =============== bonus stats vital attunement ===============
-            var vitalAttunement = ResourcesPrefabManager.Instance.GetItemPrefab(8890101) as PassiveSkill;
-            var affectHealth = vitalAttunement.GetComponentInChildren<AffectStat>();
-            affectHealth.Value = ModBase.settings.VitalAttunement_HealthBonus;
-            var affectStamina = affectHealth.gameObject.AddComponent<AffectStat>();
-            affectStamina.AffectedStat = new TagSourceSelector(TagSourceManager.Instance.GetTag("79"));
-            affectStamina.Value = ModBase.settings.VitalAttunement_StaminaBonus;
-            affectStamina.IsModifier = false;
+            // Vital Attunement is now set up completely by SideLoader :)
+
+            //// =============== bonus stats vital attunement ===============
+            //var vitalAttunement = ResourcesPrefabManager.Instance.GetItemPrefab(8890101) as PassiveSkill;
+            //var affectHealth = vitalAttunement.GetComponentInChildren<AffectStat>();
+            //affectHealth.Value = ModBase.settings.VitalAttunement_HealthBonus;
+            //var affectStamina = affectHealth.gameObject.AddComponent<AffectStat>();
+            //affectStamina.AffectedStat = new TagSourceSelector(TagSourceManager.Instance.GetTag("79"));
+            //affectStamina.Value = ModBase.settings.VitalAttunement_StaminaBonus;
+            //affectStamina.IsModifier = false;
 
             // =============== transendence ===============
 
@@ -104,11 +101,11 @@ namespace NecromancerSkills
             passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "102" });
 
 
-            // ======== strong resurrect (dont need any real setup, handled by the Summon skill itself)
+            // ======== strong resurrect (no longer need any setup here, handled by the Summon Skill itself)
 
-            var strongRes = ResourcesPrefabManager.Instance.GetItemPrefab(8890108) as PassiveSkill;
-            passiveTransform = strongRes.transform.Find("Passive");
-            DestroyImmediate(passiveTransform.GetComponent<AffectStat>());
+            //var strongRes = ResourcesPrefabManager.Instance.GetItemPrefab(8890108) as PassiveSkill;
+            //passiveTransform = strongRes.transform.Find("Passive");
+            //DestroyImmediate(passiveTransform.GetComponent<AffectStat>());
         }
         #endregion
 
@@ -127,24 +124,24 @@ namespace NecromancerSkills
 
                 // row 1
                 var row1 = necroTree.transform.Find("Row1");
-                CustomSkills.DestroyChildren(row1.transform);
+                CustomItems.DestroyChildren(row1.transform);
                 var resurrect = CustomSkills.CreateSkillSlot(row1, "Resurrect", 8890103, 50, null, false, 2);
                 var statboost = CustomSkills.CreateSkillSlot(row1, "PassiveStatBoost", 8890101, 50, null, false, 3);
 
                 // row 2
                 var row2 = necroTree.transform.Find("Row2");
-                CustomSkills.DestroyChildren(row2.transform);
+                CustomItems.DestroyChildren(row2.transform);
                 var frenzy = CustomSkills.CreateSkillSlot(row2, "Frenzy", 8890105, 100, resurrect, false, 2);
                 CustomSkills.CreateSkillSlot(row2, "Tendrils", 8890100, 100, statboost, false, 3);
 
                 // row 3
                 var row3 = necroTree.transform.Find("Row3");
-                CustomSkills.DestroyChildren(row3);
+                CustomItems.DestroyChildren(row3);
                 var transcendence = CustomSkills.CreateSkillSlot(row3, "Transcendence", 8890104, 600, frenzy, true, 2);
 
                 // row 4
                 var row4 = necroTree.transform.Find("Row4");
-                CustomSkills.DestroyChildren(row4);
+                CustomItems.DestroyChildren(row4);
                 var detonate = CustomSkills.CreateSkillSlot(row4, "Detonate", 8890106, 600, transcendence, false, 2);
 
                 // row 5

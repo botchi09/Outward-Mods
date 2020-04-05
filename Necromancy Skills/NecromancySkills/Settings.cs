@@ -12,6 +12,10 @@ namespace NecromancerSkills
         public bool Summon_BurnsHealth = false;
         public int Summon_MaxSummons_NoArmyOfDeath = 1;
         public int Summon_MaxSummons_WithArmyOfDeath = 3;
+        public float Summon_MaxHealth = 75f;
+        public float Summon_HealthLoss = -0.75f;
+        public float StrongSummon_MaxHealth = 250;
+        public float StrongSummon_HealthLoss = 2.5f;
 
         // Shoot Tendrils
         public float ShootTendrils_Heal_NoPlagueAura = 2.5f;

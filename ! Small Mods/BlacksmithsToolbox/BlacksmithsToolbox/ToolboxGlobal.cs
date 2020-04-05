@@ -12,16 +12,12 @@ namespace BlacksmithsToolbox
 {
     public class ModBase : PartialityMod
     {
-        public static ToolboxGlobal Instance;
-
-        public GameObject obj;
-        public string ID = "ArmorToolbox";
-        public double version = 1.2;
+        public double version = 1.4;
 
         public ModBase()
         {
             this.author = "Sinai";
-            this.ModID = ID;
+            this.ModID = "BlacksmithsToolbox";
             this.Version = version.ToString("0.00");
         }
 
@@ -29,17 +25,10 @@ namespace BlacksmithsToolbox
         {
             base.OnEnable();
 
-            obj = new GameObject(ID);
+            var obj = new GameObject("BlacksmithsToolbox");
             GameObject.DontDestroyOnLoad(obj);
 
-            Instance = obj.AddComponent<ToolboxGlobal>();
-            Instance._base = this;
-            Instance.Init();
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
+            obj.AddComponent<ToolboxGlobal>();
         }
     }
 
@@ -54,21 +43,18 @@ namespace BlacksmithsToolbox
     {
         public ModBase _base;
 
-        private bool SetupDone;
         public static Settings settings = new Settings();
         private static readonly string savePath = @"Mods\BlacksmithsToolbox.json";
 
         public static readonly int Toolbox_ID = 5850750;
         public Item ToolboxPrefab;
 
-        private string CurrentSceneName = "";
-        private bool SceneChangeFlag = false;
-
-        public void Init()
+        internal void Awake()
         {
             LoadSettings();
 
-            //On.Item.Use += OnItemUse;
+            SL.OnPacksLoaded += Setup;
+            SL.OnSceneLoaded += OnSceneChange;
         }
 
         private void LoadSettings()
@@ -83,71 +69,38 @@ namespace BlacksmithsToolbox
             }
         }
 
-        internal void Update()
+        private void Setup()
         {
-            // patch once
-            if (!SetupDone && SL.Instance.InitDone > 0)
-            {
-                SetupToolboxItem();
-                SetupDone = true;
-            }
+            SetupToolboxItem();
+        }
 
-            // check for scene change flag
-            if (CurrentSceneName != SceneManagerHelper.ActiveSceneName)
-            {
-                CurrentSceneName = SceneManagerHelper.ActiveSceneName;
-                SceneChangeFlag = true;
-            }
-
-            // patch on scene change, after gameplay resumes
-            if (SceneChangeFlag && !NetworkLevelLoader.Instance.IsGameplayPaused && Global.Lobby.PlayersInLobbyCount > 0)
-            {
-                SetupBlacksmith();
-
-                SceneChangeFlag = false;
-            }
+        private void OnSceneChange()
+        {
+            SetupBlacksmith();
         }
 
         // Set up the Toolbox item prefab
 
         private void SetupToolboxItem()
         {
-            CustomItem ArmorToolboxTemplate = new CustomItem
+            var item = ResourcesPrefabManager.Instance.GetItemPrefab(Toolbox_ID);
+
+            var desc = item.Description;
+            desc = desc.Replace("%COST%", settings.Iron_Scrap_Cost.ToString());
+            CustomItems.SetDescription(item, desc);
+
+            var stats = new SL_ItemStats()
             {
-                CloneTarget_ItemID = 6600227, // vendavel hospitality ingot
-                New_ItemID = Toolbox_ID,
-                Name = "Blacksmith's Toolbox",
-                Description = string.Format("Requires: {0} Iron Scrap\n\nA box containing a whetstone and other useful tools for mending one's equipment.", settings.Iron_Scrap_Cost),
                 BaseValue = settings.Toolbox_Cost,
-                Durability = 100,
-                Weight = 5.0f,
-                ItemIconName = "ToolboxIcon",
+                MaxDurability = 100,
+                RawWeight = 5.0f,
             };
+            stats.ApplyToItem(item.GetComponent<ItemStats>());
 
-            CustomItems.Instance.ApplyCustomItem(ArmorToolboxTemplate);
-
-            if (ResourcesPrefabManager.Instance.GetItemPrefab(Toolbox_ID) is Item item)
-            {
-                ToolboxPrefab = item;
-
-                item.IsUsable = true; // need to make it Usable, as thats how this item works
-                item.QtyRemovedOnUse = -1; // dont consume itself on use
-                item.GroupItemInDisplay = false; // dont group toolboxes in inventory
-                item.BehaviorOnNoDurability = Item.BehaviorOnNoDurabilityType.Destroy;
-
-                // just some stuff to remove the Tags from the clone item I used.
-                TagSource tagSource = item.GetComponent<TagSource>();
-                At.SetValue(false, typeof(TagSource), tagSource, "m_isIngredient");
-                List<Tag> emptyTag = new List<Tag>();
-                At.SetValue(emptyTag, typeof(TagListSelectorComponent), tagSource as TagListSelectorComponent, "m_tags");
-                List<TagSourceSelector> emptyTag2 = new List<TagSourceSelector>();
-                At.SetValue(emptyTag2, typeof(TagListSelectorComponent), tagSource as TagListSelectorComponent, "m_tagSelectors");
-
-                // add our custom effect
-                var effects = new GameObject("Effects");
-                effects.transform.parent = item.transform;
-                effects.AddComponent<ToolboxEffect>();
-            }
+            // add our custom effect
+            var effects = new GameObject("Effects");
+            effects.transform.parent = item.transform;
+            effects.AddComponent<ToolboxEffect>();
         }
 
         // Function for setting up Blacksmith NPCs whenever a scene is loaded. Just adds our item to their pouch, if they dont already have it.

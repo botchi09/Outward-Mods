@@ -13,6 +13,9 @@ namespace Dataminer
 
         public DroptableHolder DropTable;
 
+        public List<float> BuyModifiers = new List<float>();
+        public List<float> SellModifiers = new List<float>();
+
         public static MerchantHolder ParseMerchant(Merchant merchant)
         {
             var merchantHolder = new MerchantHolder
@@ -24,6 +27,16 @@ namespace Dataminer
             if (At.GetValue(typeof(Merchant), merchant, "m_dropableInventory") is Dropable dropper)
             {
                 merchantHolder.DropTable = DroptableHolder.ParseDropTable(dropper, merchant);
+            }
+
+            foreach (PriceModifier priceMod in merchant.GetComponentsInChildren<PriceModifier>())
+            {
+                if (priceMod.BuyMultiplierAdded != 0f || priceMod.SellMultiplierAdded != 0f)
+                {
+                    Debug.Log("Merchant " + merchantHolder.Name + " has buy or sell mods! Buy: " + priceMod.BuyMultiplierAdded + ", Sell: " + priceMod.SellMultiplierAdded);
+                    merchantHolder.BuyModifiers.Add(priceMod.BuyMultiplierAdded);
+                    merchantHolder.SellModifiers.Add(priceMod.SellMultiplierAdded);
+                }
             }
 
             string dir = Folders.Merchants;

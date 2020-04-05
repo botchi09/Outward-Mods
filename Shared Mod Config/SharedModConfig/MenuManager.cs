@@ -89,21 +89,18 @@ namespace SharedModConfig
         internal void Awake()
         {
             Instance = this;
-            StartCoroutine(SetupCoroutine());
+
+            SL.OnPacksLoaded += Setup;
 
             CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
         }
-
-        private IEnumerator SetupCoroutine()
+        
+        private void Setup()
         {
-            while (SL.Instance == null || !SL.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
             SetupCanvas();
 
             InitDone = true;
+
             OnMenuLoaded?.Invoke();
         }
 
@@ -111,7 +108,14 @@ namespace SharedModConfig
         {
             // Debug.Log(ModBase.ModName + " started, version: " + ModBase.ModVersion);
 
-            var bundle = SL.Instance.LoadedBundles["sharedmodconfig"];
+            var pack = SL.Packs["SharedModConfig"];
+
+            if (pack == null)
+            {
+                Debug.LogError("ERROR: Could not find pack 'SharedModConfig'! Please make sure it exists at Mods/SideLoader/SharedModConfig!");
+            }
+
+            var bundle = pack.AssetBundles["sharedmodconfig"];
 
             if (bundle.LoadAsset("SharedModConfigCanvas") is GameObject canvasAsset)
             {

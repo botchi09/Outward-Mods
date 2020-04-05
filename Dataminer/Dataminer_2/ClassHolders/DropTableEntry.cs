@@ -18,5 +18,8 @@ namespace Dataminer
     {
         public float Drop_Chance;
         public int Dice_Range;
+        public int ChanceReduction;
+        public float ChanceRegenDelay;
+        public float ChanceRegenQty;
     }
 }

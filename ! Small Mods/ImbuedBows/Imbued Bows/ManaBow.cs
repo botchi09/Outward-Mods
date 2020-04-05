@@ -16,7 +16,7 @@ namespace ImbuedBows
 
         internal void Awake()
         {
-            StartCoroutine(SetupManaBowCoroutine());
+            SideLoader.SL.OnPacksLoaded += Setup;
 
             // mana bow hooks
             On.WeaponLoadout.CanBeLoaded += CanBeLoadedHook;
@@ -88,19 +88,18 @@ namespace ImbuedBows
             orig(self, _equipment);
         }
 
-        // coroutine to setup after sideloader init is done
-        private IEnumerator SetupManaBowCoroutine()
+        //setup after sideloader init is done
+        private void Setup()
         {
-            while (!SideLoader.SL.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+            Debug.Log("Setting up mana bow");
+
+            SkinnedMeshRenderer skinnedMesh = null;
 
             // setup bow
             var bow = ResourcesPrefabManager.Instance.GetItemPrefab(ManaBowID) as ProjectileWeapon;
             if (bow != null && bow.VisualPrefab is Transform bowVisuals)
             {
-                var skinnedMesh = bowVisuals.GetComponentInChildren<SkinnedMeshRenderer>();
+                skinnedMesh = bowVisuals.GetComponentInChildren<SkinnedMeshRenderer>();
                 if (skinnedMesh)
                 {
                     skinnedMesh.material.color = new Color(0.5f, 0.8f, 2.0f);
@@ -110,6 +109,24 @@ namespace ImbuedBows
                 light.color = new Color(0.3f, 0.7f, 0.9f);
                 light.intensity = 1.5f;
                 light.range = 1.3f;
+            }
+
+            var etherealImbue = ResourcesPrefabManager.Instance.GetEffectPreset(208);
+
+            var fx = etherealImbue.GetComponent<ImbueEffectPreset>().ImbueFX;
+
+            var newFX = Instantiate(fx.gameObject);
+            DontDestroyOnLoad(newFX.gameObject);
+            newFX.transform.parent = bow.VisualPrefab;
+
+            foreach (var ps in newFX.GetComponentsInChildren<ParticleSystem>())
+            {
+                var shape = ps.shape;
+                shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
+                shape.skinnedMeshRenderer = skinnedMesh;
+
+                var main = ps.main;
+                main.startColor = new Color(0.1f, 0.4f, 0.95f);
             }
 
             // setup custom mana projectile

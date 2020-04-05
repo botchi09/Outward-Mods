@@ -92,7 +92,7 @@ namespace Dataminer
             return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
         }
     }
-    
+
     public class TypesToSerialize
     {
         public static Type[] Types { get; } = new Type[]
@@ -172,7 +172,7 @@ namespace Dataminer
             return madeFolder;
         }
 
-        public static readonly string SaveFolder = @"Dumps_2";        
+        public static readonly string SaveFolder = @"Dumps_2";
         public static readonly string Prefabs = SaveFolder + "/Prefabs";
         public static readonly string Lists = SaveFolder + "/Lists";
         public static readonly string Scenes = SaveFolder + "/Scenes";

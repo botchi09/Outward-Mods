@@ -47,23 +47,44 @@ namespace Dataminer
             }
             else if (effectPreset.GetComponent<StatusEffect>() is StatusEffect status)
             {
-                statusEffectHolder.Name = status.IdentifierName;
-                statusEffectHolder.Lifespan = status.StartLifespan;
-                statusEffectHolder.LengthType = status.LengthType.ToString();
+                ParseStatusEffectPrefab(statusEffectHolder, status, effectPreset.gameObject);
+            }
 
-                foreach (Tag tag in status.InheritedTags)
+            return statusEffectHolder;
+        }
+
+        public static void ParseStatusEffectPrefab(StatusEffectHolder statusEffectHolder, StatusEffect status, GameObject prefab) 
+        {
+            statusEffectHolder.Name = status.IdentifierName;
+            statusEffectHolder.Lifespan = status.StartLifespan;
+            statusEffectHolder.LengthType = status.LengthType.ToString();
+
+            foreach (Tag tag in status.InheritedTags)
+            {
+                statusEffectHolder.Tags.Add(tag.TagName);
+                ListManager.AddTagSource(tag, statusEffectHolder.Name);
+            }
+
+            if (status is Disease disease)
+            {
+                statusEffectHolder.CanBeHealedBySleeping = disease.CanBeHealedBySleeping;
+                statusEffectHolder.StraightSleepHealTime = disease.StraightSleepHealTime;
+            }
+
+            foreach (Effect effect in prefab.GetComponentsInChildren<Effect>())
+            {
+                var effectHolder = EffectHolder.ParseEffect(effect);
+                if (effectHolder != null)
                 {
-                    statusEffectHolder.Tags.Add(tag.TagName);
-                    ListManager.AddTagSource(tag, statusEffectHolder.Name);
+                    statusEffectHolder.Effects.Add(effectHolder);
                 }
+            }
 
-                if (status is Disease disease)
-                {
-                    statusEffectHolder.CanBeHealedBySleeping = disease.CanBeHealedBySleeping;
-                    statusEffectHolder.StraightSleepHealTime = disease.StraightSleepHealTime;
-                }
-
-                foreach (Effect effect in effectPreset.GetComponentsInChildren<Effect>())
+            // Vital recovery effects (stack level)
+            var sigmode = (StatusEffect.EffectSignatureModes)At.GetValue(typeof(StatusEffect), status, "m_effectSignatureMode");
+            if (sigmode == StatusEffect.EffectSignatureModes.Reference)
+            {
+                foreach (Effect effect in status.StatusEffectSignature?.GetComponentsInChildren<Effect>())
                 {
                     var effectHolder = EffectHolder.ParseEffect(effect);
                     if (effectHolder != null)
@@ -71,61 +92,49 @@ namespace Dataminer
                         statusEffectHolder.Effects.Add(effectHolder);
                     }
                 }
+            }
 
-                // Vital recovery effects (stack level)
-                var sigmode = (StatusEffect.EffectSignatureModes)At.GetValue(typeof(StatusEffect), status, "m_effectSignatureMode");
-                if (sigmode == StatusEffect.EffectSignatureModes.Reference)
+            for (int i = 0; i < status.StatusData.EffectsData.Length; i++)
+            {
+                if (i >= statusEffectHolder.Effects.Count)
                 {
-                    foreach (Effect effect in status.StatusEffectSignature?.GetComponentsInChildren<Effect>())
-                    {
-                        var effectHolder = EffectHolder.ParseEffect(effect);
-                        if (effectHolder != null)
-                        {
-                            statusEffectHolder.Effects.Add(effectHolder);
-                        }
-                    }
+                    Debug.LogWarning("we exceeded our effectholder count...");
+                    continue;
                 }
 
-                for (int i = 0; i < status.StatusData.EffectsData.Length; i++)
+                // burning and poison. 
+                // this ignores a lot of edge cases, but burning and poison are the only cases atm.
+                // both effects only use one value in the statusdata, used for the damage on players.
+                if (statusEffectHolder.Effects[i] is PunctualDamageHolder)
                 {
-                    if (i >= statusEffectHolder.Effects.Count)
+                    var strings = status.StatusData.EffectsData[i].Data[0].Split(new char[] { ':' });
+                    var value = float.Parse(strings[0]);
+                    (statusEffectHolder.Effects[i] as PunctualDamageHolder).Damage[0].Damage = value;
+                }
+                else
+                {
+                    // everything else
+                    try
                     {
-                        Debug.LogWarning("we exceeded our effectholder count...");
-                        continue;
+                        FieldInfo fi = statusEffectHolder.Effects[i].GetType().GetField("AffectQuantity");
+                        fi.SetValue(statusEffectHolder.Effects[i], float.Parse(status.StatusData.EffectsData[i].Data[0]));
                     }
-
-                    // burning and poison. 
-                    // this ignores a lot of edge cases, but burning and poison are the only cases atm.
-                    // both effects only use one value in the statusdata, used for the damage on players.
-                    if (statusEffectHolder.Effects[i] is PunctualDamageHolder)
+                    catch (Exception e)
                     {
-                        var strings = status.StatusData.EffectsData[i].Data[0].Split(new char[] { ':' });
-                        var value = float.Parse(strings[0]);
-                        (statusEffectHolder.Effects[i] as PunctualDamageHolder).Damage[0].Damage = value;
-                    }
-                    else
-                    {
-                        // everything else
-                        try
-                        {
-                            FieldInfo fi = statusEffectHolder.Effects[i].GetType().GetField("AffectQuantity");
-                            fi.SetValue(statusEffectHolder.Effects[i], float.Parse(status.StatusData.EffectsData[i].Data[0]));
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogWarning("Exception parsing StausData: " + e.Message);
-                        }
+                        Debug.LogWarning("Exception parsing StatusData: " + e.Message);
                     }
                 }
             }
-
-            return statusEffectHolder;
         }
 
         public static void ParseAllEffects()
         {
+            var parsedIdentifiers = new List<string>();
+
             if (At.GetValue(typeof(ResourcesPrefabManager), null, "EFFECTPRESET_PREFABS") is Dictionary<int, EffectPreset> dict)
             {
+                Debug.Log("Parsing " + dict.Count + " EffectPresets!");
+
                 foreach (EffectPreset preset in dict.Values)
                 {
                     Debug.Log("Parsing Effect Preset " + preset.gameObject.name);
@@ -134,6 +143,8 @@ namespace Dataminer
 
                     if (!string.IsNullOrEmpty(statusHolder.Name))
                     {
+                        parsedIdentifiers.Add(statusHolder.Name);
+
                         string dir = Folders.Prefabs + "/Effects";
                         string saveName = statusHolder.Name;
 
@@ -146,6 +157,41 @@ namespace Dataminer
             else
             {
                 Debug.LogError("Could not find Effect Prefabs!");
+            }
+
+            int manualID = 1000;
+            if (At.GetValue(typeof(ResourcesPrefabManager), null, "STATUSEFFECT_PREFABS") is Dictionary<string, StatusEffect> statusDict)
+            {
+                Debug.Log("Parsing " + statusDict.Count + " StatusEffect Prefabs! (before dupe check)");
+
+                foreach (var entry in statusDict.Where(x => !string.IsNullOrEmpty(x.Value.IdentifierName) && !parsedIdentifiers.Contains(x.Value.IdentifierName)))
+                {
+                    Debug.Log("Parsing status prefab " + entry.Key);
+
+                    var status = entry.Value;
+
+                    var statusHolder = new StatusEffectHolder();
+                    
+                    try
+                    {
+                        ParseStatusEffectPrefab(statusHolder, status, status.gameObject);
+
+                        if (!string.IsNullOrEmpty(statusHolder.Name))
+                        {
+                            string dir = Folders.Prefabs + "/Effects";
+                            string saveName = statusHolder.Name;
+
+                            manualID++;
+                            ListManager.Effects.Add(manualID.ToString(), statusHolder);
+
+                            Dataminer.SerializeXML(dir, saveName, statusHolder, typeof(StatusEffectHolder));
+                        }
+                    }
+                    catch
+                    {
+                        Debug.LogWarning("Exception parsing status prefab!");
+                    }
+                }
             }
         }
     }

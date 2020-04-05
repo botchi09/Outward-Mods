@@ -49,7 +49,19 @@ namespace AttackTimer
             Instance = this;
 
             On.Character.StartAttack += StartAttackHook;
+
+            On.Character.ReceiveDamage += Character_ReceiveDamage;
         }
+
+        // debug damage on enemy hit hook
+        private void Character_ReceiveDamage(On.Character.orig_ReceiveDamage orig, Character self, float _damage, Vector3 _hitVec, bool _syncIfClient)
+        {
+            Debug.Log(string.Format("{0} | {1} received {2} damage", Math.Round(Time.time, 1), self.Name, Math.Round(_damage, 2)));
+
+            orig(self, _damage, _hitVec, _syncIfClient);
+        }
+
+
 
         internal void Update()
         {

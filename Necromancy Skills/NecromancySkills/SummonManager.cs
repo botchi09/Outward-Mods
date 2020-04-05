@@ -117,8 +117,8 @@ namespace NecromancerSkills
 			_char.SetUID(summonUID);
 			//_char.photonView.viewID = sceneViewID;
 
-			float healthLoss = insidePlagueAura ? -2.5f : -0.75f;
-			float maxHealth = insidePlagueAura ? 250f : 75f;
+			float healthLoss = insidePlagueAura ? ModBase.settings.StrongSummon_HealthLoss : ModBase.settings.Summon_HealthLoss;
+			float maxHealth = insidePlagueAura ? ModBase.settings.StrongSummon_MaxHealth : ModBase.settings.Summon_MaxHealth;
 
 			// set custom stats
 			At.SetValue(new Stat(healthLoss), typeof(CharacterStats), _char.Stats, "m_healthRegen");

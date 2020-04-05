@@ -43,13 +43,13 @@ namespace NecromancerSkills
             var ephemeral = plagueStone.GetComponent<Ephemeral>();
             ephemeral.LifeSpan = ModBase.settings.PlagueAura_SigilLifespan;
 
-            // setup custom visuals
-            var origVisuals = plagueStone.GetComponent<Item>().VisualPrefab;
-            origVisuals.gameObject.SetActive(false);
-            var newVisuals = Instantiate(origVisuals.gameObject);
-            DontDestroyOnLoad(newVisuals);
-            origVisuals.gameObject.SetActive(true);
-            plagueStone.GetComponent<Item>().VisualPrefab = newVisuals.transform;
+            //// setup custom visuals
+            //var origVisuals = plagueStone.GetComponent<Item>().VisualPrefab;
+            //origVisuals.gameObject.SetActive(false);
+            //var newVisuals = Instantiate(origVisuals.gameObject);
+            //DontDestroyOnLoad(newVisuals);
+            //origVisuals.gameObject.SetActive(true);
+            var newVisuals = plagueStone.GetComponent<Item>().VisualPrefab;
 
             var magiccircle = newVisuals.transform.Find("mdl_fx_magicCircle");
             // destroy rotating bolt fx

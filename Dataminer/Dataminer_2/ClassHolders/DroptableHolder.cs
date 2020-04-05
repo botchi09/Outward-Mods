@@ -59,6 +59,24 @@ namespace Dataminer
                         MaxDiceValue = (int)At.GetValue(typeof(DropTable), table, "m_maxDiceValue"),
                     };
 
+                    if (At.GetValue(typeof(DropTable), table, "m_dropAmount") is SimpleRandomChance dropAmount)
+                    {
+                        generatorHolder.ChanceReduction = dropAmount.ChanceReduction;
+                        generatorHolder.ChanceRegenQty = dropAmount.ChanceRegenQty;
+                        if (dropAmount.CanRegen)
+                        {
+                            generatorHolder.RegenTime = dropAmount.ChanceRegenDelay;
+                        }
+                        else
+                        {
+                            generatorHolder.RegenTime = -1;
+                        }
+                    }
+                    else
+                    {
+                        generatorHolder.RegenTime = -1;
+                    }
+
                     if (At.GetValue(typeof(DropTable), table, "m_emptyDropChance") is int i)
                     {
                         decimal emptyChance = (decimal)i / generatorHolder.MaxDiceValue;
@@ -73,36 +91,52 @@ namespace Dataminer
 
                             percentage = (float)Math.Round(percentage, 2);
 
-                            if (percentage == 100)
+                            generatorHolder.Item_Drops.Add(new DropTableChanceEntry
                             {
-                                var pos = dropper.transform.position;
-                                AddGuaranteedDrop(dropTableHolder, 
-                                    dropChance.DroppedItem.ItemID, 
-                                    dropChance.DroppedItem.Name, 
-                                    dropChance.MinDropCount, 
-                                    dropChance.MaxDropCount,
-                                    containerName,
-                                    pos);
-                            }
-                            else if (percentage > 0)
-                            {
-                                generatorHolder.Item_Drops.Add(new DropTableChanceEntry
-                                {
-                                    Item_ID = dropChance.DroppedItem.ItemID,
-                                    Item_Name = dropChance.DroppedItem.Name,
-                                    Min_Quantity = dropChance.MinDropCount,
-                                    Max_Quantity = dropChance.MaxDropCount,
-                                    Drop_Chance = percentage,
-                                    Dice_Range = dropChance.MaxDiceRollValue - dropChance.MinDiceRollValue
-                                });
+                                Item_ID = dropChance.DroppedItem.ItemID,
+                                Item_Name = dropChance.DroppedItem.Name,
+                                Min_Quantity = dropChance.MinDropCount,
+                                Max_Quantity = dropChance.MaxDropCount,
+                                Drop_Chance = percentage,
+                                Dice_Range = dropChance.MaxDiceRollValue - dropChance.MinDiceRollValue,
+                                ChanceReduction = dropChance.ChanceReduction,
+                                ChanceRegenDelay = dropChance.ChanceRegenDelay,
+                                ChanceRegenQty = dropChance.ChanceRegenQty
+                            });
 
-                                //if (!string.IsNullOrEmpty(containerName))
-                                //{
-                                //    int id = dropChance.DroppedItem.ItemID;
-                                //    var pos = dropper.transform.position;
-                                //    AddItemSource(id, dropChance.DroppedItem.Name, containerName, pos);
-                                //}
-                            }
+                            //if (percentage == 100)
+                            //{
+                            //    var pos = dropper.transform.position;
+                            //    AddGuaranteedDrop(dropTableHolder, 
+                            //        dropChance.DroppedItem.ItemID, 
+                            //        dropChance.DroppedItem.Name, 
+                            //        dropChance.MinDropCount, 
+                            //        dropChance.MaxDropCount,
+                            //        containerName,
+                            //        pos);
+                            //}
+                            //else if (percentage > 0)
+                            //{
+                            //    generatorHolder.Item_Drops.Add(new DropTableChanceEntry
+                            //    {
+                            //        Item_ID = dropChance.DroppedItem.ItemID,
+                            //        Item_Name = dropChance.DroppedItem.Name,
+                            //        Min_Quantity = dropChance.MinDropCount,
+                            //        Max_Quantity = dropChance.MaxDropCount,
+                            //        Drop_Chance = percentage,
+                            //        Dice_Range = dropChance.MaxDiceRollValue - dropChance.MinDiceRollValue,
+                            //        ChanceReduction = dropChance.ChanceReduction,
+                            //        ChanceRegenDelay = dropChance.ChanceRegenDelay,
+                            //        ChanceRegenQty = dropChance.ChanceRegenQty
+                            //    });
+
+                            //    //if (!string.IsNullOrEmpty(containerName))
+                            //    //{
+                            //    //    int id = dropChance.DroppedItem.ItemID;
+                            //    //    var pos = dropper.transform.position;
+                            //    //    AddItemSource(id, dropChance.DroppedItem.Name, containerName, pos);
+                            //    //}
+                            //}
                         }
                     }
 
@@ -180,6 +214,10 @@ namespace Dataminer
             public int MaxNumberOfDrops;
             public int MaxDiceValue;
             public float EmptyDrop;
+            
+            public float RegenTime;
+            public int ChanceReduction;
+            public int ChanceRegenQty;
 
             public List<DropTableChanceEntry> Item_Drops = new List<DropTableChanceEntry>();
         }
