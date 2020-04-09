@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
 using System.Reflection;
-using System.IO;
-using System.Text.RegularExpressions;
 
-namespace CombatAndDodgeOverhaul
+namespace Dismantler
 {
-    public static class At // Access Tools
+    /// <summary>
+    /// AccessTools 
+    /// Some helpers for Reflection (GetValue, SetValue, Call, InheritBaseValues)
+    /// </summary>
+    public static class At
     {
         public static BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Static;
 

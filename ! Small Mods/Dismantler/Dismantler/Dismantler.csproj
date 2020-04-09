@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{54ED797B-99D9-4F3F-93D6-172F3FD3DDF9}</ProjectGuid>
+    <ProjectGuid>{3576345C-5FC4-4078-A474-0AF872F83FD8}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NecromancerSkills</RootNamespace>
-    <AssemblyName>NecromancerSkills</AssemblyName>
+    <RootNamespace>Dismantler</RootNamespace>
+    <AssemblyName>Dismantler</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -17,8 +17,9 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\Mods\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>.\</OutputPath>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -32,35 +33,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Partiality">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Photon3Unity3D">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Rewired_Core">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Sideloader">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -70,34 +67,19 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomSkills\DetonateBlast.cs" />
-    <Compile Include="CustomSkills\DetonateCondition.cs" />
-    <Compile Include="CustomSkills\Frenzy.cs" />
-    <Compile Include="CustomSkills\ManaPointAffectStat.cs" />
-    <Compile Include="CustomSkills\PlagueAura.cs" />
-    <Compile Include="CustomSkills\PlagueAuraProximityCondition.cs" />
-    <Compile Include="CustomSkills\PlagueTendrils.cs" />
-    <Compile Include="CustomSkills\ShootTendrils.cs" />
-    <Compile Include="CustomSkills\SummonSkeleton.cs" />
-    <Compile Include="CustomSkills\SummonTeleport.cs" />
+    <Compile Include="Dismantler.cs" />
     <Compile Include="ModBase.cs" />
-    <Compile Include="NPCLookFollow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RPCManager.cs" />
-    <Compile Include="Settings.cs" />
-    <Compile Include="SkillManager.cs" />
-    <Compile Include="SummonManager.cs" />
-    <Compile Include="TrainerManager.cs" />
-    <Compile Include="util\AccessTools.cs" />
+    <Compile Include="utils\AccessTools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

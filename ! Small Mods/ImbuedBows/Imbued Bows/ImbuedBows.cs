@@ -6,6 +6,7 @@ using System.Text;
 //using SinAPI;
 using UnityEngine;
 using Partiality.Modloader;
+using SideLoader;
 
 namespace ImbuedBows
 {
@@ -46,21 +47,19 @@ namespace ImbuedBows
     {
         internal void Awake()
         {
-            StartCoroutine(SetupCoroutine());
+            SL.OnPacksLoaded += Setup;
 
             On.InfuseConsumable.Use += UseInfuseHook;
 
             On.ItemVisual.AddImbueFX += AddImbueFXHook;
+
+
         }
 
 
-        private IEnumerator SetupCoroutine()
+        private void Setup()
         {
-            while (!ResourcesPrefabManager.Instance.Loaded)
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
+            // =============== setup infuse skills ===============
             var list = new List<int>
             {
                 8200100, // infuse light

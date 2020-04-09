@@ -21,9 +21,6 @@ namespace NecromancerSkills
         //public ModBase global;
         public static TrainerManager Instance;
 
-        private string CurrentSceneName = "";
-        private bool SceneChangeFlag = false;
-
         public static string TrainerName = "Spectral Wanderer";
         public static string TrainerSceneName = "Hallowed_Dungeon4_Interior";
         public Vector3 TrainerLocation = new Vector3(-138.3397f, 58.99699f, -102.4192f); 
@@ -31,47 +28,25 @@ namespace NecromancerSkills
 
         internal void Awake()
         {
-            if (Instance == null) { Instance = this; }
-        }
+            Instance = this;
 
-        internal void Update()
-        {
-            if (SceneManagerHelper.ActiveSceneName != CurrentSceneName)
-            {
-                SceneChangeFlag = true;
-                CurrentSceneName = SceneManagerHelper.ActiveSceneName;
-            }
-
-            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)
-            {
-                return;
-            }
-
-            if (SceneChangeFlag)
-            {
-                SceneChangeFlag = false;
-                
-                if (!PhotonNetwork.isNonMasterClientInRoom)
-                {
-                    OnSceneChange();
-                }
-            }
+            SL.OnSceneLoaded += OnSceneChange;
         }
 
         private void OnSceneChange()
         {
-            if (GameObject.Find("UNPC_" + TrainerName) is GameObject _o)
+            if (GameObject.Find("UNPC_" + TrainerName) is GameObject obj)
             {
                 //OLogger.Warning("Trainer already exists on scene change, skipping setup!");
-                if (CurrentSceneName != TrainerSceneName)
+                if (SceneManagerHelper.ActiveSceneName != TrainerSceneName)
                 {
                     //Debug.Log("Destroying trainer");
-                    DestroyImmediate(_o);
+                    DestroyImmediate(obj);
                 }
                 return;
             }
 
-            if (CurrentSceneName == TrainerSceneName && !PhotonNetwork.isNonMasterClientInRoom)
+            if (SceneManagerHelper.ActiveSceneName == TrainerSceneName && !PhotonNetwork.isNonMasterClientInRoom)
             {
                 HostSetupTrainer();
             }

@@ -51,24 +51,13 @@ namespace MixedGrip
         {
             Instance = this;
 
-            config = SetupConfig();
-
-            StartCoroutine(SetupCoroutine());
-
-            this.gameObject.AddComponent<GripManager>();
-
             // custom keybindings
             AddAction(ToggleKey, KeybindingsCategory.Actions, ControlType.Both, 5);
-        }
 
-        private IEnumerator SetupCoroutine()
-        {
-            while (ConfigManager.Instance == null || !ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
+            config = SetupConfig();
             config.Register();
+
+            this.gameObject.AddComponent<GripManager>();
         }
 
         private ModConfig SetupConfig()

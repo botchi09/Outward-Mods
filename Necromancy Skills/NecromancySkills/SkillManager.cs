@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 //using SinAPI;
 using SideLoader;
+using SideLoader.CustomSkills;
 
 namespace NecromancerSkills
 {
@@ -54,12 +55,11 @@ namespace NecromancerSkills
             return orig(self, _tryingToActivate);
         }
 
-        #region Actual Skills Setup
         private void SetupSkills()
         {
             // I use the SideLoader to do the preliminary setup (clone existing skill, change ID / name / etc..)
 
-            SetupPassives();
+            SetupTranscendence();
 
             SummonSkeleton.SetupSummon();
 
@@ -72,20 +72,8 @@ namespace NecromancerSkills
             PlagueAura.SetupPlagueAura();
         }
 
-        #region Passive Skills
-        private void SetupPassives()
+        private void SetupTranscendence()
         {
-            // Vital Attunement is now set up completely by SideLoader :)
-
-            //// =============== bonus stats vital attunement ===============
-            //var vitalAttunement = ResourcesPrefabManager.Instance.GetItemPrefab(8890101) as PassiveSkill;
-            //var affectHealth = vitalAttunement.GetComponentInChildren<AffectStat>();
-            //affectHealth.Value = ModBase.settings.VitalAttunement_HealthBonus;
-            //var affectStamina = affectHealth.gameObject.AddComponent<AffectStat>();
-            //affectStamina.AffectedStat = new TagSourceSelector(TagSourceManager.Instance.GetTag("79"));
-            //affectStamina.Value = ModBase.settings.VitalAttunement_StaminaBonus;
-            //affectStamina.IsModifier = false;
-
             // =============== transendence ===============
 
             var transcendence = ResourcesPrefabManager.Instance.GetItemPrefab(8890104) as PassiveSkill;
@@ -99,98 +87,130 @@ namespace NecromancerSkills
             passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "100" });
             passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "101" });
             passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "102" });
-
-
-            // ======== strong resurrect (no longer need any setup here, handled by the Summon Skill itself)
-
-            //var strongRes = ResourcesPrefabManager.Instance.GetItemPrefab(8890108) as PassiveSkill;
-            //passiveTransform = strongRes.transform.Find("Passive");
-            //DestroyImmediate(passiveTransform.GetComponent<AffectStat>());
         }
-        #endregion
 
-        #endregion
 
-        #region Skill Tree setup, and add to SkillTreeHolder (game manager)
+        // Skill Tree setup, and add to SkillTreeHolder (game manager)
 
         private void SetupSkillTree()
         {
-            // load the dev template for skill progression tree
-            if (CustomSkills.CreateSkillSchool("Necromancy").gameObject is GameObject necroTree)
+            var tree = new SL_SkillTree()
             {
-                NecromancyTree = necroTree.GetComponent<SkillSchool>();
-
-                NecromancyTree.SchoolSigil = Sprite.Create(new Texture2D(0, 0), new Rect(0, 0, 0, 0), Vector2.zero); // TODO
-
-                // row 1
-                var row1 = necroTree.transform.Find("Row1");
-                CustomItems.DestroyChildren(row1.transform);
-                var resurrect = CustomSkills.CreateSkillSlot(row1, "Resurrect", 8890103, 50, null, false, 2);
-                var statboost = CustomSkills.CreateSkillSlot(row1, "PassiveStatBoost", 8890101, 50, null, false, 3);
-
-                // row 2
-                var row2 = necroTree.transform.Find("Row2");
-                CustomItems.DestroyChildren(row2.transform);
-                var frenzy = CustomSkills.CreateSkillSlot(row2, "Frenzy", 8890105, 100, resurrect, false, 2);
-                CustomSkills.CreateSkillSlot(row2, "Tendrils", 8890100, 100, statboost, false, 3);
-
-                // row 3
-                var row3 = necroTree.transform.Find("Row3");
-                CustomItems.DestroyChildren(row3);
-                var transcendence = CustomSkills.CreateSkillSlot(row3, "Transcendence", 8890104, 600, frenzy, true, 2);
-
-                // row 4
-                var row4 = necroTree.transform.Find("Row4");
-                CustomItems.DestroyChildren(row4);
-                var detonate = CustomSkills.CreateSkillSlot(row4, "Detonate", 8890106, 600, transcendence, false, 2);
-
-                // row 5
-                var row5 = new GameObject("Row5");
-                row5.transform.parent = necroTree.transform;
-                row5.AddComponent(new SkillBranch() { ParentTree = NecromancyTree });
-                var choiceObj2 = new GameObject("Choice2");
-                choiceObj2.transform.parent = row5.transform;
-                var choice2 = choiceObj2.AddComponent<SkillSlotFork>();
-                At.SetValue(2, typeof(BaseSkillSlot), choice2 as BaseSkillSlot, "m_columnIndex");
-                At.SetValue(detonate, typeof(BaseSkillSlot), choice2 as BaseSkillSlot, "m_requiredSkillSlot");
-                CustomSkills.CreateSkillSlot(choice2.transform, "DeathCloud", 8890107, 600, detonate, false, 2);
-                CustomSkills.CreateSkillSlot(choice2.transform, "StrongResurrect", 8890108, 600, detonate, false, 2);
-
-                NecromancyTree.gameObject.SetActive(true);
-            }
-        }
-
-        #endregion
-
-    }
-
-    #region Component Tools
-    public static class ComponentTools
-    {
-        public static T GetCopyOf<T>(this Component comp, T other) where T : Component
-        {
-            Type type = comp.GetType();
-            if (type != other.GetType()) return null; // type mis-match
-            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;// | BindingFlags.Default | BindingFlags.DeclaredOnly | BindingFlags.Static;
-            PropertyInfo[] pinfos = type.GetProperties(flags);
-            foreach (var pinfo in pinfos)
-            {
-                if (pinfo.CanWrite)
+                Name = "Necromancy",
+                SkillRows = new List<SL_SkillRow>()
                 {
-                    try
+                    new SL_SkillRow()
                     {
-                        pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
+                        RowIndex = 1,
+                        Slots = new List<SL_BaseSkillSlot>()
+                        {
+                            new SL_SkillSlot() // Summon
+                            {
+                                ColumnIndex = 2,
+                                SilverCost = 50,
+                                SkillID = 8890103,
+                                Breakthrough = false,
+                                RequiredSkillSlot = Vector2.zero,
+                            },
+                            new SL_SkillSlot() // Vital Attunement
+                            {
+                                ColumnIndex = 3,
+                                SilverCost = 50,
+                                SkillID = 8890101,
+                                Breakthrough = false,
+                                RequiredSkillSlot = Vector2.zero,
+                            },
+                        }
+                    },
+                    new SL_SkillRow()
+                    {
+                        RowIndex = 2,
+                        Slots = new List<SL_BaseSkillSlot>()
+                        {
+                            new SL_SkillSlot() // Life Ritual
+                            {
+                                ColumnIndex = 2,
+                                SkillID = 8890105,
+                                SilverCost = 100,
+                                Breakthrough = false,
+                                RequiredSkillSlot = new Vector2(1, 2), // requires Summon (row 1, slot 2)
+                            },
+                            new SL_SkillSlot() // Tendrils
+                            {
+                                ColumnIndex = 3,
+                                SkillID = 8890100,
+                                SilverCost = 100,
+                                Breakthrough = false,
+                                RequiredSkillSlot = new Vector2(1, 3), // requires Vital Attunement (row 1, slot 3)
+                            }
+                        }
+                    },
+                    new SL_SkillRow()
+                    {
+                        RowIndex = 3,
+                        Slots = new List<SL_BaseSkillSlot>() // Transcendence (Breakthrough)
+                        {
+                            new SL_SkillSlot()
+                            {
+                                Breakthrough = true,
+                                SkillID = 8890104,
+                                RequiredSkillSlot = new Vector2(2, 2), // requires Life Ritual (row 2, slot 2),
+                                SilverCost = 500,
+                                ColumnIndex = 2
+                            }
+                        }
+                    },
+                    new SL_SkillRow()
+                    {
+                        RowIndex = 4,
+                        Slots = new List<SL_BaseSkillSlot>() // Death Ritual
+                        {
+                            new SL_SkillSlot()
+                            {
+                                ColumnIndex = 2,
+                                RequiredSkillSlot = new Vector2(3, 2), // requires breakthrough
+                                SkillID = 8890106,
+                                SilverCost = 600,
+                                Breakthrough = false
+                            }
+                        }
+                    },
+                    new SL_SkillRow()
+                    {
+                        RowIndex = 5,
+                        Slots = new List<SL_BaseSkillSlot>() // fork choice
+                        {
+                            new SL_SkillSlotFork()
+                            {
+                                ColumnIndex = 2,
+                                RequiredSkillSlot = new Vector2(4, 2), // requires Death Ritual
+                                Choice1 = new SL_SkillSlot() // Plague Aura
+                                {
+                                    ColumnIndex = 2,
+                                    Breakthrough = false,
+                                    SilverCost = 600,
+                                    SkillID = 8890107,
+                                    RequiredSkillSlot = new Vector2(4, 2), // requires Death Ritual
+                                },
+                                Choice2 = new SL_SkillSlot() // Army of Death
+                                {
+                                    ColumnIndex = 2,
+                                    Breakthrough = false,
+                                    SilverCost = 600,
+                                    SkillID = 8890108,
+                                    RequiredSkillSlot = new Vector2(4, 2), // requires Death Ritual
+                                }
+                            }
+                        }
                     }
-                    catch { } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
                 }
-            }
-            FieldInfo[] finfos = type.GetFields(flags);
-            foreach (var finfo in finfos)
-            {
-                finfo.SetValue(comp, finfo.GetValue(other));
-            }
-            return comp as T;
+            };
+
+            NecromancyTree = tree.CreateBaseSchool();
+
+            tree.ApplyRows();
+
+            //Debug.Log("Set up necromancy tree. Components: " + NecromancyTree.gameObject.GetComponentsInChildren<BaseSkillSlot>().Length);
         }
     }
-    #endregion
 }

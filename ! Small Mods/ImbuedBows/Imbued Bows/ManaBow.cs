@@ -33,61 +33,6 @@ namespace ImbuedBows
             On.AttackSkill.OwnerHasAllRequiredItems += OwnerHasItemsHook;
         }
 
-        private bool OwnerHasItemsHook(On.AttackSkill.orig_OwnerHasAllRequiredItems orig, AttackSkill self, bool _tryingToActivate)
-        {
-            if (self.OwnerCharacter && self.OwnerCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
-            {
-                return true;
-            }
-            else
-            {
-                return orig(self, _tryingToActivate);
-            }
-        }
-
-        private bool TryUseAmmoHook(On.UseLoadoutAmunition.orig_TryTriggerConditions orig, UseLoadoutAmunition self)
-        {
-            var affectedChar = At.GetValue(typeof(Effect), self as Effect, "m_affectedCharacter") as Character;
-
-            if (self.MainHand && affectedChar.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
-            {
-                return true;
-            }
-            else
-            {
-                return orig(self);
-            }
-        }
-
-        private void ActivateAmmoHook(On.UseLoadoutAmunition.orig_ActivateLocally orig, UseLoadoutAmunition self, Character _affectedCharacter, object[] _infos)
-        {
-            if (self.MainHand && _affectedCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBow.ManaBowID)
-            {
-                // do nothing.
-            }
-            else
-            {
-                orig(self, _affectedCharacter, _infos);
-            }
-        }
-
-        private void EquipSoundHook(On.CharacterInventory.orig_PlayEquipSFX orig, CharacterInventory self, Equipment _equipment)
-        {
-            if (_equipment.ItemID == ManaArrowID)
-            {
-                return;
-            }
-            orig(self, _equipment);
-        }
-        private void UnequipSoundHook(On.CharacterInventory.orig_PlayUnequipSFX orig, CharacterInventory self, Equipment _equipment)
-        {
-            if (_equipment.ItemID == ManaArrowID)
-            {
-                return;
-            }
-            orig(self, _equipment);
-        }
-
         //setup after sideloader init is done
         private void Setup()
         {
@@ -132,7 +77,7 @@ namespace ImbuedBows
             // setup custom mana projectile
             var manaArrow = ResourcesPrefabManager.Instance.GetItemPrefab(ManaArrowID) as Ammunition;
 
-            manaArrow.IsPickable = false;
+            // manaArrow.IsPickable = false;
 
             // custom arrow ProjectileItem component (determines the ammunition behaviour as projectile)
             var origObj = manaArrow.ProjectileFXPrefab.gameObject;
@@ -229,6 +174,61 @@ namespace ImbuedBows
             }
 
             return orig(self);
+        }
+
+        private bool OwnerHasItemsHook(On.AttackSkill.orig_OwnerHasAllRequiredItems orig, AttackSkill self, bool _tryingToActivate)
+        {
+            if (self.OwnerCharacter && self.OwnerCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            {
+                return true;
+            }
+            else
+            {
+                return orig(self, _tryingToActivate);
+            }
+        }
+
+        private bool TryUseAmmoHook(On.UseLoadoutAmunition.orig_TryTriggerConditions orig, UseLoadoutAmunition self)
+        {
+            var affectedChar = At.GetValue(typeof(Effect), self as Effect, "m_affectedCharacter") as Character;
+
+            if (self.MainHand && affectedChar.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            {
+                return true;
+            }
+            else
+            {
+                return orig(self);
+            }
+        }
+
+        private void ActivateAmmoHook(On.UseLoadoutAmunition.orig_ActivateLocally orig, UseLoadoutAmunition self, Character _affectedCharacter, object[] _infos)
+        {
+            if (self.MainHand && _affectedCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBow.ManaBowID)
+            {
+                // do nothing.
+            }
+            else
+            {
+                orig(self, _affectedCharacter, _infos);
+            }
+        }
+
+        private void EquipSoundHook(On.CharacterInventory.orig_PlayEquipSFX orig, CharacterInventory self, Equipment _equipment)
+        {
+            if (_equipment.ItemID == ManaArrowID)
+            {
+                return;
+            }
+            orig(self, _equipment);
+        }
+        private void UnequipSoundHook(On.CharacterInventory.orig_PlayUnequipSFX orig, CharacterInventory self, Equipment _equipment)
+        {
+            if (_equipment.ItemID == ManaArrowID)
+            {
+                return;
+            }
+            orig(self, _equipment);
         }
     }
 }
