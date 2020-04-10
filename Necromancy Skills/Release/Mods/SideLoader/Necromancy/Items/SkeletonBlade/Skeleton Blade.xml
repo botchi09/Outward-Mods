@@ -126,7 +126,7 @@
       <Effects>
         <SL_Effect xsi:type="SL_AddStatusEffectBuildUp">
           <StatusEffect>Elemental Vulnerability</StatusEffect>
-          <ChanceToContract>60</ChanceToContract>
+          <Buildup>60</Buildup>
         </SL_Effect>
       </Effects>
       <ChildEffects />

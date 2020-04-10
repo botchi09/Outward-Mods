@@ -62,13 +62,12 @@ namespace Dismantler
 
 				Debug.Log("DeployableManager: Adding InteractionDestroy to " + m_item.Name + " (" + m_item.UID + ")");
 
-
 				var holder = m_item.InteractionHolder;
 
 				// add custom "Destroy" component
 				var comp = m_item.InteractionHolder.AddComponent<InteractionDestroy>();
 
-				// set up the activator
+				// set up the activator and base for our hold action, and do what the game normally does for the disassemble interaction
 				var activator = holder.GetComponent<InteractionActivator>();
 				activator.AddHoldInteractionOverride(comp);
 

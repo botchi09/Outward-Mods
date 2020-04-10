@@ -15,7 +15,7 @@ namespace Dismantler
 
             var obj = new GameObject("Dismantler");
             GameObject.DontDestroyOnLoad(obj);
-            obj.AddComponent<Dismantler>();
+            obj.AddComponent<DeployableManager>();
         }
     }
 }

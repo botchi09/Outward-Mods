@@ -55,8 +55,7 @@ namespace OutSoulsMod
         internal void Start()
         {
             config = SetupConfig();
-
-            StartCoroutine(SetupCoroutine());
+            config.Register();
         }
 
         private ModConfig SetupConfig()
@@ -95,16 +94,6 @@ namespace OutSoulsMod
             };
 
             return newConfig;
-        }
-
-        private IEnumerator SetupCoroutine()
-        {
-            while (!ConfigManager.Instance.IsInitDone())
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
-
-            config.Register();
         }
 
         public bool CanInteract(Character c)
