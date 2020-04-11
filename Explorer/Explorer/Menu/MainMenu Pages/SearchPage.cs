@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Reflection;
 using UnityEngine.SceneManagement;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class SearchPage : MenuManager.WindowPage
     {
@@ -22,6 +22,7 @@ namespace Explorer_2
 
         private bool m_anyMode = true;
         private bool m_sceneMode;
+        private bool m_dontDestroyMode;
         private bool m_noSceneMode;
 
         public override void Init() 
@@ -42,53 +43,61 @@ namespace Explorer_2
 
         public override void DrawWindow()
         {
-            // ----- GameObject Search -----
-            GUILayout.Label("<b>Search Objects:</b>");
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Name Contains:", GUILayout.Width(100));
-            m_searchInput = GUILayout.TextField(m_searchInput);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Class Type:", GUILayout.Width(100));
-            m_typeInput = GUILayout.TextField(m_typeInput);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Result limit:", GUILayout.Width(100));
-            var resultinput = m_limit.ToString();
-            resultinput = GUILayout.TextField(resultinput);
-            if (int.TryParse(resultinput, out int i) && i > 0)
+            try
             {
-                m_limit = i;
-            }
-            GUILayout.EndHorizontal();
+                // ----- GameObject Search -----
+                GUILayout.Label("<b>Search Objects:</b>");
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Scene filter:", GUILayout.Width(100));
-            SceneModeToggleButton(ref m_anyMode, "Any");
-            SceneModeToggleButton(ref m_sceneMode, "Scene Objects");
-            SceneModeToggleButton(ref m_noSceneMode, "Non-Scene Objects");
-            GUILayout.EndHorizontal();
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Name Contains:", GUILayout.Width(100));
+                m_searchInput = GUILayout.TextField(m_searchInput);
+                GUILayout.EndHorizontal();
 
-            if (GUILayout.Button("Search"))
-            {
-                Search();
-            }
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Class Type:", GUILayout.Width(100));
+                m_typeInput = GUILayout.TextField(m_typeInput);
+                GUILayout.EndHorizontal();
 
-            GUILayout.Space(15);
-
-            if (m_searchResults.Count > 0)
-            {
-                foreach (var obj in m_searchResults)
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Result limit:", GUILayout.Width(100));
+                var resultinput = m_limit.ToString();
+                resultinput = GUILayout.TextField(resultinput);
+                if (int.TryParse(resultinput, out int i) && i > 0)
                 {
-                    DrawObjectRow(obj);
+                    m_limit = i;
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Scene filter:", GUILayout.Width(100));
+                SceneModeToggleButton(ref m_anyMode, "Any");
+                SceneModeToggleButton(ref m_sceneMode, "This Scene");
+                SceneModeToggleButton(ref m_dontDestroyMode, "DontDestroyOnLoad");
+                SceneModeToggleButton(ref m_noSceneMode, "No Scene");
+                GUILayout.EndHorizontal();
+
+                if (GUILayout.Button("Search"))
+                {
+                    Search();
+                }
+
+                GUILayout.Space(15);
+
+                if (m_searchResults.Count > 0)
+                {
+                    foreach (var obj in m_searchResults)
+                    {
+                        DrawObjectRow(obj);
+                    }
+                }
+                else
+                {
+                    GUILayout.Label("<color=red><i>No results found!</i></color>");
                 }
             }
-            else
+            catch
             {
-                GUILayout.Label("<color=red><i>No results found!</i></color>");
+                m_searchResults.Clear();
             }
         }
 
@@ -96,6 +105,7 @@ namespace Explorer_2
         {
             m_anyMode = false;
             m_noSceneMode = false;
+            m_dontDestroyMode = false;
             m_sceneMode = false;
             toggle = true;
         }
@@ -180,7 +190,11 @@ namespace Explorer_2
 
                 if (!m_anyMode)
                 {
-                    if (m_noSceneMode && go.scene != null && go.scene.name == SceneManagerHelper.ActiveSceneName)
+                    if (m_noSceneMode && (go.scene.name == SceneManagerHelper.ActiveSceneName || go.scene.name == "DontDestroyOnLoad"))
+                    {
+                        continue;
+                    }
+                    else if (m_dontDestroyMode && (go.scene == null || go.scene.name != "DontDestroyOnLoad"))
                     {
                         continue;
                     }

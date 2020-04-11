@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace OutwardExplorer
+namespace Explorer
 {
 
     //static class to call debug functions

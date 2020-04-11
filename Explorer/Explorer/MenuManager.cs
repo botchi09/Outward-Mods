@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class MenuManager : MonoBehaviour
     {

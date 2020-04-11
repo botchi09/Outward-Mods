@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class ScenePage : MenuManager.WindowPage
     {
@@ -93,76 +93,83 @@ namespace Explorer_2
 
         public override void DrawWindow()
         {            
-            // Current Scene label
-            GUILayout.Label("Current Scene: <color=cyan>" + m_currentScene + "</color>");
-
-            // ----- GameObject Search -----
-            GUILayout.BeginHorizontal(GUI.skin.box);
-            GUILayout.Label("<b>Search Scene:</b>", GUILayout.Width(100));
-            m_searchInput = GUILayout.TextField(m_searchInput);
-            if (GUILayout.Button("Search", GUILayout.Width(80)))
+            try
             {
-                Search();
-            }
-            GUILayout.EndHorizontal();
+                // Current Scene label
+                GUILayout.Label("Current Scene: <color=cyan>" + m_currentScene + "</color>");
 
-            GUILayout.Space(15);
-
-            // ************** GameObject list ***************
-
-            // ----- main explorer ------
-            if (!m_searching)
-            {
-                if (m_currentTransform != null)
+                // ----- GameObject Search -----
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                GUILayout.Label("<b>Search Scene:</b>", GUILayout.Width(100));
+                m_searchInput = GUILayout.TextField(m_searchInput);
+                if (GUILayout.Button("Search", GUILayout.Width(80)))
                 {
-                    GUILayout.BeginHorizontal();
-                    if (GUILayout.Button("<-", GUILayout.Width(35)))
+                    Search();
+                }
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(15);
+
+                // ************** GameObject list ***************
+
+                // ----- main explorer ------
+                if (!m_searching)
+                {
+                    if (m_currentTransform != null)
                     {
-                        TraverseUp();
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("<-", GUILayout.Width(35)))
+                        {
+                            TraverseUp();
+                        }
+                        else
+                        {
+                            GUILayout.Label(m_currentTransform.GetGameObjectPath());
+                        }
+                        GUILayout.EndHorizontal();
                     }
                     else
                     {
-                        GUILayout.Label(m_currentTransform.GetGameObjectPath());
+                        GUILayout.Label("Scene Root:");
                     }
-                    GUILayout.EndHorizontal();
-                }
-                else
-                {
-                    GUILayout.Label("Scene Root:");
-                }
 
-                if (m_objectList.Count > 0)
-                {
-                    foreach (var obj in m_objectList)
+                    if (m_objectList.Count > 0)
                     {
-                        DrawGameObjectRow(obj);
+                        foreach (var obj in m_objectList)
+                        {
+                            DrawGameObjectRow(obj);
+                        }
+                    }
+                    else
+                    {
+                        // if m_currentTransform != null ...
                     }
                 }
-                else
+                else // ------ Scene Search results ------
                 {
-                    // if m_currentTransform != null ...
+                    if (GUILayout.Button("<-", GUILayout.Width(35)))
+                    {
+                        CancelSearch();
+                    }
+
+                    GUILayout.Label("Search Results:");
+
+                    if (m_searchResults.Count > 0)
+                    {
+                        foreach (var obj in m_searchResults)
+                        {
+                            DrawGameObjectRow(obj);
+                        }
+                    }
+                    else
+                    {
+                        GUILayout.Label("<color=red><i>No results found!</i></color>");
+                    }
                 }
             }
-            else // ------ Scene Search results ------
+            catch
             {
-                if (GUILayout.Button("<-", GUILayout.Width(35)))
-                {
-                    CancelSearch();
-                }
-
-                GUILayout.Label("Search Results:");
-
-                if (m_searchResults.Count > 0)
-                {
-                    foreach (var obj in m_searchResults)
-                    {
-                        DrawGameObjectRow(obj);
-                    }
-                }
-                else
-                {
-                    GUILayout.Label("<color=red><i>No results found!</i></color>");
-                }
+                m_currentTransform = null;
             }
         }
 

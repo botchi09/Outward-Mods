@@ -5,7 +5,7 @@ using System.Text;
 using Partiality.Modloader;
 using UnityEngine;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class ModLoader : PartialityMod
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class GameObjectWindow : MenuManager.ExplorerWindow
     {
@@ -22,6 +22,9 @@ namespace Explorer_2
         private Vector2 m_compScroll = Vector2.zero;
         private Component[] m_components;
 
+        private float m_translateAmount = 0.3f;
+        private float m_rotateAmount = 50f;
+        private float m_scaleAmount = 0.1f;
 
         public override void Init()
         {
@@ -29,6 +32,7 @@ namespace Explorer_2
             {
                 Debug.LogError("Target is not a GameObject!");
                 Destroy(this);
+                return;
             }
 
             m_name = m_object.name;
@@ -82,7 +86,10 @@ namespace Explorer_2
 
             scroll = GUILayout.BeginScrollView(scroll);
 
-            GUILayout.Label("Name: <b><color=cyan>" + m_name + "</color></b>");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Name:", GUILayout.Width(50));
+            GUILayout.TextArea(m_name);
+            GUILayout.EndHorizontal();
 
             GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>");
             if (m_scene == SceneManagerHelper.ActiveSceneName)
@@ -115,11 +122,6 @@ namespace Explorer_2
             ComponentList();
 
             GameObjectControls();
-
-            if (CharacterManager.Instance.GetFirstLocalCharacter() is Character c)
-            {
-                CharacterCheats(c);
-            }
 
             GUILayout.EndScrollView();
         }
@@ -178,21 +180,121 @@ namespace Explorer_2
         private void GameObjectControls()
         {
             GUILayout.BeginVertical(GUI.skin.box);
-            GUILayout.Label("<b><size=15>Object Controls</size></b>");
+            GUILayout.Label("<b><size=15>GameObject Controls</size></b>");
 
-            GUILayout.Label("TODO gameobject controls");
+            if (CharacterManager.Instance.GetFirstLocalCharacter() is Character c)
+            {
+                CharacterCheats(c);
+            }
+
+            GUILayout.BeginVertical(GUI.skin.box);
+
+            var t = m_object.transform;
+            TranslateControl(t, TranslateType.Position, ref m_translateAmount,  false);
+            TranslateControl(t, TranslateType.Rotation, ref m_rotateAmount,     true);
+            TranslateControl(t, TranslateType.Scale,    ref m_scaleAmount,      false);
+
+            GUILayout.EndVertical();
+
+            if (GUILayout.Button("<color=red><b>Destroy</b></color>"))
+            {
+                Destroy(m_object);
+                Destroy(this);
+                return;
+            }
 
             GUILayout.EndVertical();
         }
 
+        public enum TranslateType
+        {
+            Position,
+            Rotation,
+            Scale
+        }
+
+        private void TranslateControl(Transform transform, TranslateType mode, ref float amount, bool multByTime)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("<color=cyan><b>" + mode + "</b></color>:", GUILayout.Width(65));
+
+            Vector3 vector = Vector3.zero;
+            switch (mode)
+            {
+                case TranslateType.Position: vector = transform.position; break;
+                case TranslateType.Rotation: vector = transform.rotation.eulerAngles; break;
+                case TranslateType.Scale:    vector = transform.localScale; break;
+            }
+            GUILayout.Label(vector.ToString());
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Force:", GUILayout.Width(50));
+            var input = amount.ToString();
+            input = GUILayout.TextField(input, GUILayout.Width(50));
+            if (float.TryParse(input, out float f))
+            {
+                amount = f;
+            }
+
+            GUI.skin.label.alignment = TextAnchor.MiddleRight;
+
+            GUILayout.Label("X:");
+            PlusMinusFloat(ref vector.x, amount, multByTime);
+
+            GUILayout.Label("Y:");
+            PlusMinusFloat(ref vector.y, amount, multByTime);
+
+            GUILayout.Label("Z:");
+            PlusMinusFloat(ref vector.y, amount, multByTime);
+
+            switch (mode)
+            {
+                case TranslateType.Position: transform.position = vector; break;
+                case TranslateType.Rotation: transform.rotation = Quaternion.Euler(vector); break;
+                case TranslateType.Scale:    transform.localScale = vector; break;
+            }
+
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+            GUILayout.EndHorizontal();
+        }
+
+        private void PlusMinusFloat(ref float f, float amount, bool multByTime)
+        {
+            if (GUILayout.RepeatButton("-", GUILayout.Width(30)))
+            {
+                f -= multByTime ? amount * Time.deltaTime : amount;
+            }
+            if (GUILayout.RepeatButton("+", GUILayout.Width(30)))
+            {
+                f += multByTime ? amount * Time.deltaTime : amount;
+            }
+        }
+
         private void CharacterCheats(Character player)
         {
-            GUILayout.BeginVertical(GUI.skin.box);
-            GUILayout.Label("<b><size=15>Character Cheats</size></b>");
-
-            GUILayout.Label("TODO character cheats");
-
-            GUILayout.EndVertical();
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("<color=lime>Teleport SELF to</color>"))
+            {
+                player.Teleport(m_object.transform.position, Quaternion.identity);
+            }
+            if (GUILayout.Button("<color=red>Teleport TO self</color>"))
+            {
+                var pos = player.transform.position + new Vector3(0f, 1f, 0f);
+                if (m_object.GetComponent<Character>() is Character other)
+                {
+                    other.Teleport(pos, Quaternion.identity);
+                }
+                else if (m_object.GetComponent<Item>() is Item item)
+                {
+                    item.ChangeParent(item.transform.parent, pos);
+                }
+                else
+                {
+                    m_object.transform.position = pos;
+                }
+            }
+            GUILayout.EndHorizontal();
         }
 
         private void DrawGameObjectRow(GameObject obj)

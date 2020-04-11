@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Reflection;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class Explorer : MonoBehaviour
     {

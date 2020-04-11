@@ -1,13 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace OutwardExplorer
+namespace Explorer
 {
-
     internal class DebugBox : MonoBehaviour
     {
         //store basic variables of a debugBox
@@ -240,7 +238,7 @@ namespace OutwardExplorer
 
         }
 
-        internal void WindowFunction(int windowID)
+        private void WindowFunction(int windowID)
         {
 
             //allow window to be dragged

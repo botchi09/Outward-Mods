@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace Explorer_2
+namespace Explorer
 {
     /// <summary>
     /// AccessTools 

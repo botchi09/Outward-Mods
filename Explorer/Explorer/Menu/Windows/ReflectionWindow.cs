@@ -6,13 +6,15 @@ using UnityEngine;
 using System.Reflection;
 using UnityEngine.UI;
 
-namespace Explorer_2
+namespace Explorer
 {
     public class ReflectionWindow : MenuManager.ExplorerWindow
     {
         public override string Name { get => "Object Reflection"; set => Name = value; }
 
         private object m_object;
+
+        private string m_searchFilter = "";
 
         private List<FieldInfoHolder> m_FieldInfos;
 
@@ -27,15 +29,25 @@ namespace Explorer_2
             UpdateValues();
         }
 
-        private void GetFieldsRecursive(Type type)
+        private void GetFieldsRecursive(Type type, List<string> names = null)
         {
+            if (names == null)
+            {
+                names = new List<string>();
+            }
+            
             foreach (var fi in type.GetFields(At.flags))
             {
+                if (names.Contains(fi.Name))
+                {
+                    continue;
+                }
+                names.Add(fi.Name);
                 m_FieldInfos.Add(FieldInfoHolder.ParseFieldInfo(type, fi));
             }
             if (type.BaseType != null)
             {
-                GetFieldsRecursive(type.BaseType);
+                GetFieldsRecursive(type.BaseType, names);
             }
         }
 
@@ -80,11 +92,18 @@ namespace Explorer_2
                 GUILayout.EndHorizontal();
 
                 GUILayout.BeginHorizontal();
-                if (!m_autoUpdate && GUILayout.Button("Update values"))
+                if (GUILayout.Button("Update values"))
                 {
                     UpdateValues();
                 }
+                GUI.color = m_autoUpdate ? Color.green : Color.red;
                 m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update values?");
+                GUI.color = Color.white;
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Filter field names:", GUILayout.Width(180));
+                m_searchFilter = GUILayout.TextField(m_searchFilter);
                 GUILayout.EndHorizontal();
 
                 GUILayout.Space(10);
@@ -95,7 +114,12 @@ namespace Explorer_2
 
                 foreach (var holder in this.m_FieldInfos)
                 {
-                    GUILayout.BeginHorizontal();
+                    if (m_searchFilter != "" && !holder.fieldInfo.Name.ToLower().Contains(m_searchFilter.ToLower())) 
+                    {
+                        continue;
+                    }
+
+                    GUILayout.BeginHorizontal(GUILayout.Height(25));
                     holder.Draw(m_object);
                     GUILayout.EndHorizontal();
                 }
@@ -122,11 +146,25 @@ namespace Explorer_2
                 FieldInfoHolder holder;
 
                 if (fi.FieldType.IsPrimitive || fi.FieldType == typeof(string))
+                {
                     holder = new PrimitiveHolder();
+                }
                 else if (fi.FieldType == typeof(GameObject) || typeof(Transform).IsAssignableFrom(fi.FieldType))
+                {
                     holder = new GameObjectFieldHolder();
+                }
+                else if (fi.FieldType.IsEnum)
+                {
+                    holder = new EnumHolder();
+                }
+                else if (fi.FieldType.IsArray)
+                {
+                    holder = new ListHolder();
+                }
                 else
+                {
                     holder = new UnsupportedHolder();
+                }
 
                 // todo enum and list
 
@@ -157,7 +195,7 @@ namespace Explorer_2
                 }
                 else
                 {
-                    GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(150));
+                    GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
                     m_value = GUILayout.TextField(m_value?.ToString() ?? "");
 
                     if (GUILayout.Button("<color=#00FF00>Apply</color>", GUILayout.Width(60)))
@@ -237,7 +275,7 @@ namespace Explorer_2
 
             public override void Draw(object _obj)
             {
-                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(150));
+                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
                 if (m_value == null)
                 {
@@ -282,7 +320,7 @@ namespace Explorer_2
                     label += m_value.name;
 
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(350) }))
+                    if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(320) }))
                     {
                         MenuManager.InspectGameObject(m_value);
                     }
@@ -317,37 +355,112 @@ namespace Explorer_2
 
         public class EnumHolder : FieldInfoHolder
         {
+            private bool m_init = false;
+
+            private string[] m_values;
+            private int m_selectedValue;
+
             public override void Draw(object obj)
             {
-                throw new NotImplementedException();
+                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
+
+                if (GUILayout.Button("<", GUILayout.Width(25)))
+                {
+                    if (m_selectedValue > 0)
+                    {
+                        m_selectedValue--;
+                        SetValue(m_values[m_selectedValue], obj);
+                    }
+                }
+                if (GUILayout.Button(">", GUILayout.Width(25)))
+                {
+                    if (m_selectedValue < m_values.Length - 1)
+                    {
+                        m_selectedValue++;
+                        SetValue(m_values[m_selectedValue], obj);
+                    }
+                }
+
+                GUILayout.Label("<color=lime>[" + m_selectedValue + "] " + m_values[m_selectedValue] + "</color>");
+
             }
 
             public override void SetValue(object value, object obj)
             {
-                throw new NotImplementedException();
+                if (Enum.Parse(fieldInfo.FieldType, value.ToString()) is object enumValue && enumValue != null)
+                {
+                    fieldInfo.SetValue(obj, enumValue);
+                }
             }
 
             public override void UpdateValue(object obj)
             {
-                throw new NotImplementedException();
+                if (!m_init)
+                {
+                    Value = fieldInfo.GetValue(fieldInfo.IsStatic ? null : obj);
+                    m_values = Enum.GetNames(fieldInfo.FieldType);
+                    m_init = true;
+                }
+
+                m_selectedValue = m_values.IndexOf(Value.ToString());
             }
         }
 
         public class ListHolder : FieldInfoHolder
         {
+            private Array m_array;
+
             public override void Draw(object obj)
             {
-                throw new NotImplementedException();
+                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
+
+                if (m_array == null || m_array.Length < 1)
+                {
+                    GUILayout.Label("<i><color=grey>null (" + fieldInfo.FieldType + ")</color></i>");
+                }
+                else
+                {
+                    GUILayout.Label(fieldInfo.FieldType.ToString());
+                    foreach (var entry in m_array)
+                    {
+                        // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
+                        GUILayout.EndHorizontal();
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Space(180);
+
+                        if (entry == null)
+                        {
+                            GUILayout.Label("<i><color=grey>null</color></i>");
+                        }
+                        else
+                        {
+                            var type = entry.GetType();
+                            if (type.IsPrimitive || type == typeof(string))
+                            {
+                                GUILayout.Label(entry.ToString());
+                            }
+                            else
+                            {
+                                GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                                if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(350)))
+                                {
+                                    MenuManager.ReflectObject(entry);
+                                }
+                                GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+                            }
+                        }
+                    }
+                }
             }
 
             public override void SetValue(object value, object obj)
             {
-                throw new NotImplementedException();
+                // n/a
             }
 
             public override void UpdateValue(object obj)
             {
-                throw new NotImplementedException();
+                m_array = fieldInfo.GetValue(fieldInfo.IsStatic ? null : obj) as Array;
             }
         }
 
@@ -355,12 +468,12 @@ namespace Explorer_2
         {
             public override void Draw(object obj)
             {
-                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(150));
+                GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
                 if (Value != null)
                 {
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>" + fieldInfo.FieldType.ToString() + "</color>", GUILayout.MaxWidth(350)))
+                    if (GUILayout.Button("<color=yellow>" + Value.ToString() + "</color>", GUILayout.MaxWidth(320)))
                     {
                         MenuManager.ReflectObject(Value);
                     }

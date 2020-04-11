@@ -1,4 +1,4 @@
-﻿namespace OutwardExplorer
+﻿namespace Explorer
 {
 
     //store message and message Color data

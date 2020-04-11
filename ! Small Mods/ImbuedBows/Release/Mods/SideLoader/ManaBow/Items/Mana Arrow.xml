@@ -4,7 +4,7 @@
   <ReplaceEffects>true</ReplaceEffects>
   <Target_ItemID>5200001</Target_ItemID>
   <New_ItemID>2800901</New_ItemID>
-  <Name>Arrow</Name>
+  <Name>Mana Arrow</Name>
   <Description>Not an item you should actually have. Used by Mana Bow.</Description>
   <LegacyItemID>-1</LegacyItemID>
   <IsPickable>true</IsPickable>

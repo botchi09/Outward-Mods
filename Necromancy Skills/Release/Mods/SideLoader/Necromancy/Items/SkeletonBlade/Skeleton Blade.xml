@@ -61,6 +61,8 @@
     <Cold_Protection>0</Cold_Protection>
     <Corruption_Protection>0</Corruption_Protection>
     <AttackSpeed>0.9</AttackSpeed>
+	<StamCost>4.4</StamCost>
+	<AutoGenerateAttackData>true</AutoGenerateAttackData>
     <BaseDamage>
       <SL_Damage>
         <Damage>5</Damage>
@@ -72,53 +74,6 @@
       </SL_Damage>
     </BaseDamage>
     <Impact>12</Impact>
-    <Attacks>
-      <AttackData>
-        <StamCost>5.2</StamCost>
-        <Knockback>12</Knockback>
-        <AttackSpeed>1</AttackSpeed>
-        <Damage>
-          <float>5</float>
-          <float>10</float>
-        </Damage>
-      </AttackData>
-      <AttackData>
-        <StamCost>5.2</StamCost>
-        <Knockback>12</Knockback>
-        <AttackSpeed>1</AttackSpeed>
-        <Damage>
-          <float>5</float>
-          <float>10</float>
-        </Damage>
-      </AttackData>
-      <AttackData>
-        <StamCost>6.24</StamCost>
-        <Knockback>15.6</Knockback>
-        <AttackSpeed>1.1</AttackSpeed>
-        <Damage>
-          <float>6.5</float>
-          <float>13</float>
-        </Damage>
-      </AttackData>
-      <AttackData>
-        <StamCost>5.72</StamCost>
-        <Knockback>13.2</Knockback>
-        <AttackSpeed>1.1</AttackSpeed>
-        <Damage>
-          <float>6.5</float>
-          <float>13</float>
-        </Damage>
-      </AttackData>
-      <AttackData>
-        <StamCost>5.72</StamCost>
-        <Knockback>13.2</Knockback>
-        <AttackSpeed>1.1</AttackSpeed>
-        <Damage>
-          <float>6.5</float>
-          <float>13</float>
-        </Damage>
-      </AttackData>
-    </Attacks>
   </StatsHolder>
   <EffectTransforms>
     <SL_EffectTransform>
