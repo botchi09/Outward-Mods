@@ -13,7 +13,7 @@ namespace Explorer
     {
         public override string Name { get => "Console"; set => base.Name = value; }
 
-        private string m_code = "";
+        // private string m_code = "";
 
         public override void Init()
         {

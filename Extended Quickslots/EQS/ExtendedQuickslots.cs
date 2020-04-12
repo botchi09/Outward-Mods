@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Partiality.Modloader;
 using UnityEngine;
-//using SinAPI;
 using System.IO;
 using static CustomKeybindings;
 
@@ -22,9 +21,9 @@ namespace ExtendedQuickslotsPartiality
 
         public Loader()
         {
-            this.author = "Sinai";
-            this.ModID = "EQSPartiality";
-            this.Version = version.ToString("0.00");
+            this.author = "Ashnal, Stimmedcow, Sinai";
+            this.ModID = "EQS";
+            this.Version = version.ToString("1.00");
         }
 
         public override void OnEnable()
@@ -283,11 +282,13 @@ namespace ExtendedQuickslotsPartiality
 
         // ============== SETTINGS ==============
 
+        private const string savePath = @"Mods\ExtendedQuickslots.json";
+
         private void LoadSettings()
         {
             try
             {
-                string path = @"Mods\EQSPartiality.json";
+                string path = savePath;
                 Settings s2 = JsonUtility.FromJson<Settings>(File.ReadAllText(path));
                 if (s2 != null)
                 {
@@ -305,7 +306,7 @@ namespace ExtendedQuickslotsPartiality
         private void SaveSettings()
         {
             Directory.CreateDirectory(@"Mods");
-            string path = @"Mods\EQSPartiality.json";
+            string path = savePath;
             if (File.Exists(path)) { File.Delete(path); }
             File.WriteAllText(path, JsonUtility.ToJson(settings, true));
         }

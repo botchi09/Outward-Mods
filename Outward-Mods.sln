@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "! Small Mods", "! Small Mod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CombatAndDodgeOverhaul", "Combat and Dodge Overhaul\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul.csproj", "{2B6018A4-7387-45B9-9FA0-7C7709BD2917}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedQuickslotsPartiality", "Extended Quickslots\EQS\ExtendedQuickslotsPartiality.csproj", "{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtendedQuickslots", "Extended Quickslots\EQS\ExtendedQuickslots.csproj", "{072C37AB-5E2F-49B3-BDDD-BBC2E02110DE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixedGrip", "Mixed Grip\Mixed Grip\MixedGrip.csproj", "{37023A33-A1C2-4260-834E-EF2ABDACB3C5}"
 EndProject
@@ -61,7 +61,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LockOnFix", "! Small Mods\L
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dismantler", "! Small Mods\Dismantler\Dismantler\Dismantler.csproj", "{3576345C-5FC4-4078-A474-0AF872F83FD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer_2\Explorer_2\Explorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Explorer", "Explorer\Explorer\Explorer.csproj", "{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
