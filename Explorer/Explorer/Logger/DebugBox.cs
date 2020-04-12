@@ -248,7 +248,7 @@ namespace Explorer
             m_prevOffset = m_offset;
 
             //begin scroll area
-            GUILayout.BeginArea(new Rect(m_windowRect.width - 25, 30, 20, m_windowRect.height - 40));
+            GUILayout.BeginArea(new Rect(m_windowRect.width - 25, 30, 20, m_windowRect.height - 55));
 
             //display offset scroll to screen
             m_currentScroll = GUILayout.VerticalScrollbar(m_currentScroll, 10, maxLines + 10, 24, GUILayout.Height(m_windowRect.height - 40));
@@ -262,14 +262,14 @@ namespace Explorer
             }
 
             //begin text area
-            GUILayout.BeginArea(new Rect(10, 30, m_windowRect.width - 50, m_windowRect.height - 40));
-
-            GUILayout.TextArea(m_currentOutputText, linesCharacterCount, m_guiStyle, GUILayout.Height(m_windowRect.height - 40));
+            GUILayout.BeginArea(new Rect(10, 30, m_windowRect.width - 50, m_windowRect.height - 50));
+            GUILayout.TextArea(m_currentOutputText, linesCharacterCount, m_guiStyle, GUILayout.Height(m_windowRect.height - 50));
             GUILayout.EndArea();
 
+            GUILayout.BeginArea(new Rect(0, m_windowRect.height - 25, m_windowRect.width, 25));
             m_windowRect = MenuManager.ResizeWindow(m_windowRect, m_GUIID);
+            GUILayout.EndArea();
         }
-
     }
 
 

@@ -257,7 +257,7 @@ namespace Explorer
         public static Rect ResizeWindow(Rect _rect, int ID)
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Space(_rect.width - 27);
+            GUILayout.Space(_rect.width - 25);
 
             GUILayout.Button(gcDrag, GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(25), GUILayout.Height(25) });
 
