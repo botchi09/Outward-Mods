@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -125,9 +126,12 @@ namespace Explorer
                 }
 
                 GUILayout.EndScrollView();
+
+                m_rect = MenuManager.ResizeWindow(m_rect, windowID);
             }
-            catch
+            catch (Exception e)
             {
+                Debug.LogWarning("Exception on window draw. Message: " + e.Message + "\r\nStack: " + e.StackTrace);
                 Destroy(this);
                 return;
             }
@@ -157,7 +161,7 @@ namespace Explorer
                 {
                     holder = new EnumHolder();
                 }
-                else if (fi.FieldType.IsArray)
+                else if (fi.FieldType.IsArray || IsList(fi.FieldType))
                 {
                     holder = new ListHolder();
                 }
@@ -171,6 +175,11 @@ namespace Explorer
                 holder.classType = type;
                 holder.fieldInfo = fi;
                 return holder;
+            }
+
+            private static bool IsList(Type t)
+            {
+                return t.IsGenericType && t.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
             }
 
             public abstract void UpdateValue(object obj);
@@ -196,7 +205,15 @@ namespace Explorer
                 else
                 {
                     GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
-                    m_value = GUILayout.TextField(m_value?.ToString() ?? "");
+
+                    if (m_value.ToString().Length > 37)
+                    {
+                        m_value = GUILayout.TextArea(m_value?.ToString() ?? "", GUILayout.MaxWidth(350));
+                    }
+                    else
+                    {
+                        m_value = GUILayout.TextField(m_value?.ToString() ?? "", GUILayout.MaxWidth(350));
+                    }
 
                     if (GUILayout.Button("<color=#00FF00>Apply</color>", GUILayout.Width(60)))
                     {
@@ -420,7 +437,13 @@ namespace Explorer
                 }
                 else
                 {
-                    GUILayout.Label(fieldInfo.FieldType.ToString());
+                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+                    if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + fieldInfo.FieldType + "</color>", GUILayout.MaxWidth(320)))
+                    {
+                        MenuManager.ReflectObject(Value);
+                    }
+                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+
                     foreach (var entry in m_array)
                     {
                         // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
@@ -460,7 +483,19 @@ namespace Explorer
 
             public override void UpdateValue(object obj)
             {
-                m_array = fieldInfo.GetValue(fieldInfo.IsStatic ? null : obj) as Array;
+                var value = fieldInfo.GetValue(fieldInfo.IsStatic ? null : obj);
+
+                if (value != null)
+                {
+                    if (value is Array)
+                    {
+                        m_array = value as Array;
+                    }
+                    else if (value is IList list)
+                    {
+                        m_array = list.Cast<object>().ToArray();
+                    }
+                }
             }
         }
 

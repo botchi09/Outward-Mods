@@ -10,7 +10,9 @@ namespace Explorer
     {
         public static MenuManager Instance;
 
-        public static int CurrentWindowID { get; set; } = 1000;
+        private const int m_mainWindowID = 10;
+
+        public static int CurrentWindowID { get; set; } = 500000;
         public static bool ShowMenu { get; set; } = false;
 
         private static Rect m_rect = new Rect(5, 5, 550, 700);
@@ -93,25 +95,33 @@ namespace Explorer
             Pages[m_currentPage].Update();
         }
 
+        private static bool m_init = false;
+
         internal void OnGUI()
         {
-            if (m_nofocusTex == null || m_focusTex == null)
+            if (!m_init)
             {
-                m_nofocusTex = MakeTex(550, 700, new Color(0f, 0f, 0f, 0.75f));
-                m_focusTex = MakeTex(550, 700, new Color(0f, 0f, 0f, 0.9f));
-
-                GUI.skin.window.normal.background = m_nofocusTex;
-                GUI.skin.window.onNormal.background = m_focusTex;
+                GuiInit();
             }
-
 
             if (ShowMenu)
             {
-                m_rect = GUI.Window(10, m_rect, MainWindow, "Outward Explorer");
+                m_rect = GUI.Window(m_mainWindowID, m_rect, MainWindow, "Outward Explorer");
             }
         }
 
-        private void MainWindow(int id)
+        private void GuiInit()
+        {
+            m_nofocusTex = MakeTex(550, 700, new Color(0f, 0f, 0f, 0.75f));
+            m_focusTex = MakeTex(550, 700, new Color(0f, 0f, 0f, 0.9f));
+
+            GUI.skin.window.normal.background = m_nofocusTex;
+            GUI.skin.window.onNormal.background = m_focusTex;
+
+            m_init = true;
+        }
+
+        private void MainWindow(int id = m_mainWindowID)
         {
             GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
 
@@ -129,6 +139,8 @@ namespace Explorer
             page.scroll = GUILayout.BeginScrollView(page.scroll);
             page.DrawWindow();
             GUILayout.EndScrollView();
+
+            m_rect = ResizeWindow(m_rect, m_mainWindowID);
 
             GUILayout.EndArea();
         }
@@ -235,5 +247,104 @@ namespace Explorer
                 }
             }
         }
-    }
+
+        static readonly GUIContent gcDrag = new GUIContent("///", "drag to resize");
+
+        private static bool isResizing = false;
+        private static Rect m_currentResize;
+        private static int m_currentWindow;
+
+        public static Rect ResizeWindow(Rect _rect, int ID)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Space(_rect.width - 27);
+
+            GUILayout.Button(gcDrag, GUI.skin.box, new GUILayoutOption[] { GUILayout.Width(25), GUILayout.Height(25) });
+
+            var r = GUILayoutUtility.GetLastRect();
+
+            Vector2 mouse = GUIUtility.ScreenToGUIPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+
+            if (r.Contains(mouse) && Input.GetMouseButtonDown(0))
+            {
+                isResizing = true;
+                m_currentWindow = ID;
+                m_currentResize = new Rect(mouse.x, mouse.y, _rect.width, _rect.height);
+            }
+            else if (!Input.GetMouseButton(0))
+            {
+                isResizing = false;
+            }
+            
+            if (isResizing && ID == m_currentWindow)
+            {
+                _rect.width = Mathf.Max(100, m_currentResize.width + (mouse.x - m_currentResize.x));
+                _rect.height = Mathf.Max(100, m_currentResize.height + (mouse.y - m_currentResize.y));
+                _rect.xMax = Mathf.Min(Screen.width, _rect.xMax);  // modifying xMax affects width, not x
+                _rect.yMax = Mathf.Min(Screen.height, _rect.yMax);  // modifying yMax affects height, not y
+            }
+
+            GUILayout.EndHorizontal();
+
+            return _rect;
+        }
+
+            //private static bool draggingLeft = false;
+            //private static bool draggingRight = false;
+
+            //public static void HorizResizer(ref Rect window)
+            //{
+            //    window = HorizResizer(window);
+            //    window = HorizResizer(window, false);
+            //}
+
+            //private static Rect HorizResizer(Rect window, bool right = true, float detectionRange = 8f)
+            //{
+            //    detectionRange *= 0.5f;
+            //    Rect resizer = window;
+
+            //    if (right)
+            //    {
+            //        resizer.xMin = resizer.xMax - detectionRange;
+            //        resizer.xMax += detectionRange;
+            //    }
+            //    else
+            //    {
+            //        resizer.xMax = resizer.xMin + detectionRange;
+            //        resizer.xMin -= detectionRange;
+            //    }
+
+            //    Event current = Event.current;
+            //   // EditorGUIUtility.AddCursorRect(resizer, MouseCursor.ResizeHorizontal);
+
+            //    // if mouse is no longer dragging, stop tracking direction of drag
+            //    if (current.type == EventType.MouseUp)
+            //    {
+            //        draggingLeft = false;
+            //        draggingRight = false;
+            //    }
+
+            //    // resize window if mouse is being dragged within resizor bounds
+            //    if (current.mousePosition.x > resizer.xMin &&
+            //        current.mousePosition.x < resizer.xMax &&
+            //        current.type == EventType.MouseDrag &&
+            //        current.button == 0 ||
+            //        draggingLeft ||
+            //        draggingRight)
+            //    {
+            //        if (right == !draggingLeft)
+            //        {
+            //            window.width = current.mousePosition.x + current.delta.x;
+            //            draggingRight = true;
+            //        }
+            //        else if (!right == !draggingRight)
+            //        {
+            //            window.width -= (current.mousePosition.x + current.delta.x);
+            //            draggingLeft = true;
+            //        }
+            //    }
+
+            //    return window;
+            //}
+        }
 }

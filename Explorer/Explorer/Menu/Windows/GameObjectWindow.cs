@@ -59,7 +59,7 @@ namespace Explorer
         private void InspectGameObject(GameObject obj)
         {
             var window = MenuManager.InspectGameObject(obj);
-            window.m_rect = new Rect(this.m_rect.x, this.m_rect.y, 550, 700);
+            window.m_rect = new Rect(this.m_rect.x, this.m_rect.y, this.m_rect.width, this.m_rect.height);
             Destroy(this);
         }
 
@@ -124,6 +124,8 @@ namespace Explorer
             GameObjectControls();
 
             GUILayout.EndScrollView();
+
+            m_rect = MenuManager.ResizeWindow(m_rect, windowID);
         }
 
         private void TransformList()
