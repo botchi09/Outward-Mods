@@ -251,7 +251,7 @@ namespace Explorer
             GUILayout.BeginArea(new Rect(m_windowRect.width - 25, 30, 20, m_windowRect.height - 55));
 
             //display offset scroll to screen
-            m_currentScroll = GUILayout.VerticalScrollbar(m_currentScroll, 10, maxLines + 10, 24, GUILayout.Height(m_windowRect.height - 40));
+            m_currentScroll = GUILayout.VerticalScrollbar(m_currentScroll, 10, maxLines + 10, 24, GUILayout.Height(m_windowRect.height - 55));
             m_offset = (int)(maxLines - m_currentScroll);
             GUILayout.EndArea();
 
