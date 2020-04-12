@@ -267,6 +267,7 @@ namespace Explorer
             GUILayout.TextArea(m_currentOutputText, linesCharacterCount, m_guiStyle, GUILayout.Height(m_windowRect.height - 40));
             GUILayout.EndArea();
 
+            m_windowRect = MenuManager.ResizeWindow(m_windowRect, m_GUIID);
         }
 
     }
