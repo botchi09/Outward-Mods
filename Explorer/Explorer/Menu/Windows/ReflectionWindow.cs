@@ -14,11 +14,8 @@ namespace Explorer
         public override string Name { get => "Object Reflection"; set => Name = value; }
 
         private object m_object;
-
         private string m_searchFilter = "";
-
         private List<FieldInfoHolder> m_FieldInfos;
-
         private bool m_autoUpdate = false;
 
         public override void Init()
@@ -44,7 +41,9 @@ namespace Explorer
                     continue;
                 }
                 names.Add(fi.Name);
-                m_FieldInfos.Add(FieldInfoHolder.ParseFieldInfo(type, fi));
+
+                var fiHolder = FieldInfoHolder.ParseFieldInfo(type, fi);                
+                m_FieldInfos.Add(fiHolder);
             }
             if (type.BaseType != null)
             {
@@ -83,7 +82,7 @@ namespace Explorer
                     GUILayout.BeginHorizontal();
                     GUI.skin.label.alignment = TextAnchor.MiddleRight;
                     GUILayout.Label("GameObject:");
-                    if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", GUILayout.MaxWidth(200)))
+                    if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", GUILayout.MaxWidth(m_rect.width - 350)))
                     {
                         MenuManager.InspectGameObject(obj);
                     }
@@ -121,7 +120,7 @@ namespace Explorer
                     }
 
                     GUILayout.BeginHorizontal(GUILayout.Height(25));
-                    holder.Draw(m_object);
+                    holder.Draw(m_object, this.m_rect);
                     GUILayout.EndHorizontal();
                 }
 
@@ -144,6 +143,8 @@ namespace Explorer
             public Type classType;
             public FieldInfo fieldInfo;
             public object Value;
+
+            // public Rect m_window;
 
             public static FieldInfoHolder ParseFieldInfo(Type type, FieldInfo fi)
             {
@@ -184,14 +185,14 @@ namespace Explorer
 
             public abstract void UpdateValue(object obj);
             public abstract void SetValue(object value, object obj);
-            public abstract void Draw(object obj);
+            public abstract void Draw(object obj, Rect m_window);
         }
 
         public class PrimitiveHolder : FieldInfoHolder
         {
             private object m_value;
 
-            public override void Draw(object obj)
+            public override void Draw(object obj, Rect m_window)
             {
                 if (fieldInfo.FieldType == typeof(bool))
                 {
@@ -208,11 +209,11 @@ namespace Explorer
 
                     if (m_value.ToString().Length > 37)
                     {
-                        m_value = GUILayout.TextArea(m_value?.ToString() ?? "", GUILayout.MaxWidth(350));
+                        m_value = GUILayout.TextArea(m_value?.ToString() ?? "", GUILayout.MaxWidth(m_window.width - 260));
                     }
                     else
                     {
-                        m_value = GUILayout.TextField(m_value?.ToString() ?? "", GUILayout.MaxWidth(350));
+                        m_value = GUILayout.TextField(m_value?.ToString() ?? "", GUILayout.MaxWidth(m_window.width - 260));
                     }
 
                     if (GUILayout.Button("<color=#00FF00>Apply</color>", GUILayout.Width(60)))
@@ -290,7 +291,7 @@ namespace Explorer
         {
             private GameObject m_value;
 
-            public override void Draw(object _obj)
+            public override void Draw(object _obj, Rect m_window)
             {
                 GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
@@ -337,7 +338,7 @@ namespace Explorer
                     label += m_value.name;
 
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(320) }))
+                    if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(m_window.width - 220) }))
                     {
                         MenuManager.InspectGameObject(m_value);
                     }
@@ -377,7 +378,7 @@ namespace Explorer
             private string[] m_values;
             private int m_selectedValue;
 
-            public override void Draw(object obj)
+            public override void Draw(object obj, Rect m_window)
             {
                 GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
@@ -427,7 +428,7 @@ namespace Explorer
         {
             private Array m_array;
 
-            public override void Draw(object obj)
+            public override void Draw(object obj, Rect m_window)
             {
                 GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
@@ -438,7 +439,7 @@ namespace Explorer
                 else
                 {
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + fieldInfo.FieldType + "</color>", GUILayout.MaxWidth(320)))
+                    if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + fieldInfo.FieldType + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                     {
                         MenuManager.ReflectObject(Value);
                     }
@@ -449,7 +450,7 @@ namespace Explorer
                         // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
-                        GUILayout.Space(180);
+                        GUILayout.Space(190);
 
                         if (entry == null)
                         {
@@ -465,7 +466,7 @@ namespace Explorer
                             else
                             {
                                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                                if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(350)))
+                                if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                                 {
                                     MenuManager.ReflectObject(entry);
                                 }
@@ -501,14 +502,14 @@ namespace Explorer
 
         public class UnsupportedHolder : FieldInfoHolder
         {
-            public override void Draw(object obj)
+            public override void Draw(object obj, Rect m_window)
             {
                 GUILayout.Label("<color=cyan>" + fieldInfo.Name + ":</color>", GUILayout.Width(180));
 
                 if (Value != null)
                 {
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>" + Value.ToString() + "</color>", GUILayout.MaxWidth(320)))
+                    if (GUILayout.Button("<color=yellow>" + Value.ToString() + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                     {
                         MenuManager.ReflectObject(Value);
                     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,9 @@ using System.Reflection;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using NodeCanvas.Framework;
+using NodeCanvas.DialogueTrees;
+using NodeCanvas.Tasks.Actions;
 
 namespace Explorer
 {
@@ -54,7 +58,105 @@ namespace Explorer
             {
                 MenuManager.ShowMenu = !MenuManager.ShowMenu;
             }
+
+            //if (Input.GetKeyDown(KeyCode.F11))
+            //{
+            //    Debug.Log("Searching for negotiation power");
+
+            //    StartCoroutine(ParseScenesForGraphs());
+            //}
         }
+
+        //private IEnumerator ParseScenesForGraphs()
+        //{
+        //    foreach (string sceneName in SceneBuildNames.Keys)
+        //    {
+        //        /*        Load Scene        */
+
+        //        if (SceneManagerHelper.ActiveSceneName != sceneName)
+        //        {
+        //            NetworkLevelLoader.Instance.RequestSwitchArea(sceneName, 0, 1.5f);
+
+        //            yield return new WaitForSeconds(5f);
+
+        //            while (NetworkLevelLoader.Instance.IsGameplayPaused)
+        //            {
+        //                NetworkLevelLoader loader = NetworkLevelLoader.Instance;
+        //                At.SetValue(true, typeof(NetworkLevelLoader), loader, "m_continueAfterLoading");
+        //                global::MenuManager.Instance.HideMasterLoadingScreen();
+
+        //                yield return new WaitForSeconds(1f);
+        //            }
+        //            yield return new WaitForSeconds(2f);
+        //        }
+
+        //        Debug.Log("--- Parsing " + sceneName + " ---");
+
+        //        /*        Parse Scene        */
+        //        FindGraphs();
+        //    }
+        //}
+
+        //private static readonly List<string> ParsedGraphs = new List<string>();
+
+        //private void FindGraphs()
+        //{
+        //    foreach (var graph in Resources.FindObjectsOfTypeAll<Graph>())
+        //    {
+        //        if (!ParsedGraphs.Contains(graph.name))
+        //        {
+        //            ParsedGraphs.Add(graph.name);
+        //        }
+        //        else
+        //        {
+        //            continue;
+        //        }
+
+        //        var nodes = At.GetValue(typeof(Graph), graph, "_nodes") as List<Node>;
+
+        //        foreach (var node in nodes.Where(x => x is ActionNode))
+        //        {
+        //            var act_node = (node as ActionNode).action;
+
+        //            if (act_node is ActionList list)
+        //            {
+        //                foreach (var action in list.actions)
+        //                {
+        //                    if (action is SendQuestEvent sendEvent)
+        //                    {
+        //                        CheckForNegotiation(graph, node as ActionNode, sendEvent);
+        //                    }
+        //                }
+        //            }
+        //            else if (act_node is SendQuestEvent sendEvent)
+        //            {
+        //                CheckForNegotiation(graph, node as ActionNode, sendEvent);
+        //            }
+        //        }
+        //    }
+
+        //    Debug.Log("Finished parsing scene for graphs");
+        //}
+
+        //private void CheckForNegotiation(Graph graph, ActionNode node, SendQuestEvent _event) 
+        //{
+        //    if (_event.QuestEventRef.Event.EventName == "General_NegociationPower")
+        //    {
+        //        Debug.LogWarning("-------- Found source of negotiation power! --------");
+
+        //        Debug.Log("Graph: " + graph.name);
+        //        Debug.Log("Stack: " + _event.StackAmount);
+
+        //        if (node.inConnections != null && node.inConnections.Count > 0 && node.inConnections[0].sourceNode != null)
+        //        {
+        //            Debug.Log("Source node: " + node.inConnections[0].sourceNode.ToString());
+        //        }
+        //        else
+        //        {
+        //            Debug.Log("Source node is null!");
+        //        }
+        //    }
+        //}
 
         // ************** public helpers **************
 
@@ -94,20 +196,21 @@ namespace Explorer
 
         // ***************** LOG DEBUGGING ******************** //
 
+        // logs i want to ignore
+        private static readonly string[] blacklist = new string[]
+        {
+            "Internal: JobTempAlloc",
+            "GUI Error:",
+            "BoxColliders does not support negative scale or size",
+            "is registered with more than one LODGroup",
+            "only 0 controls when doing Repaint",
+            "it is not close enough to the NavMesh",
+            "Start Node:",
+        };
+
         // Log Debug messages to OLogger window
         private void Application_logMessageReceived(string message, string stackTrace, LogType type)
         {
-            // useless spam errors (unity warnings)
-            string[] blacklist = new string[]
-            {
-                "Internal: JobTempAlloc",
-                "GUI Error:",
-                "BoxColliders does not support negative scale or size",
-                "is registered with more than one LODGroup",
-                "only 0 controls when doing Repaint",
-                "it is not close enough to the NavMesh"
-            };
-
             foreach (string s in blacklist)
             {
                 if (message.ToLower().Contains(s.ToLower()))
@@ -248,9 +351,9 @@ namespace Explorer
         private void SendQuestEventHook(On.NodeCanvas.Tasks.Actions.SendQuestEvent.orig_OnExecute orig, NodeCanvas.Tasks.Actions.SendQuestEvent self)
         {
             var _event = self.QuestEventRef.Event;
-            var s = self.QuestEventRef.EventUID;
+            //var s = self.QuestEventRef.EventUID;
 
-            if (_event != null && s != null)
+            if (_event != null)
             {
                 LogQuestEvent(_event, self.StackAmount);
             }
