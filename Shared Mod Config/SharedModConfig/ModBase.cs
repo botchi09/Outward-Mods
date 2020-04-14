@@ -10,15 +10,16 @@ namespace SharedModConfig
 {
     public class ModBase : PartialityMod
     {
-        public static string ModName = "SharedModConfig";
-        public static string ModVersion = "1.3";
-        public static string ModAuthor = "Sinai";
+        public const string ModName = "SharedModConfig";
+        public const string ModVersion = "1.3";
+        public const string ModAuthor = "Sinai";
 
         public ModBase()
         {
             ModID = ModName;
             author = ModAuthor;
             Version = ModVersion;
+            this.loadPriority = -998; // lower number = higher priority
         }
 
         public override void OnEnable()
