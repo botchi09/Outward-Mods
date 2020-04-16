@@ -301,50 +301,7 @@ namespace Explorer
                 }
                 else
                 {
-                    bool enabled = m_value.activeInHierarchy;
-                    bool children = m_value.transform.childCount > 0;
-                    bool _static = false;
-
-                    GUI.skin.button.alignment = TextAnchor.UpperLeft;
-
-                    if (enabled)
-                    {
-                        if (m_value.GetComponent<MeshRenderer>() is MeshRenderer m && m.isPartOfStaticBatch)
-                        {
-                            _static = true;
-                            GUI.color = Color.yellow;
-                        }
-                        else if (children)
-                        {
-                            GUI.color = Color.green;
-                        }
-                        else
-                        {
-                            GUI.color = Global.LIGHT_GREEN;
-                        }
-                    }
-                    else
-                    {
-                        GUI.color = Global.LIGHT_RED;
-                    }
-
-                    // build name
-                    string label = "";
-                    if (_static) { label = "(STATIC) " + label; }
-
-                    if (children)
-                        label += "[" + m_value.transform.childCount + " children] ";
-
-                    label += m_value.name;
-
-                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.MaxWidth(m_window.width - 220) }))
-                    {
-                        MenuManager.InspectGameObject(m_value);
-                    }
-
-                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-                    GUI.color = Color.white;
+                    MenuManager.DrawGameObjectRow(_obj as GameObject, null, false, m_window.width - 220);
                 }
             }
 

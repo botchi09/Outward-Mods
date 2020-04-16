@@ -87,7 +87,7 @@ namespace Explorer
                 {
                     foreach (var obj in m_searchResults)
                     {
-                        DrawObjectRow(obj);
+                        MenuManager.DrawGameObjectRow(obj, null, false, MenuManager.m_rect.width - 70);
                     }
                 }
                 else
@@ -101,7 +101,7 @@ namespace Explorer
             }
         }
 
-        private void SetToggleTrue(ref bool toggle)
+        private void SetSceneMode(ref bool toggle)
         {
             m_anyMode = false;
             m_noSceneMode = false;
@@ -122,25 +122,9 @@ namespace Explorer
             }
             if (GUILayout.Button(label))
             {
-                SetToggleTrue(ref toggle);
+                SetSceneMode(ref toggle);
             }
             GUI.color = Color.white;
-        }
-
-        private void DrawObjectRow(GameObject obj)
-        {
-            GUILayout.BeginVertical(GUI.skin.box);
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(obj.name);
-
-            if (GUILayout.Button("Inspect", GUILayout.Width(100)))
-            {
-                MenuManager.InspectGameObject(obj);
-            }
-            GUILayout.EndHorizontal();
-
-            GUILayout.EndVertical();
         }
 
 

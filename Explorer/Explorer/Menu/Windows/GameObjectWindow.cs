@@ -87,10 +87,6 @@ namespace Explorer
             scroll = GUILayout.BeginScrollView(scroll);
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Name:", GUILayout.Width(50));
-            GUILayout.TextArea(m_name);
-            GUILayout.EndHorizontal();
-
             GUILayout.Label("Scene: <color=cyan>" + (m_scene == "" ? "n/a" : m_scene) + "</color>");
             if (m_scene == SceneManagerHelper.ActiveSceneName)
             {
@@ -100,26 +96,45 @@ namespace Explorer
                     MenuManager.SetCurrentPage(0);
                 }
             }
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            string pathlabel = "Path: ";
+            GUILayout.Label("Path:", GUILayout.Width(50));
+            string pathlabel = m_object.transform.GetGameObjectPath();
             if (m_object.transform.parent != null)
             {
-                pathlabel += m_object.transform.GetGameObjectPath();
                 if (GUILayout.Button("<-", GUILayout.Width(35)))
                 {
                     InspectGameObject(m_object.transform.parent.gameObject);
                 }
             }
-            GUILayout.Label(pathlabel);
+            GUILayout.TextArea(pathlabel);
             GUILayout.EndHorizontal();
 
-            if (m_object.transform.parent != null || m_object.transform.childCount > 0)
-            {
-                TransformList();
-            }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Name:", GUILayout.Width(50));
+            GUILayout.TextArea(m_name);
+            GUILayout.EndHorizontal();
 
+            //GUILayout.BeginHorizontal();
+            //GUILayout.Label("GameObject Active:", GUILayout.Width(150));
+            //bool m_active = m_object.activeSelf;
+            //m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>");
+            //if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
+            //GUILayout.EndHorizontal();
+
+            // --- Horizontal Columns section ---
+            GUILayout.BeginHorizontal();
+
+            GUILayout.BeginVertical(GUILayout.Width(m_rect.width / 2 - 17));
+            TransformList();
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(GUILayout.Width(m_rect.width / 2 - 17));
             ComponentList();
+            GUILayout.EndVertical();
+
+            GUILayout.EndHorizontal(); // end horiz columns
 
             GameObjectControls();
 
@@ -130,7 +145,7 @@ namespace Explorer
 
         private void TransformList()
         {
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.MaxHeight(225), GUILayout.MinHeight(100), GUILayout.ExpandHeight(true) });
+            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.MaxHeight(450), GUILayout.MinHeight(100), GUILayout.ExpandHeight(true) });
             m_transformScroll = GUILayout.BeginScrollView(m_transformScroll);
 
             GUILayout.Label("<b>Children:</b>");
@@ -138,11 +153,11 @@ namespace Explorer
             {
                 foreach (var obj in m_children.Where(x => x.childCount > 0))
                 {
-                    DrawGameObjectRow(obj.gameObject);
+                    MenuManager.DrawGameObjectRow(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
                 foreach (var obj in m_children.Where(x => x.childCount == 0))
                 {
-                    DrawGameObjectRow(obj.gameObject);
+                    MenuManager.DrawGameObjectRow(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
             }
             else
@@ -156,7 +171,7 @@ namespace Explorer
 
         private void ComponentList()
         {
-            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.MaxHeight(225), GUILayout.MinHeight(100), GUILayout.ExpandHeight(true) });
+            GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.MaxHeight(450), GUILayout.MinHeight(100), GUILayout.ExpandHeight(true) });
             m_compScroll = GUILayout.BeginScrollView(m_compScroll);
             GUILayout.Label("<b><size=15>Components</size></b>");
 
@@ -181,7 +196,7 @@ namespace Explorer
 
         private void GameObjectControls()
         {
-            GUILayout.BeginVertical(GUI.skin.box);
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(500));
             GUILayout.Label("<b><size=15>GameObject Controls</size></b>");
 
             if (CharacterManager.Instance.GetFirstLocalCharacter() is Character c)
@@ -296,56 +311,6 @@ namespace Explorer
                     m_object.transform.position = pos;
                 }
             }
-            GUILayout.EndHorizontal();
-        }
-
-        private void DrawGameObjectRow(GameObject obj)
-        {
-            bool enabled = obj.activeInHierarchy;
-            bool children = obj.transform.childCount > 0;
-            bool _static = false;
-
-            GUILayout.BeginHorizontal();
-            GUI.skin.button.alignment = TextAnchor.UpperLeft;
-
-            if (enabled)
-            {
-                if (obj.GetComponent<MeshRenderer>() is MeshRenderer m && m.isPartOfStaticBatch)
-                {
-                    _static = true;
-                    GUI.color = Color.yellow;
-                }
-                else if (children)
-                {
-                    GUI.color = Color.green;
-                }
-                else
-                {
-                    GUI.color = Global.LIGHT_GREEN;
-                }
-            }
-            else
-            {
-                GUI.color = Global.LIGHT_RED;
-            }
-
-            // build name
-            string label = "";
-            if (_static) { label = "(STATIC) " + label; }
-
-            if (children)
-                label += "[" + obj.transform.childCount + " children] ";
-
-            label += obj.name;
-
-            if (GUILayout.Button(label, GUILayout.Height(22)))
-            {
-                InspectGameObject(obj);
-            }
-
-            GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-            GUI.color = Color.white;
-
             GUILayout.EndHorizontal();
         }
     }

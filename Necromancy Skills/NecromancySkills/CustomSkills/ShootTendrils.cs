@@ -57,7 +57,7 @@ namespace NecromancerSkills
             var projectile = projectileObj.GetComponent<RaycastProjectile>();
             shootTendrils.BaseProjectile = projectile;
             shootTendrils.IntanstiatedAmount = 8; // 2 per character, potential 3 summoned skeletons, so 8 total subeffects needed.
-
+            
             projectile.Lifespan = 0.75f;
             projectile.DisableOnHit = false;
             projectile.EndMode = Projectile.EndLifeMode.LifetimeOnly;

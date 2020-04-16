@@ -41,15 +41,15 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\HOOKS-Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.RuntimeDetour.dll</HintPath>
+      <HintPath>..\..\..\PartialityWrapper\Release\BepInEx_x64_5.0.1.0\core\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Partiality">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Partiality.dll</HintPath>
+      <HintPath>..\..\..\PartialityWrapper\Release\BepInEx\plugins\PartialityWrapper\Partiality.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Photon3Unity3D">
@@ -61,19 +61,31 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="SharedModConfig">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\SharedModConfig.dll</HintPath>
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SharedModConfig.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Sideloader">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Mods\Sideloader.dll</HintPath>
+    <Reference Include="SideLoader">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <Reference Include="System">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Core">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Data">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>

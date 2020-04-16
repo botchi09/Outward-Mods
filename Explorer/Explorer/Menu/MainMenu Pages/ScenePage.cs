@@ -130,14 +130,14 @@ namespace Explorer
                     }
                     else
                     {
-                        GUILayout.Label("Scene Root:");
+                        GUILayout.Label("Scene Root GameObjects:");
                     }
 
                     if (m_objectList.Count > 0)
                     {
                         foreach (var obj in m_objectList)
                         {
-                            DrawGameObjectRow(obj);
+                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_rect.width - 170);
                         }
                     }
                     else
@@ -158,7 +158,7 @@ namespace Explorer
                     {
                         foreach (var obj in m_searchResults)
                         {
-                            DrawGameObjectRow(obj);
+                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_rect.width - 170);
                         }
                     }
                     else
@@ -173,72 +173,7 @@ namespace Explorer
             }
         }
 
-        private void DrawGameObjectRow(GameObject obj)
-        {
-            if (obj == null) { return; }
-
-            bool enabled = obj.activeInHierarchy;
-            bool children = obj.transform.childCount > 0;
-            bool _static = false;
-
-            GUILayout.BeginHorizontal();
-            GUI.skin.button.alignment = TextAnchor.UpperLeft;
-
-            if (enabled)
-            {
-                if (obj.GetComponent<MeshRenderer>() is MeshRenderer m && m.isPartOfStaticBatch)
-                {
-                    _static = true;
-                    GUI.color = Color.yellow;
-                }
-                else if (children)
-                {
-                    GUI.color = Color.green;
-                }
-                else
-                {
-                    GUI.color = Global.LIGHT_GREEN;
-                }
-            }
-            else
-            {
-                GUI.color = Global.LIGHT_RED;
-            }
-
-            // build name
-            string label = "";
-            if (_static) { label = "(STATIC) " + label; }
-
-            if (children)
-                label += "[" + obj.transform.childCount + " children] ";
-
-            label += obj.name;
-
-            if (obj.transform.childCount > 0)
-            {
-                if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(380) }))
-                {
-                    SetTransformTarget(obj);
-                }
-            }
-            else
-            {
-                if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(380) }))
-                {
-                    MenuManager.InspectGameObject(obj);
-                }
-            }
-
-            GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-            GUI.color = Color.white;
-
-            if (GUILayout.Button("Inspect"))
-            {
-                MenuManager.InspectGameObject(obj);
-            }
-
-            GUILayout.EndHorizontal();
-        }
+        
 
         // -------- Actual Methods (not drawing GUI) ---------- //
 

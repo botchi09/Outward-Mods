@@ -2,25 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using SinAPI;
 using UnityEngine;
-//using OModAPI;
+using System.IO;
 
 namespace NecromancerSkills
 {
     public class SummonSkeleton : Effect // Inherits from the game's "Effect" class, so it works with those systems automatically.
     {
-	    //public static readonly float HealthCost = 0.10f; // 10% of current health
+		//public static readonly float HealthCost = 0.10f; // 10% of current health
 
 		// Setup (called from SkillManager init)
 		#region Summon Skill Setup
 		public static void SetupSummon()
 		{
 			var resurrect = ResourcesPrefabManager.Instance.GetItemPrefab(8890103) as Skill;
-
-			// setup skill
-			resurrect.CastModifier = Character.SpellCastModifier.Mobile; // can move while casting but movement speed is 0.7x
-			resurrect.MobileCastMovementMult = 0.7f;
 
 			// destroy the existing skills, but keep the rest (VFX / Sound).
 			DestroyImmediate(resurrect.transform.Find("Lightning").gameObject);

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 namespace Explorer
 {
@@ -15,10 +17,14 @@ namespace Explorer
         public static int CurrentWindowID { get; set; } = 500000;
         public static bool ShowMenu { get; set; } = false;
 
-        private static Rect m_rect = new Rect(5, 5, 550, 700);
+        public static Rect m_rect = new Rect(5, 5, 550, 700);
         private static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;
+
+        public static bool MouseInWindow { get; set; }
         
+        // ========= Public Helpers =========
+
         public static int GetNewWindowID()
         {
             return CurrentWindowID++;
@@ -71,6 +77,11 @@ namespace Explorer
             return ExplorerWindow.CreateWindow<ReflectionWindow>(obj);
         }
 
+        public static bool IsMouseInRect(Rect rect)
+        {
+            return rect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+        }
+
         // --------------------- INTERNAL MAIN MENU FUNCTIONS ---------------------- //
 
         private Texture2D m_nofocusTex;
@@ -88,10 +99,27 @@ namespace Explorer
             {
                 page.Init();
             }
+
+            // prevent Rewired GUI click-through
+            On.UICursor.StateForCursorButton += UICursor_StateForCursorButton;
+        }
+
+        private PointerEventData.FramePressState UICursor_StateForCursorButton(On.UICursor.orig_StateForCursorButton orig, UICursor self, int _buttonID)
+        {
+            if (MouseInWindow)
+            {
+                return PointerEventData.FramePressState.NotChanged;
+            }
+            else
+            {
+                return orig(self, _buttonID);
+            }
         }
 
         internal void Update()
         {
+            MouseInWindow = false;
+
             Pages[m_currentPage].Update();
         }
 
@@ -107,6 +135,11 @@ namespace Explorer
             if (ShowMenu)
             {
                 m_rect = GUI.Window(m_mainWindowID, m_rect, MainWindow, "Outward Explorer");
+
+                if (!MouseInWindow)
+                {
+                    MouseInWindow = IsMouseInRect(m_rect);
+                }
             }
         }
 
@@ -177,6 +210,84 @@ namespace Explorer
             result.SetPixels(pix);
             result.Apply();
             return result;
+        }
+
+        // ============= Public helper for GameObject rows ================ //
+        
+        /// <summary>
+        /// Helper for drawing a "GameObject Row" (listing a gameobject entry on a list, with button / details)
+        /// </summary>
+        /// <param name="obj">the GameObject</param>
+        /// <param name="specialInspectMethod">Special optional method for what happens if you click a gameobject, otherwise opens a GameObject window</param>
+        public static void DrawGameObjectRow(GameObject obj, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
+        {
+            if (obj == null) { return; }
+
+            bool enabled = obj.activeInHierarchy;
+            bool children = obj.transform.childCount > 0;
+
+            GUILayout.BeginHorizontal();
+            GUI.skin.button.alignment = TextAnchor.UpperLeft;
+
+            // ------ build name ------
+
+            string label = children ? "[" + obj.transform.childCount + " children] " : "";
+            label += obj.name;
+
+            // ------ Color -------
+
+            if (enabled)
+            {
+                if (children)
+                {
+                    GUI.color = Color.green;
+                }
+                else
+                {
+                    GUI.color = Global.LIGHT_GREEN;
+                }
+            }
+            else
+            {
+                GUI.color = Global.LIGHT_RED;
+            }
+
+            // ------ toggle active button ------
+
+            enabled = GUILayout.Toggle(enabled, "", GUILayout.Width(18));
+            if (obj.activeSelf != enabled)
+            {
+                obj.SetActive(enabled);
+            }
+
+            // ------- actual button ---------
+
+            if (GUILayout.Button(label, new GUILayoutOption[] { GUILayout.Height(22), GUILayout.Width(width) }))
+            {
+                if (specialInspectMethod != null)
+                {
+                    specialInspectMethod(obj);
+                }
+                else
+                {
+                    InspectGameObject(obj);
+                }
+            }
+
+            // ------ small "Inspect" button on the right ------
+
+            GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+            GUI.color = Color.white;
+
+            if (showSmallInspectBtn)
+            {
+                if (GUILayout.Button("Inspect"))
+                {
+                    InspectGameObject(obj);
+                }
+            }
+
+            GUILayout.EndHorizontal();
         }
 
         // ============= Resize Window Helper ============
@@ -276,7 +387,15 @@ namespace Explorer
 
             internal void OnGUI()
             {
-                m_rect = GUI.Window(windowID, m_rect, WindowFunction, Name);
+                if (ShowMenu)
+                {
+                    m_rect = GUI.Window(windowID, m_rect, WindowFunction, Name);
+
+                    if (!MouseInWindow)
+                    {
+                        MouseInWindow = IsMouseInRect(m_rect);
+                    }
+                }
             }
 
             public void Header()
