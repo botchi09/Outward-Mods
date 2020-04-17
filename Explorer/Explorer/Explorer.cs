@@ -40,34 +40,6 @@ namespace Explorer
 
             // Skip Logos hook
             On.StartupVideo.Start += new On.StartupVideo.hook_Start(StartupVideo_Start);
-
-            // temp debug
-            SL.OnPacksLoaded += SL_OnPacksLoaded;
-        }
-
-        // ========== temp debug ========        
-
-        private void SL_OnPacksLoaded()
-        {
-            var customLeap = CustomItems.CreateCustomItem(8100290, 8999995, "newleap") as MeleeSkill;
-
-            CustomItems.SetNameAndDescription(customLeap, "Custom Attack Skill", "test");
-            At.SetValue(Character.SpellCastType.AxeLeap, typeof(Item), customLeap, "m_activateEffectAnimType");
-
-            var effects = new GameObject("Activation");
-            effects.transform.parent = customLeap.transform;
-
-            var customHit = effects.AddComponent<CustomHitCollision>();
-            customHit.Delay = 0.5f;
-        }
-
-        public class CustomHitCollision : Effect
-        {
-            protected override void ActivateLocally(Character _affectedCharacter, object[] _infos)
-            {
-                Debug.Log(this.GetType() + "::ActivateLocally");
-                (_affectedCharacter?.CurrentWeapon as MeleeWeapon)?.HitStarted(-1);
-            }
         }
 
         // ============= END TEMP DEBUG ============== //
