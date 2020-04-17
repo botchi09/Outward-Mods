@@ -12,50 +12,117 @@ namespace Explorer
     {
         public static MenuManager Instance;
 
-        private const int m_mainWindowID = 10;
+        public static bool ShowWindows { get; set; } = false;
 
+        public static List<ExplorerWindow> Windows = new List<ExplorerWindow>();
         public static int CurrentWindowID { get; set; } = 500000;
-        public static bool ShowMenu { get; set; } = false;
+        private static Rect m_lastWindowRect;
+        private static Rect m_lastReflectRect;
 
-        public static Rect m_rect = new Rect(5, 5, 550, 700);
+        private const int m_mainWindowID = 10;
+        public static Rect m_mainRect = new Rect(5, 5, 550, 700);
         private static readonly List<WindowPage> Pages = new List<WindowPage>();
         private static int m_currentPage = 0;
 
-        public static bool MouseInWindow { get; set; }
-        
         // ========= Public Helpers =========
 
-        public static int GetNewWindowID()
+        public static bool IsMouseInWindow
+        {
+            get
+            {
+                if (!ShowWindows)
+                {
+                    return false;
+                }
+
+                foreach (var window in Windows)
+                {
+                    if (RectContainsMouse(window.m_rect))
+                    {
+                        return true;
+                    }
+                }
+                return RectContainsMouse(m_mainRect);
+            }
+        }
+
+        private static bool RectContainsMouse(Rect rect)
+        {
+            return rect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
+        }
+
+        public static int NextWindowID()
         {
             return CurrentWindowID++;
         }
 
-        private static Rect m_lastWindowRect;
-        private static Rect m_lastReflectRect;
-
-        public static Rect GetNewReflectRect()
-        {
-            return GetNewWindowRect(ref m_lastReflectRect);
-        }
-
-        public static Rect GetNewGameObjectRect()
+        public static Rect NewGamebjectRect()
         {
             return GetNewWindowRect(ref m_lastWindowRect);
+        }
+
+        public static Rect NewReflectionRect()
+        {
+            return GetNewWindowRect(ref m_lastReflectRect);
         }
 
         public static Rect GetNewWindowRect(ref Rect lastRect)
         {
             Rect rect = new Rect(0, 0, 550, 700);
-            if (m_rect.x <= (Screen.width - m_rect.width - 100))
+
+            if (m_mainRect.x <= (Screen.width - m_mainRect.width - 100))
             {
-                rect = new Rect(m_rect.x + m_rect.width + 20, m_rect.y, rect.width, rect.height);
+                rect = new Rect(m_mainRect.x + m_mainRect.width + 20, m_mainRect.y, rect.width, rect.height);
             }
-            if (lastRect != null && lastRect.x == rect.x)
+
+            if (lastRect.x == rect.x)
             {
                 rect = new Rect(rect.x + 25, rect.y + 25, rect.width, rect.height);
             }
+
             lastRect = rect;
+
             return rect;
+        }
+
+        public static ExplorerWindow InspectGameObject(GameObject obj, out bool createdNew)
+        {
+            foreach (GameObjectWindow window in Windows.Where(x => x is GameObjectWindow))
+            {
+                if (obj == window.m_object)
+                {
+                    GUI.BringWindowToFront(window.windowID);
+                    GUI.FocusWindow(window.windowID);
+                    createdNew = false;
+                    return window;
+                }
+            }
+
+            createdNew = true;
+            var new_window = ExplorerWindow.CreateWindow<GameObjectWindow>(obj);
+            GUI.FocusWindow(new_window.windowID);
+
+            return new_window;
+        }
+
+        public static ExplorerWindow ReflectObject(object obj, out bool createdNew)
+        {
+            foreach (ReflectionWindow window in Windows.Where(x => x is ReflectionWindow))
+            {
+                if (obj == window.m_object)
+                {
+                    GUI.BringWindowToFront(window.windowID);
+                    GUI.FocusWindow(window.windowID);
+                    createdNew = false;
+                    return window;
+                }
+            }
+
+            createdNew = true;
+            var new_window = ExplorerWindow.CreateWindow<ReflectionWindow>(obj);
+            GUI.FocusWindow(new_window.windowID);
+
+            return new_window;
         }
 
         public static void SetCurrentPage(int index)
@@ -65,21 +132,6 @@ namespace Explorer
                 return;
             }
             m_currentPage = index;
-        }
-
-        public static ExplorerWindow InspectGameObject(GameObject obj)
-        {
-            return ExplorerWindow.CreateWindow<GameObjectWindow>(obj);
-        }
-
-        public static ExplorerWindow ReflectObject(object obj)
-        {
-            return ExplorerWindow.CreateWindow<ReflectionWindow>(obj);
-        }
-
-        public static bool IsMouseInRect(Rect rect)
-        {
-            return rect.Contains(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
         }
 
         // --------------------- INTERNAL MAIN MENU FUNCTIONS ---------------------- //
@@ -106,7 +158,7 @@ namespace Explorer
 
         private PointerEventData.FramePressState UICursor_StateForCursorButton(On.UICursor.orig_StateForCursorButton orig, UICursor self, int _buttonID)
         {
-            if (MouseInWindow)
+            if (IsMouseInWindow)
             {
                 return PointerEventData.FramePressState.NotChanged;
             }
@@ -118,8 +170,6 @@ namespace Explorer
 
         internal void Update()
         {
-            MouseInWindow = false;
-
             Pages[m_currentPage].Update();
         }
 
@@ -132,14 +182,9 @@ namespace Explorer
                 GuiInit();
             }
 
-            if (ShowMenu)
+            if (ShowWindows)
             {
-                m_rect = GUI.Window(m_mainWindowID, m_rect, MainWindow, "Outward Explorer");
-
-                if (!MouseInWindow)
-                {
-                    MouseInWindow = IsMouseInRect(m_rect);
-                }
+                m_mainRect = GUI.Window(m_mainWindowID, m_mainRect, MainWindow, "Outward Explorer");
             }
         }
 
@@ -156,15 +201,15 @@ namespace Explorer
 
         private void MainWindow(int id = m_mainWindowID)
         {
-            GUI.DragWindow(new Rect(0, 0, m_rect.width - 90, 20));
+            GUI.DragWindow(new Rect(0, 0, m_mainRect.width - 90, 20));
 
-            if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "Hide (F7)"))
+            if (GUI.Button(new Rect(m_mainRect.width - 90, 2, 80, 20), "Hide (F7)"))
             {
-                ShowMenu = false;
+                ShowWindows = false;
                 return;
             }
 
-            GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35));
+            GUILayout.BeginArea(new Rect(5, 25, m_mainRect.width - 10, m_mainRect.height - 35));
 
             MainHeader();
 
@@ -173,7 +218,7 @@ namespace Explorer
             page.DrawWindow();
             GUILayout.EndScrollView();
 
-            m_rect = ResizeWindow(m_rect, m_mainWindowID);
+            m_mainRect = ResizeWindow(m_mainRect, m_mainWindowID);
 
             GUILayout.EndArea();
         }
@@ -221,7 +266,11 @@ namespace Explorer
         /// <param name="specialInspectMethod">Special optional method for what happens if you click a gameobject, otherwise opens a GameObject window</param>
         public static void DrawGameObjectRow(GameObject obj, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
         {
-            if (obj == null) { return; }
+            if (obj == null) 
+            {
+                GUILayout.Label("<i><color=red>null</color></i>");
+                return; 
+            }
 
             bool enabled = obj.activeInHierarchy;
             bool children = obj.transform.childCount > 0;
@@ -270,7 +319,7 @@ namespace Explorer
                 }
                 else
                 {
-                    InspectGameObject(obj);
+                    InspectGameObject(obj, out bool _);
                 }
             }
 
@@ -283,7 +332,7 @@ namespace Explorer
             {
                 if (GUILayout.Button("Inspect"))
                 {
-                    InspectGameObject(obj);
+                    InspectGameObject(obj, out bool _);
                 }
             }
 
@@ -363,23 +412,31 @@ namespace Explorer
 
             public static ExplorerWindow CreateWindow<T>(object target) where T: ExplorerWindow
             {
-                var component = Instance.gameObject.AddComponent(typeof(T)) as ExplorerWindow;
+                var component = (ExplorerWindow)Instance.gameObject.AddComponent(typeof(T));
 
                 component.Target = target;
-                component.windowID = GetNewWindowID();
+                component.windowID = NextWindowID();
                 
                 if (component is GameObjectWindow)
                 {
-                    component.m_rect = GetNewGameObjectRect();
+                    component.m_rect = NewGamebjectRect();
                 }
                 else
                 {
-                    component.m_rect = GetNewReflectRect();
+                    component.m_rect = NewReflectionRect();
                 }
+
+                Windows.Add(component);
 
                 component.Init();
 
                 return component;
+            }
+
+            public void DestroyWindow()
+            {
+                Windows.Remove(this);
+                Destroy(this);
             }
 
             public abstract void Init();
@@ -387,14 +444,9 @@ namespace Explorer
 
             internal void OnGUI()
             {
-                if (ShowMenu)
+                if (ShowWindows)
                 {
                     m_rect = GUI.Window(windowID, m_rect, WindowFunction, Name);
-
-                    if (!MouseInWindow)
-                    {
-                        MouseInWindow = IsMouseInRect(m_rect);
-                    }
                 }
             }
 
@@ -404,7 +456,7 @@ namespace Explorer
 
                 if (GUI.Button(new Rect(m_rect.width - 90, 2, 80, 20), "<color=red><b>X</b></color>"))
                 {
-                    Destroy(this);
+                    DestroyWindow();
                     return;
                 }
             }

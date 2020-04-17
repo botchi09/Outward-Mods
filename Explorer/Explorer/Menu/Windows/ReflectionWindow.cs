@@ -13,7 +13,7 @@ namespace Explorer
     {
         public override string Name { get => "Object Reflection"; set => Name = value; }
 
-        private object m_object;
+        public object m_object;
         private string m_searchFilter = "";
         private List<FieldInfoHolder> m_FieldInfos;
         private bool m_autoUpdate = false;
@@ -84,7 +84,7 @@ namespace Explorer
                     GUILayout.Label("GameObject:");
                     if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", GUILayout.MaxWidth(m_rect.width - 350)))
                     {
-                        MenuManager.InspectGameObject(obj);
+                        MenuManager.InspectGameObject(obj, out bool _);
                     }
                     GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     GUILayout.EndHorizontal();
@@ -130,8 +130,8 @@ namespace Explorer
             }
             catch (Exception e)
             {
-                Debug.LogWarning("Exception on window draw. Message: " + e.Message + "\r\nStack: " + e.StackTrace);
-                Destroy(this);
+                Debug.LogWarning("Exception on window draw. Message: " + e.Message);
+                DestroyWindow();
                 return;
             }
         }
@@ -154,7 +154,7 @@ namespace Explorer
                 {
                     holder = new PrimitiveHolder();
                 }
-                else if (fi.FieldType == typeof(GameObject) || typeof(Transform).IsAssignableFrom(fi.FieldType))
+                else if (fi.FieldType == typeof(GameObject) || fi.FieldType == typeof(Transform))
                 {
                     holder = new GameObjectFieldHolder();
                 }
@@ -200,8 +200,12 @@ namespace Explorer
                     var color = "<color=";
                     if (value) { color += "lime>"; } else { color += "red>"; }
                     value = GUILayout.Toggle(value, color + fieldInfo.Name + "</color>");
-                    m_value = value;
-                    SetValue(m_value, obj);
+                    
+                    if (value != (bool)m_value)
+                    {
+                        m_value = value;
+                        SetValue(m_value, obj);
+                    }
                 }
                 else
                 {
@@ -301,7 +305,7 @@ namespace Explorer
                 }
                 else
                 {
-                    MenuManager.DrawGameObjectRow(_obj as GameObject, null, false, m_window.width - 220);
+                    MenuManager.DrawGameObjectRow(m_value, null, false, m_window.width - 220);
                 }
             }
 
@@ -316,13 +320,13 @@ namespace Explorer
 
                 if (Value != null)
                 {
-                    if (Value is GameObject go)
+                    if (Value is Transform)
                     {
-                        m_value = go;
+                        m_value = ((Transform)Value).gameObject;
                     }
-                    else if (Value is Transform t)
+                    else
                     {
-                        m_value = t.gameObject;
+                        m_value = (GameObject)Value;
                     }
                 }
             }
@@ -398,7 +402,7 @@ namespace Explorer
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + fieldInfo.FieldType + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                     {
-                        MenuManager.ReflectObject(Value);
+                        MenuManager.ReflectObject(Value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
@@ -425,7 +429,7 @@ namespace Explorer
                                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                                 if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                                 {
-                                    MenuManager.ReflectObject(entry);
+                                    MenuManager.ReflectObject(entry, out bool _);
                                 }
                                 GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                             }
@@ -468,7 +472,7 @@ namespace Explorer
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUILayout.Button("<color=yellow>" + Value.ToString() + "</color>", GUILayout.MaxWidth(m_window.width - 230)))
                     {
-                        MenuManager.ReflectObject(Value);
+                        MenuManager.ReflectObject(Value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                 }

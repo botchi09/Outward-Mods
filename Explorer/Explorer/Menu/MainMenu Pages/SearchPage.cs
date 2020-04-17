@@ -87,7 +87,7 @@ namespace Explorer
                 {
                     foreach (var obj in m_searchResults)
                     {
-                        MenuManager.DrawGameObjectRow(obj, null, false, MenuManager.m_rect.width - 70);
+                        MenuManager.DrawGameObjectRow(obj, null, false, MenuManager.m_mainRect.width - 70);
                     }
                 }
                 else

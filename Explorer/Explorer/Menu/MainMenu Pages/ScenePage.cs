@@ -137,7 +137,7 @@ namespace Explorer
                     {
                         foreach (var obj in m_objectList)
                         {
-                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_rect.width - 170);
+                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_mainRect.width - 170);
                         }
                     }
                     else
@@ -158,7 +158,7 @@ namespace Explorer
                     {
                         foreach (var obj in m_searchResults)
                         {
-                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_rect.width - 170);
+                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_mainRect.width - 170);
                         }
                     }
                     else

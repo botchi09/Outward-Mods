@@ -70,7 +70,7 @@ namespace CombatHUD
 
         private void Setup()
         {
-            Debug.Log(ModBase.ModName + " started, version: " + ModBase.ModVersion);
+            Debug.Log(CombatHUDLoader.ModName + " started, version: " + CombatHUDLoader.ModVersion);
 
             var pack = SL.Packs["CombatHUD"];
 

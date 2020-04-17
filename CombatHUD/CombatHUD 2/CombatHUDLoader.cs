@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using Partiality.Modloader;
 using UnityEngine;
-using System.IO;
 
 namespace CombatHUD
 {
-    public class ModBase : PartialityMod
+    public class CombatHUDLoader : PartialityMod
     {
-        public static string ModName = "CombatHUD";
-        public static string ModVersion = "4.13";
-        public static string ModAuthor = "Sinai";
+        public const string ModName = "CombatHUD";
+        public const string ModVersion = "4.13";
+        public const string ModAuthor = "Sinai";
 
-        public ModBase()
+        public CombatHUDLoader()
         {
             ModID = ModName;
             author = ModAuthor;

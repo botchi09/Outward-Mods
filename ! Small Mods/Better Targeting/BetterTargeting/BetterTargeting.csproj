@@ -45,7 +45,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.RuntimeDetour">
-      <HintPath>..\..\..\..\PartialityWrapper\Release\BepInEx_x64_5.0.1.0\core\MonoMod.RuntimeDetour.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\PartialityWrapper\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Partiality">

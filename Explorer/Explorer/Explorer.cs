@@ -12,6 +12,7 @@ using UnityEngine.EventSystems;
 using NodeCanvas.Framework;
 using NodeCanvas.DialogueTrees;
 using NodeCanvas.Tasks.Actions;
+using SideLoader;
 
 namespace Explorer
 {
@@ -39,7 +40,37 @@ namespace Explorer
 
             // Skip Logos hook
             On.StartupVideo.Start += new On.StartupVideo.hook_Start(StartupVideo_Start);
+
+            // temp debug
+            SL.OnPacksLoaded += SL_OnPacksLoaded;
         }
+
+        // ========== temp debug ========        
+
+        private void SL_OnPacksLoaded()
+        {
+            var customLeap = CustomItems.CreateCustomItem(8100290, 8999995, "newleap") as MeleeSkill;
+
+            CustomItems.SetNameAndDescription(customLeap, "Custom Attack Skill", "test");
+            At.SetValue(Character.SpellCastType.AxeLeap, typeof(Item), customLeap, "m_activateEffectAnimType");
+
+            var effects = new GameObject("Activation");
+            effects.transform.parent = customLeap.transform;
+
+            var customHit = effects.AddComponent<CustomHitCollision>();
+            customHit.Delay = 0.5f;
+        }
+
+        public class CustomHitCollision : Effect
+        {
+            protected override void ActivateLocally(Character _affectedCharacter, object[] _infos)
+            {
+                Debug.Log(this.GetType() + "::ActivateLocally");
+                (_affectedCharacter?.CurrentWeapon as MeleeWeapon)?.HitStarted(-1);
+            }
+        }
+
+        // ============= END TEMP DEBUG ============== //
 
         internal void Start()
         {
@@ -48,7 +79,7 @@ namespace Explorer
             OLogger.CreateLog(new Rect(Screen.width - m_logger.x - 5, Screen.height - m_logger.y - 5, m_logger.x, m_logger.y));            
 
             // done init
-            MenuManager.ShowMenu = true;
+            MenuManager.ShowWindows = true;
             OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
         }
 
@@ -56,7 +87,7 @@ namespace Explorer
         {
             if (Input.GetKeyDown(KeyCode.F7))
             {
-                MenuManager.ShowMenu = !MenuManager.ShowMenu;
+                MenuManager.ShowWindows = !MenuManager.ShowWindows;
             }
 
             //if (Input.GetKeyDown(KeyCode.F11))

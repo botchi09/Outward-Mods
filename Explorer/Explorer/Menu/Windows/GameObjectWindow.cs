@@ -10,7 +10,7 @@ namespace Explorer
     {
         public override string Name { get => "GameObject Inspector"; set => Name = value; }
 
-        private GameObject m_object;
+        public GameObject m_object;
 
         // gui element holders
         private string m_name;
@@ -31,7 +31,7 @@ namespace Explorer
             if (!(m_object = Target as GameObject))
             {
                 Debug.LogError("Target is not a GameObject!");
-                Destroy(this);
+                DestroyWindow();
                 return;
             }
 
@@ -52,31 +52,39 @@ namespace Explorer
         {
             if (m_object == null)
             {
-                Destroy(this);
+                DestroyWindow();
             }
         }
 
         private void InspectGameObject(GameObject obj)
         {
-            var window = MenuManager.InspectGameObject(obj);
-            window.m_rect = new Rect(this.m_rect.x, this.m_rect.y, this.m_rect.width, this.m_rect.height);
-            Destroy(this);
+            var window = MenuManager.InspectGameObject(obj, out bool created);
+            
+            if (created)
+            {
+                window.m_rect = new Rect(this.m_rect.x, this.m_rect.y, this.m_rect.width, this.m_rect.height);
+                DestroyWindow();
+            }
         }
 
         private void ReflectObject(object obj)
         {
-            var window = MenuManager.ReflectObject(obj);
-            if (this.m_rect.x <= (Screen.width - this.m_rect.width - 100))
+            var window = MenuManager.ReflectObject(obj, out bool created);
+
+            if (created)
             {
-                window.m_rect = new Rect(
-                    this.m_rect.x + this.m_rect.width + 20,
-                    this.m_rect.y,
-                    550,
-                    700);
-            }
-            else
-            {
-                window.m_rect = new Rect(this.m_rect.x + 50, this.m_rect.y + 50, 550, 700);
+                if (this.m_rect.x <= (Screen.width - this.m_rect.width - 100))
+                {
+                    window.m_rect = new Rect(
+                        this.m_rect.x + this.m_rect.width + 20,
+                        this.m_rect.y,
+                        550,
+                        700);
+                }
+                else
+                {
+                    window.m_rect = new Rect(this.m_rect.x + 50, this.m_rect.y + 50, 550, 700);
+                }
             }
         }
 
@@ -216,7 +224,7 @@ namespace Explorer
             if (GUILayout.Button("<color=red><b>Destroy</b></color>"))
             {
                 Destroy(m_object);
-                Destroy(this);
+                DestroyWindow();
                 return;
             }
 
