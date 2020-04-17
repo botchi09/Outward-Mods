@@ -27,7 +27,7 @@ namespace Explorer
         {
             GUILayout.Label("<b><size=15><color=cyan>Dynamic Method Console</color></size></b>");
 
-            GUILayout.Label("This doesn't work yet, because Unity 5.6.1 with .NET 3.5 uses Mono 2.0.0, which doesn't have enough power.");
+            GUILayout.Label("Work in progress.");
 
             //m_code = GUILayout.TextArea(m_code, GUILayout.Height(500));
 

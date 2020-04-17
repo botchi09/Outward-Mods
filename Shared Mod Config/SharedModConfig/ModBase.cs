@@ -19,7 +19,7 @@ namespace SharedModConfig
             ModID = ModName;
             author = ModAuthor;
             Version = ModVersion;
-            this.loadPriority = -998; // lower number = higher priority
+            loadPriority = -998; // lower number = higher priority
         }
 
         public override void OnEnable()
