@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 namespace Explorer
 {
-    public class SearchPage : MenuManager.WindowPage
+    public class SearchPage : MainMenu.WindowPage
     {
         public static SearchPage Instance;
 
@@ -87,7 +87,7 @@ namespace Explorer
                 {
                     foreach (var obj in m_searchResults)
                     {
-                        MenuManager.DrawGameObjectRow(obj, null, false, MenuManager.m_mainRect.width - 70);
+                        UIStyles.GameobjButton(obj, null, false, MainMenu.MainRect.width - 70);
                     }
                 }
                 else

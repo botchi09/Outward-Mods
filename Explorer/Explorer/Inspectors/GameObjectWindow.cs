@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Explorer
 {
-    public class GameObjectWindow : MenuManager.ExplorerWindow
+    public class GameObjectWindow : WindowManager.UIWindow
     {
         public override string Name { get => "GameObject Inspector"; set => Name = value; }
 
@@ -58,7 +58,7 @@ namespace Explorer
 
         private void InspectGameObject(GameObject obj)
         {
-            var window = MenuManager.InspectGameObject(obj, out bool created);
+            var window = WindowManager.InspectGameObject(obj, out bool created);
             
             if (created)
             {
@@ -69,7 +69,7 @@ namespace Explorer
 
         private void ReflectObject(object obj)
         {
-            var window = MenuManager.ReflectObject(obj, out bool created);
+            var window = WindowManager.ReflectObject(obj, out bool created);
 
             if (created)
             {
@@ -92,6 +92,8 @@ namespace Explorer
         {
             Header();
 
+            GUILayout.BeginArea(new Rect(5, 25, m_rect.width - 10, m_rect.height - 35), GUI.skin.box);
+
             scroll = GUILayout.BeginScrollView(scroll);
 
             GUILayout.BeginHorizontal();
@@ -101,7 +103,7 @@ namespace Explorer
                 if (GUILayout.Button("<color=#00FF00>< View in Scene Explorer</color>", GUILayout.Width(230)))
                 {
                     ScenePage.Instance.SetTransformTarget(m_object);
-                    MenuManager.SetCurrentPage(0);
+                    MainMenu.SetCurrentPage(0);
                 }
             }
             GUILayout.EndHorizontal();
@@ -124,12 +126,12 @@ namespace Explorer
             GUILayout.TextArea(m_name);
             GUILayout.EndHorizontal();
 
-            //GUILayout.BeginHorizontal();
-            //GUILayout.Label("GameObject Active:", GUILayout.Width(150));
-            //bool m_active = m_object.activeSelf;
-            //m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>");
-            //if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
-            //GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("GameObject Active:", GUILayout.Width(150));
+            bool m_active = m_object.activeSelf;
+            m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>");
+            if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
+            GUILayout.EndHorizontal();
 
             // --- Horizontal Columns section ---
             GUILayout.BeginHorizontal();
@@ -148,7 +150,9 @@ namespace Explorer
 
             GUILayout.EndScrollView();
 
-            m_rect = MenuManager.ResizeWindow(m_rect, windowID);
+            m_rect = WindowManager.ResizeWindow(m_rect, windowID);
+
+            GUILayout.EndArea();
         }
 
         private void TransformList()
@@ -161,11 +165,11 @@ namespace Explorer
             {
                 foreach (var obj in m_children.Where(x => x.childCount > 0))
                 {
-                    MenuManager.DrawGameObjectRow(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
                 foreach (var obj in m_children.Where(x => x.childCount == 0))
                 {
-                    MenuManager.DrawGameObjectRow(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
+                    UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
             }
             else

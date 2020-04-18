@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace Explorer
 {
-    public class ScenePage : MenuManager.WindowPage
+    public class ScenePage : MainMenu.WindowPage
     {
         public static ScenePage Instance;
 
@@ -137,7 +137,7 @@ namespace Explorer
                     {
                         foreach (var obj in m_objectList)
                         {
-                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_mainRect.width - 170);
+                            UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
                     }
                     else
@@ -158,7 +158,7 @@ namespace Explorer
                     {
                         foreach (var obj in m_searchResults)
                         {
-                            MenuManager.DrawGameObjectRow(obj, SetTransformTarget, true, MenuManager.m_mainRect.width - 170);
+                            UIStyles.GameobjButton(obj, SetTransformTarget, true, MainMenu.MainRect.width - 170);
                         }
                     }
                     else

@@ -17,7 +17,7 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\</OutputPath>
+    <OutputPath>..\Release\BepInEx\plugins\Explorer\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
@@ -48,6 +48,10 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\PartialityWrapper\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="mcs">
+      <HintPath>..\Release\BepInEx\plugins\Explorer\mcs.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.Utils.dll</HintPath>
       <Private>False</Private>
@@ -58,10 +62,6 @@
     </Reference>
     <Reference Include="Rewired_Core">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SharedModConfig">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SharedModConfig.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SideLoader">
@@ -85,16 +85,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Explorer.cs" />
-    <Compile Include="MenuManager.cs" />
+    <Compile Include="Hooks.cs" />
+    <Compile Include="WindowManager.cs" />
     <Compile Include="Logger\DebugBox.cs" />
     <Compile Include="Logger\DebugType.cs" />
     <Compile Include="Logger\OLogger.cs" />
     <Compile Include="Logger\UnityDebugIgnore.cs" />
-    <Compile Include="Menu\MainMenu Pages\ConsolePage.cs" />
-    <Compile Include="Menu\Windows\GameObjectWindow.cs" />
-    <Compile Include="Menu\Windows\ReflectionWindow.cs" />
-    <Compile Include="Menu\MainMenu Pages\ScenePage.cs" />
-    <Compile Include="Menu\MainMenu Pages\SearchPage.cs" />
+    <Compile Include="MainMenu.cs" />
+    <Compile Include="MainMenu\ConsolePage.cs" />
+    <Compile Include="Inspectors\GameObjectWindow.cs" />
+    <Compile Include="Inspectors\ReflectionWindow.cs" />
+    <Compile Include="MainMenu\Console\REPL.cs" />
+    <Compile Include="MainMenu\Console\REPLHelper.cs" />
+    <Compile Include="MainMenu\ScenePage.cs" />
+    <Compile Include="MainMenu\SearchPage.cs" />
+    <Compile Include="UIStyles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="utils\AccessTools.cs" />
   </ItemGroup>
