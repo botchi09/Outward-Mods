@@ -14,8 +14,8 @@ namespace Explorer
     {
         public static void InitHooks()
         {
-            // mouse control
-            On.Global.Update += Hooks.Global_Update;
+            //// mouse control
+            //On.Global.Update += Hooks.Global_Update;
 
             // debug quest events
             On.SendQuestEventInteraction.OnActivate += Hooks.SendQuestInteractionHook;
@@ -36,12 +36,10 @@ namespace Explorer
             {
                 if (Cursor.lockState != CursorLockMode.None)
                 {
-                    Debug.Log("Set lock state");
                     Cursor.lockState = CursorLockMode.None;
                 }
                 if (!Cursor.visible)
                 {
-                    Debug.Log("Set vis");
                     Cursor.visible = true;
                 }
             }
