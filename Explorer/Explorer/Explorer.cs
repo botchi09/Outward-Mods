@@ -4,21 +4,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using System.Reflection;
 using UnityEngine.UI;
-using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using NodeCanvas.Framework;
-using NodeCanvas.DialogueTrees;
-using NodeCanvas.Tasks.Actions;
-using SideLoader;
+using BepInEx;
 
 namespace Explorer
 {
-    public class Explorer : MonoBehaviour
+    [BepInPlugin(ID, NAME, VERSION)]
+    public class Explorer : BaseUnityPlugin
     {
         public static Explorer Instance;
+
+        const string ID = "com.sinai.explorer";
+        const string NAME = "Explorer";
+        const string VERSION = "2.0";
 
         // quest debugging
         public bool QuestDebugging { get; set; } = true;
@@ -27,6 +26,8 @@ namespace Explorer
         internal void Awake()
         {
             Instance = this;
+
+            this.gameObject.AddComponent<MenuManager>();
 
             // log to game window
             Application.logMessageReceived += Application_logMessageReceived;
