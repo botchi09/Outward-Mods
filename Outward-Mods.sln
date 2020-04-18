@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCoopRewards", "! Smal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mods\Speedrun Timer\SpeedrunTimer\SpeedrunTimer.csproj", "{0078FDE4-B0C0-4DCA-B576-78D741436EFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomAreaResetTime", "! Small Mods\Custom Area Reset Time\CustomAreaReset\CustomAreaResetTime.csproj", "{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,10 @@ Global
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -166,6 +172,7 @@ Global
 		{D1F5A81F-656C-4A95-B9BC-D39BA076C164} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{7A47E79E-EDDB-4D72-88C7-6AC493DC9070} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
+		{69156EE5-DDAB-4B14-8F55-EE1EDB674B4A} = {D4ED1719-C87C-498D-A772-121C2636DE1D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E61EA2C4-5D64-4828-A24A-47E3EB51A10C}
