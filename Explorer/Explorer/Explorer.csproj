@@ -51,7 +51,7 @@
     </Reference>
     <Reference Include="mcs">
       <HintPath>..\Release\BepInEx\plugins\Explorer\mcs.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="MonoMod.Utils">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\MonoMod.Utils.dll</HintPath>

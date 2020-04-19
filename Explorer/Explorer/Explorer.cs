@@ -13,7 +13,7 @@ using System.Reflection;
 namespace Explorer
 {
     [BepInPlugin(ID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    //[BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
     public class Explorer : BaseUnityPlugin
     {
         public static Explorer Instance;
