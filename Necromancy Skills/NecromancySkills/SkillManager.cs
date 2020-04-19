@@ -31,6 +31,8 @@ namespace NecromancerSkills
 
         private void Setup()
         {
+            Debug.Log("Setting up necromancy skills");
+
             SetupSkills(); // setup the actual skills
 
             SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)

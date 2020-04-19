@@ -95,7 +95,9 @@ namespace Explorer
 
                 scroll = GUILayout.BeginScrollView(scroll);
 
-                GUILayout.Space(15);
+                GUILayout.Space(10);
+
+                UIStyles.HorizontalLine(Color.white);
 
                 GUILayout.Label("<size=18><b><color=gold>Fields</color></b></size>");
 
@@ -110,6 +112,8 @@ namespace Explorer
                     holder.Draw(this);
                     GUILayout.EndHorizontal();
                 }
+
+                UIStyles.HorizontalLine(Color.white);
 
                 GUILayout.Label("<size=18><b><color=gold>Properties</color></b></size>");
 
@@ -139,7 +143,7 @@ namespace Explorer
             }
         }
 
-        private static bool IsList(Type t)
+        public static bool IsList(Type t)
         {
             return t.IsGenericType && t.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
         }
@@ -192,175 +196,7 @@ namespace Explorer
                 GetFields(type.BaseType, names);
             }
         }
-
-        // -------------- big ugly draw value function --------------
-
-        public void DrawValue(ref object value, string valueType, string memberName, Action<object> setAction = null)
-        {
-            GUILayout.Label("<color=cyan>" + memberName + ":</color>", GUILayout.Width(180));
-
-            if (value == null)
-            {
-                GUILayout.Label("<i>null (" + valueType + ")</i>");
-            }
-            else
-            {
-                if (value.GetType().IsPrimitive || value.GetType() == typeof(string))
-                {
-                    DrawPrimitive(ref value, setAction);
-                }
-                else if (value.GetType() == typeof(GameObject) || value.GetType() == typeof(Transform))
-                {
-                    GameObject go;
-                    if (value.GetType() == typeof(Transform))
-                    {
-                        go = (value as Transform).gameObject;
-                    }
-                    else
-                    {
-                        go = (value as GameObject);
-                    }
-
-                    UIStyles.GameobjButton(go, null, false, m_rect.width - 250);
-                }
-                else if (value.GetType().IsEnum)
-                {
-                    if (setAction != null)
-                    {
-                        if (GUILayout.Button("<", GUILayout.Width(25)))
-                        {
-                            SetEnum(ref value, -1);
-                            setAction.Invoke(this.m_object);
-                        }
-                        if (GUILayout.Button(">", GUILayout.Width(25)))
-                        {
-                            SetEnum(ref value, 1);
-                            setAction.Invoke(this.m_object);
-                        }
-                    }
-
-                    GUILayout.Label(value.ToString());
-
-                }
-                else if (value.GetType().IsArray || IsList(value.GetType()))
-                {
-                    Array m_array = null;
-
-                    if (value is Array)
-                    {
-                        m_array = value as Array;
-                    }
-                    else if (value is IList list)
-                    {
-                        m_array = list.Cast<object>().ToArray();
-                    }
-
-                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + valueType + "</color>", GUILayout.MaxWidth(m_rect.width - 230)))
-                    {
-                        WindowManager.ReflectObject(value, out bool _);
-                    }
-                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-
-                    foreach (var entry in m_array)
-                    {
-                        // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
-                        GUILayout.EndHorizontal();
-                        GUILayout.BeginHorizontal();
-                        GUILayout.Space(190);
-
-                        if (entry == null)
-                        {
-                            GUILayout.Label("<i><color=grey>null</color></i>");
-                        }
-                        else
-                        {
-                            var type = entry.GetType();
-                            if (type.IsPrimitive || type == typeof(string))
-                            {
-                                GUILayout.Label(entry.ToString());
-                            }
-                            else
-                            {
-                                GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                                if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(m_rect.width - 230)))
-                                {
-                                    WindowManager.ReflectObject(entry, out bool _);
-                                }
-                                GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>" + value.ToString() + "</color>", GUILayout.MaxWidth(m_rect.width - 230)))
-                    {
-                        WindowManager.ReflectObject(value, out bool _);
-                    }
-                    GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-                }
-            }
-        }
-
-        // Helper for drawing primitive values (with Apply button)
-
-        public void DrawPrimitive(ref object value, Action<object> setAction)
-        {
-            bool allowSet = setAction != null;
-
-            if (value.GetType() == typeof(bool))
-            {
-                bool b = (bool)value;
-                var color = "<color=";
-                if (b) { color += "lime>"; } else { color += "red>"; }
-                
-                if (allowSet)
-                {
-                    b = GUILayout.Toggle(b, "", GUILayout.Width(20));
-                }
-
-                GUILayout.Label(color + b.ToString() + "</color>");
-
-                if (allowSet && (bool)value != b)
-                {
-                    value = b;
-                    setAction.Invoke(this.m_object);
-                }
-            }
-            else
-            {
-                if (value.ToString().Length > 37)
-                {
-                    value = GUILayout.TextArea(value.ToString(), GUILayout.MaxWidth(m_rect.width - 260));
-                }
-                else
-                {
-                    value = GUILayout.TextField(value.ToString(), GUILayout.MaxWidth(m_rect.width - 260));
-                }
-
-                if (allowSet && GUILayout.Button("<color=#00FF00>Apply</color>", GUILayout.Width(60)))
-                {
-                    setAction.Invoke(this.m_object);
-                }
-            }
-        }
-
-        // Helper for setting an enum
-
-        public void SetEnum(ref object value, int change)
-        {
-            var type = value.GetType();
-            var names = Enum.GetNames(type).ToList();
-
-            int newindex = names.IndexOf(value.ToString()) + change;
-
-            if (newindex > 0 && newindex < names.Count - 1)
-            {
-                value = Enum.Parse(type, names[newindex]);
-            }
-        }
+        
 
         /* *********************
          *   PROPERTYINFO HOLDER
@@ -380,7 +216,7 @@ namespace Explorer
 
             public void Draw(ReflectionWindow window)
             {
-                window.DrawValue(ref m_value, propInfo.PropertyType.Name, propInfo.Name);
+                UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object);
             }
 
             public void UpdateValue(object obj)
@@ -389,7 +225,10 @@ namespace Explorer
                 {
                     m_value = this.propInfo.GetValue(obj, null);
                 }
-                catch { }
+                catch 
+                {
+                    m_value = null;
+                }
             }
         }
 
@@ -421,22 +260,16 @@ namespace Explorer
 
                 if (canSet)
                 {
-                    window.DrawValue(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name, SetValue);
+                    UIStyles.DrawMember(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name, window.m_rect, window.m_object, SetValue);
                 }
                 else
                 {
-                    window.DrawValue(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name);
+                    UIStyles.DrawMember(ref m_value, fieldInfo.FieldType.Name, fieldInfo.Name, window.m_rect, window.m_object);
                 }
             }
 
             public void SetValue(object obj)
             {
-                if (fieldInfo.IsLiteral && !fieldInfo.IsInitOnly)
-                {
-                    Debug.LogWarning("You cannot change the value of a const!");
-                    return;
-                }
-
                 if (fieldInfo.FieldType.IsPrimitive || fieldInfo.FieldType == typeof(string))
                 {
                     if (fieldInfo.FieldType == typeof(string) || fieldInfo.FieldType == typeof(bool))

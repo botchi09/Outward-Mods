@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-//using SinAPI;
 using Partiality.Modloader;
 
 namespace NecromancerSkills
@@ -21,9 +20,9 @@ namespace NecromancerSkills
 
         public ModBase()
         {
-            this.ModID = "NecroSkills";
-            this.Version = version.ToString("0.00");
-            this.author = "Sinai";
+            ModID = "NecroSkills";
+            Version = version.ToString("0.00");
+            author = "Sinai";
         }
 
         public override void OnEnable()
@@ -32,18 +31,15 @@ namespace NecromancerSkills
 
             LoadSettings();
 
-            if (_obj == null)
-            {
-                _obj = new GameObject(ModID);
-                GameObject.DontDestroyOnLoad(_obj);
+            _obj = new GameObject(ModID);
+            GameObject.DontDestroyOnLoad(_obj);
 
-                // Add our custom components.
-                // These talk to each other by declaring a static Instance of themselves, which other components use as a handle.
-                _obj.AddComponent<TrainerManager>();
-                _obj.AddComponent<SkillManager>();
-                _obj.AddComponent<SummonManager>();
-                _obj.AddComponent<RPCManager>();
-            }
+            // Add our custom components.
+            // These talk to each other by declaring a static Instance of themselves, which other components use as a handle.
+            _obj.AddComponent<TrainerManager>();
+            _obj.AddComponent<SkillManager>();
+            _obj.AddComponent<SummonManager>();
+            _obj.AddComponent<RPCManager>();
         }
 
         private void LoadSettings()

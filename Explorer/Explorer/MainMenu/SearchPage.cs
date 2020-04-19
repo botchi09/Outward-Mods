@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using System.Reflection;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace Explorer
 {
@@ -14,7 +15,7 @@ namespace Explorer
 
         public override string Name { get => "Advanced Search"; set => base.Name = value; }
 
-        private List<GameObject> m_searchResults = new List<GameObject>();
+        private List<Object> m_searchResults = new List<Object>();
 
         private string m_searchInput = "";
         private string m_typeInput = "";
@@ -62,9 +63,9 @@ namespace Explorer
                 GUILayout.Label("Result limit:", GUILayout.Width(100));
                 var resultinput = m_limit.ToString();
                 resultinput = GUILayout.TextField(resultinput);
-                if (int.TryParse(resultinput, out int i) && i > 0)
+                if (int.TryParse(resultinput, out int _i) && _i > 0)
                 {
-                    m_limit = i;
+                    m_limit = _i;
                 }
                 GUILayout.EndHorizontal();
 
@@ -76,6 +77,8 @@ namespace Explorer
                 SceneModeToggleButton(ref m_noSceneMode, "No Scene");
                 GUILayout.EndHorizontal();
 
+                GUILayout.Label("<i><size=12>note: Class Type must inherit from UnityEngine.GameObject for Scene Filter to work!</size></i>");
+
                 if (GUILayout.Button("Search"))
                 {
                     Search();
@@ -83,12 +86,21 @@ namespace Explorer
 
                 GUILayout.Space(15);
 
+                var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 180, MainMenu.MainRect.height);
+
                 if (m_searchResults.Count > 0)
                 {
-                    foreach (var obj in m_searchResults)
+                    for (int i = 0; i < m_searchResults.Count; i++)
                     {
-                        UIStyles.GameobjButton(obj, null, false, MainMenu.MainRect.width - 70);
+                        var obj = (object)m_searchResults[i];
+
+                        UIStyles.DrawValue(ref obj, _temprect);
                     }
+
+                    //foreach (var obj in m_searchResults)
+                    //{
+                    //    // UIStyles.GameobjButton(obj, null, false, MainMenu.MainRect.width - 70);
+                    //}
                 }
                 else
                 {
@@ -135,11 +147,11 @@ namespace Explorer
             m_searchResults = FindAllObjectsOfType(m_searchInput, m_typeInput);
         }
 
-        private List<GameObject> FindAllObjectsOfType(string _search, string _type)
+        private List<Object> FindAllObjectsOfType(string _search, string _type)
         {
-            var objectsOfType = new List<GameObject>();
+            var objectsOfType = new List<Object>();
 
-            Type type = typeof(GameObject);
+            Type type = typeof(Object);
 
             if (!string.IsNullOrEmpty(_type))
             {
@@ -154,13 +166,13 @@ namespace Explorer
                 }
             }
 
-            if (type != typeof(GameObject) && !typeof(Component).IsAssignableFrom(type))
+            if (!typeof(Object).IsAssignableFrom(type))
             {
-                Debug.LogError("Your Type must inherit from Component! Leave Type blank to find GameObjects.");
+                Debug.LogError("Your Type must inherit from UnityEngine.Object! Leave Type blank to default to UnityEngine.Object");
                 return objectsOfType;
             }
 
-            var matches = new List<GameObject>();
+            var matches = new List<Object>();
             int added = 0;
 
             foreach (var obj in Resources.FindObjectsOfTypeAll(type))
@@ -170,27 +182,30 @@ namespace Explorer
                     break;
                 }
 
-                var go = obj as GameObject ?? (obj as Component).gameObject;
-
                 if (!m_anyMode)
                 {
-                    if (m_noSceneMode && (go.scene.name == SceneManagerHelper.ActiveSceneName || go.scene.name == "DontDestroyOnLoad"))
+                    if (type == typeof(GameObject) || typeof(Component).IsAssignableFrom(type))
                     {
-                        continue;
-                    }
-                    else if (m_dontDestroyMode && (go.scene == null || go.scene.name != "DontDestroyOnLoad"))
-                    {
-                        continue;
-                    }
-                    else if (m_sceneMode && (go.scene == null || go.scene.name != SceneManagerHelper.ActiveSceneName))
-                    {
-                        continue;
+                        var go = obj as GameObject ?? (obj as Component).gameObject;
+
+                        if (m_noSceneMode && (go.scene.name == SceneManagerHelper.ActiveSceneName || go.scene.name == "DontDestroyOnLoad"))
+                        {
+                            continue;
+                        }
+                        else if (m_dontDestroyMode && (go.scene == null || go.scene.name != "DontDestroyOnLoad"))
+                        {
+                            continue;
+                        }
+                        else if (m_sceneMode && (go.scene == null || go.scene.name != SceneManagerHelper.ActiveSceneName))
+                        {
+                            continue;
+                        }
                     }
                 }
 
-                if (!matches.Contains(go) && (string.IsNullOrEmpty(_search) || obj.name.ToLower().Contains(_search.ToLower())))
+                if (!matches.Contains(obj))
                 {
-                    matches.Add(go);
+                    matches.Add(obj);
                     added++;
                 }
             }

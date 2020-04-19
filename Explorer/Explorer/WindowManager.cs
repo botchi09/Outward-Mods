@@ -194,7 +194,7 @@ namespace Explorer
                 {
                     var origSkin = GUI.skin;
 
-                    GUI.skin = UIStyles.CustomSkin;
+                    GUI.skin = UIStyles.WindowSkin;
                     m_rect = GUI.Window(windowID, m_rect, WindowFunction, Name);
 
                     GUI.skin = origSkin;

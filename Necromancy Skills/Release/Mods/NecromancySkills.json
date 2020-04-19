@@ -7,7 +7,7 @@
 	"Summon_MaxHealth": 75,
 	"Summon_HealthLoss": -0.75,
 	"StrongSummon_MaxHealth": 250,
-	"StrongSummon_HealthLoss": -2.5
+	"StrongSummon_HealthLoss": -2.5,
     "ShootTendrils_Damage_NoPlagueAura": [
         {
             "Type": 2,

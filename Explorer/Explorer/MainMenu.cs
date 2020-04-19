@@ -50,7 +50,7 @@ namespace Explorer
             if (WindowManager.ShowWindows)
             {
                 var origSkin = GUI.skin;
-                GUI.skin = UIStyles.CustomSkin;
+                GUI.skin = UIStyles.WindowSkin;
 
                 MainRect = GUI.Window(MainWindowID, MainRect, MainWindow, "Outward Explorer");
 

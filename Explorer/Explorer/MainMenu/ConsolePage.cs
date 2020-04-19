@@ -28,6 +28,11 @@ namespace Explorer
         {
             _evaluator = new ScriptEvaluator(new StringWriter(_sb)) { InteractiveBaseClass = typeof(REPL) };
 
+            m_code = "// Welcome to the Outward Explorer Console!" +
+                    "\r\n// Enter your C# here as though you were declaring a method body. Press 'Run Code' to evaluate." +
+                    "\r\n" +
+                    "\r\nDebug.Log(\"Hello World!\");";
+
             var envSetup = "using System;" +
                            "using UnityEngine;" +
                            "using System.Linq;" +
