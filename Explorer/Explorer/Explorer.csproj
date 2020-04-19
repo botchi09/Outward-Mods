@@ -85,7 +85,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="dnSpyHelper.cs" />
     <Compile Include="Explorer.cs" />
     <Compile Include="Hooks.cs" />
     <Compile Include="WindowManager.cs" />

@@ -335,7 +335,7 @@ namespace Explorer
 
             int newindex = names.IndexOf(value.ToString()) + change;
 
-            if ((change < 0 && newindex > 0) || (change > 0 && newindex < names.Count))
+            if ((change < 0 && newindex >= 0) || (change > 0 && newindex < names.Count))
             {
                 value = Enum.Parse(type, names[newindex]);
             }
