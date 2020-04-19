@@ -216,7 +216,14 @@ namespace Explorer
 
             public void Draw(ReflectionWindow window)
             {
-                UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object);
+                if (propInfo.CanWrite)
+                {
+                    UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object, SetValue);
+                }
+                else
+                {
+                    UIStyles.DrawMember(ref m_value, propInfo.PropertyType.Name, propInfo.Name, window.m_rect, window.m_object);
+                }
             }
 
             public void UpdateValue(object obj)
@@ -228,6 +235,62 @@ namespace Explorer
                 catch 
                 {
                     m_value = null;
+                }
+            }
+
+            public void SetValue(object obj)
+            {
+                try
+                {
+                    if (propInfo.PropertyType.IsEnum)
+                    {
+                        if (Enum.Parse(propInfo.PropertyType, m_value.ToString()) is object enumValue && enumValue != null)
+                        {
+                            m_value = enumValue;
+                        }
+                    }
+                    else if (propInfo.PropertyType.IsPrimitive)
+                    {
+                        if (propInfo.PropertyType == typeof(float))
+                        {
+                            if (float.TryParse(m_value.ToString(), out float f))
+                            {
+                                m_value = f;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Cannot parse " + m_value.ToString() + " to a float!");
+                            }
+                        }
+                        else if (propInfo.PropertyType == typeof(double))
+                        {
+                            if (double.TryParse(m_value.ToString(), out double d))
+                            {
+                                m_value = d;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Cannot parse " + m_value.ToString() + " to a double!");
+                            }
+                        }
+                        else if (propInfo.PropertyType != typeof(bool))
+                        {
+                            if (int.TryParse(m_value.ToString(), out int i))
+                            {
+                                m_value = i;
+                            }
+                            else
+                            {
+                                Debug.LogWarning("Cannot parse " + m_value.ToString() + " to an integer! type: " + propInfo.PropertyType);
+                            }
+                        }
+                    }
+
+                    propInfo.SetValue(propInfo.GetAccessors()[0].IsStatic ? null : obj, m_value, null);
+                }
+                catch
+                {
+                    Debug.Log("Exception trying to set property " + this.propInfo.Name);
                 }
             }
         }
@@ -270,12 +333,16 @@ namespace Explorer
 
             public void SetValue(object obj)
             {
-                if (fieldInfo.FieldType.IsPrimitive || fieldInfo.FieldType == typeof(string))
+                if (fieldInfo.FieldType.IsEnum)
                 {
-                    if (fieldInfo.FieldType == typeof(string) || fieldInfo.FieldType == typeof(bool))
+                    if (Enum.Parse(fieldInfo.FieldType, m_value.ToString()) is object enumValue && enumValue != null)
                     {
+                        m_value = enumValue;
                     }
-                    else if (fieldInfo.FieldType == typeof(float))
+                }
+                else if (fieldInfo.FieldType.IsPrimitive)
+                {
+                    if (fieldInfo.FieldType == typeof(float))
                     {
                         if (float.TryParse(m_value.ToString(), out float f))
                         {
@@ -297,7 +364,7 @@ namespace Explorer
                             Debug.LogWarning("Cannot parse " + m_value.ToString() + " to a double!");
                         }
                     }
-                    else
+                    else if (fieldInfo.FieldType != typeof(bool))
                     {
                         if (int.TryParse(m_value.ToString(), out int i))
                         {
@@ -307,13 +374,6 @@ namespace Explorer
                         {
                             Debug.LogWarning("Cannot parse " + m_value.ToString() + " to an integer! type: " + fieldInfo.FieldType);
                         }
-                    }
-                }
-                else if (fieldInfo.FieldType.IsEnum)
-                {
-                    if (Enum.Parse(fieldInfo.FieldType, m_value.ToString()) is object enumValue && enumValue != null)
-                    {
-                        m_value = enumValue;
                     }
                 }
 

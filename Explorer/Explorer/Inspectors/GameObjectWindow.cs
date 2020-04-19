@@ -187,6 +187,7 @@ namespace Explorer
             m_compScroll = GUILayout.BeginScrollView(m_compScroll);
             GUILayout.Label("<b><size=15>Components</size></b>");
 
+            GUI.skin.button.alignment = TextAnchor.MiddleLeft;
             foreach (var component in m_components)
             {
                 if (component.GetType() == typeof(Transform))
@@ -201,6 +202,7 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
             }
+            GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
             GUILayout.EndScrollView();
             GUILayout.EndVertical();

@@ -12,6 +12,6 @@ This mod <b>requires</b> BepInEx, it's not a Partiality mod.
 
 ## Credits
 
-Uses a light-weight version of the REPL Console from [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor).
+Thanks to ManlyMarco for their [Runtime Unity Editor](https://github.com/ManlyMarco/RuntimeUnityEditor), which I used for the REPL console and the "Find Instances" snippet. The only difference is that my console is much more light-weight, and the "find instances" will search for FieldInfo and not just PropertyInfo.
 
 Also includes the same `mcs.dll` from the one used in that repository.
