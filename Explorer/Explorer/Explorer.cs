@@ -18,9 +18,14 @@ namespace Explorer
     {
         public static Explorer Instance;
 
+        public static bool ShowMenu { get; set; } = false;
+
         const string ID = "com.sinai.explorer";
         const string NAME = "Explorer";
         const string VERSION = "2.0";
+
+        public static bool ShowMouse { get; set; }
+        private static bool m_mouseShowing;
 
         public static bool QuestDebugging { get; set; } = true;
 
@@ -61,7 +66,7 @@ namespace Explorer
             OLogger.CreateLog(new Rect(Screen.width - m_logger.x - 5, Screen.height - m_logger.y - 5, m_logger.x, m_logger.y));            
 
             // done init
-            WindowManager.ShowWindows = true;
+            ShowMenu = true;
             OLogger.Log("Initialised Explorer. Unity version: " + Application.unityVersion.ToString());
         }
 
@@ -69,7 +74,55 @@ namespace Explorer
         {
             if (Input.GetKeyDown(KeyCode.F7))
             {
-                WindowManager.ShowWindows = !WindowManager.ShowWindows;
+                ShowMenu = !ShowMenu;
+            }
+
+            MouseFix();
+        }
+
+        public static void MouseFix()
+        {
+            var cha = CharacterManager.Instance.GetFirstLocalCharacter();
+
+            if (!cha)
+            {
+                return;
+            }
+
+            if (ShowMenu && ShowMouse)
+            {
+                if (!m_mouseShowing)
+                {
+                    m_mouseShowing = true;
+                    ToggleDummyPanel(cha, true);
+                }
+            }
+            else if (m_mouseShowing)
+            {
+                m_mouseShowing = false;
+                ToggleDummyPanel(cha, false);
+            }
+        }
+
+
+        private static void ToggleDummyPanel(Character cha, bool show)
+        {
+            if (cha.CharacterUI.PendingDemoCharSelectionScreen is Panel panel)
+            {
+                if (show)
+                    panel.Show();
+                else
+                    panel.Hide();
+            }
+            else if (show)
+            {
+                GameObject obj = new GameObject();
+                obj.transform.parent = cha.transform;
+                obj.SetActive(true);
+
+                Panel newPanel = obj.AddComponent<Panel>();
+                At.SetValue(newPanel, typeof(CharacterUI), cha.CharacterUI, "PendingDemoCharSelectionScreen");
+                newPanel.Show();
             }
         }
 

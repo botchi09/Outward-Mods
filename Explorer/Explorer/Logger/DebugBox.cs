@@ -15,7 +15,24 @@ namespace Explorer
         private Vector2 m_virtualSize;
         private Vector2 m_currentSize;
         private Matrix4x4 m_scaledMatrix;
-        private GUIStyle m_guiStyle;
+
+        private GUIStyle m_textStyle;
+        private GUIStyle TextStyle
+        {
+            get
+            {
+                if (m_textStyle == null)
+                {
+                    m_textStyle = new GUIStyle
+                    {
+                        richText = true,
+                        wordWrap = true,
+                        fontSize = 16
+                    };
+                }
+                return m_textStyle;
+            }
+        }
 
         private int maxLines;
         private int linesCharacterCount;
@@ -60,12 +77,6 @@ namespace Explorer
             m_virtualSize = new Vector2(1920, 1080);
             m_currentSize = new Vector2(Screen.width, Screen.height);
             m_scaledMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(Screen.width / m_virtualSize.x, Screen.height / m_virtualSize.y, 1));
-
-            //setup GUIStyle
-            m_guiStyle = new GUIStyle();
-            m_guiStyle.richText = true;
-            m_guiStyle.wordWrap = true;
-            m_guiStyle.fontSize = 16;
 
             //used to setup output string
             m_currentOutputText = "";
@@ -130,7 +141,7 @@ namespace Explorer
 
             //calculate size of characters and total character size
             GUIContent tempContent = new GUIContent("C");
-            Vector2 charSize = m_guiStyle.CalcSize(tempContent);
+            Vector2 charSize = TextStyle.CalcSize(tempContent);
             Vector2 sizeLeft = new Vector2(m_windowRect.width - 25, m_windowRect.height - 40);
 
             //calculate how many lines are supposed to be copied
@@ -155,7 +166,7 @@ namespace Explorer
 
                     //calculate current height of line
                     tempContent = new GUIContent(currentString);
-                    heightOfLine = m_guiStyle.CalcHeight(tempContent, sizeLeft.x);
+                    heightOfLine = TextStyle.CalcHeight(tempContent, sizeLeft.x);
 
                     //add color + message + newline to text
                     output += currentString + Environment.NewLine;
@@ -200,6 +211,7 @@ namespace Explorer
         internal void ClearText()
         {
             textLines.Clear();
+            UpdateGUIText();
             m_currentScroll = m_scrollStart;
         }
 
@@ -233,16 +245,21 @@ namespace Explorer
             if (m_showGUI)
             {
                 //create debugWindow
-                m_windowRect = GUI.Window(m_GUIID, m_windowRect, WindowFunction, m_BoxName);
+                m_windowRect = GUI.Window(m_GUIID, m_windowRect, WindowFunction, m_BoxName, UIStyles.WindowSkin.window);
             }
 
         }
 
         private void WindowFunction(int windowID)
         {
-
             //allow window to be dragged
-            GUI.DragWindow(new Rect(0, 0, m_windowRect.width, 20));
+            GUI.DragWindow(new Rect(0, 0, m_windowRect.width - 50, 20));
+
+            // reset button
+            if (GUI.Button(new Rect(m_windowRect.width - 50, 0, 50, 20), "Reset")) 
+            {
+                ClearText();
+            }
 
             //check if text needs to be update
             m_prevOffset = m_offset;
@@ -263,7 +280,7 @@ namespace Explorer
 
             //begin text area
             GUILayout.BeginArea(new Rect(10, 30, m_windowRect.width - 50, m_windowRect.height - 50));
-            GUILayout.TextArea(m_currentOutputText, linesCharacterCount, m_guiStyle, GUILayout.Height(m_windowRect.height - 50));
+            GUILayout.TextArea(m_currentOutputText, linesCharacterCount, TextStyle, GUILayout.Height(m_windowRect.height - 50));
             GUILayout.EndArea();
 
             GUILayout.BeginArea(new Rect(0, m_windowRect.height - 25, m_windowRect.width, 25));

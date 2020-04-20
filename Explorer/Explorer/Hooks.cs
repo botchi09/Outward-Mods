@@ -14,9 +14,6 @@ namespace Explorer
     {
         public static void InitHooks()
         {
-            //// mouse control
-            //On.Global.Update += Hooks.Global_Update;
-
             // debug quest events
             On.SendQuestEventInteraction.OnActivate += Hooks.SendQuestInteractionHook;
             On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += Hooks.SendQuestEventHook;
@@ -26,60 +23,6 @@ namespace Explorer
 
             // Skip Logos hook
             On.StartupVideo.Start += Hooks.StartupVideo_Start;
-        }
-
-        // ** MOUSE CONTROL ** //
-
-        public static void Global_Update(On.Global.orig_Update orig, Global self)
-        {
-            if (WindowManager.ShowWindows && Input.GetKey(KeyCode.LeftAlt))
-            {
-                if (Cursor.lockState != CursorLockMode.None)
-                {
-                    Cursor.lockState = CursorLockMode.None;
-                }
-                if (!Cursor.visible)
-                {
-                    Cursor.visible = true;
-                }
-            }
-
-            bool flag = false;
-            for (int i = 0; i < SplitScreenManager.Instance.LocalPlayers.Count; i++)
-            {
-                if (SplitScreenManager.Instance.LocalPlayers[i].CharUI && SplitScreenManager.Instance.LocalPlayers[i].CharUI.IsInputFieldFocused)
-                {
-                    flag = false;
-                    break;
-                }
-            }
-            if (Global.CheatsEnabled)
-            {
-                bool flag2 = !flag && Input.GetKeyDown(KeyCode.Keypad1);
-                flag2 |= Input.GetMouseButtonDown(4);
-                if (flag2)
-                {
-                    Time.timeScale = ((Time.timeScale != 1f) ? 1f : 0.2f);
-                    Time.fixedDeltaTime = 0.022f * Time.timeScale;
-                }
-            }
-            if (Global.CheatsEnabled && !flag && Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.H))
-            {
-                bool flag3 = true;
-                for (int j = 0; j < SplitScreenManager.Instance.LocalPlayers.Count; j++)
-                {
-                    if (SplitScreenManager.Instance.LocalPlayers[j].CharUI && SplitScreenManager.Instance.LocalPlayers[j].CharUI.IsInputFieldFocused)
-                    {
-                        flag3 = false;
-                        break;
-                    }
-                }
-                if (flag3)
-                {
-                    bool hidden = (bool)At.GetValue(typeof(Global), Global.Instance, "m_hideUI");
-                    At.SetValue(!hidden, typeof(Global), Global.Instance, "m_hideUI");
-                }
-            }
         }
 
         // *************** FIX DEBUG AREA SWITCH NAMES *********** //

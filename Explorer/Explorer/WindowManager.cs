@@ -12,8 +12,6 @@ namespace Explorer
     {
         public static WindowManager Instance;
 
-        public static bool ShowWindows { get; set; } = false;
-
         public static List<UIWindow> Windows = new List<UIWindow>();
         public static int CurrentWindowID { get; set; } = 500000;
         private static Rect m_lastWindowRect;
@@ -46,7 +44,7 @@ namespace Explorer
         {
             get
             {
-                if (!ShowWindows)
+                if (!Explorer.ShowMenu)
                 {
                     return false;
                 }
@@ -190,7 +188,7 @@ namespace Explorer
 
             internal void OnGUI()
             {
-                if (ShowWindows)
+                if (Explorer.ShowMenu)
                 {
                     var origSkin = GUI.skin;
 

@@ -12,11 +12,20 @@ namespace Explorer
         public override string Name { get => "Object Reflection"; set => Name = value; }
 
         public object m_object;
-        private string m_searchFilter = "";
-        private bool m_autoUpdate = false;
 
         private List<FieldInfoHolder> m_FieldInfos;
         private List<PropertyInfoHolder> m_PropertyInfos;
+
+        private bool m_autoUpdate = false;
+        private string m_search = "";
+        public MemberFilter m_filter = MemberFilter.Both;
+
+        public enum MemberFilter
+        {
+            Both,
+            Property,
+            Field
+        }
 
         public override void Init()
         {
@@ -41,14 +50,26 @@ namespace Explorer
 
         private void UpdateValues()
         {
-            foreach (var holder in this.m_FieldInfos)
+            if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Field)
             {
-                holder.UpdateValue(m_object);
+                foreach (var holder in this.m_FieldInfos)
+                {
+                    if (m_search == "" || holder.fieldInfo.Name.ToLower().Contains(m_search.ToLower()))
+                    {
+                        holder.UpdateValue(m_object);
+                    }
+                }
             }
 
-            foreach (var prop in this.m_PropertyInfos)
+            if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Property)
             {
-                prop.UpdateValue(m_object);
+                foreach (var holder in this.m_PropertyInfos)
+                {
+                    if (m_search == "" || holder.propInfo.Name.ToLower().Contains(m_search.ToLower()))
+                    {
+                        holder.UpdateValue(m_object);
+                    }
+                }
             }
         }
 
@@ -88,7 +109,14 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("<b>Search:</b>", GUILayout.Width(75));
-                m_searchFilter = GUILayout.TextField(m_searchFilter);
+                m_search = GUILayout.TextField(m_search);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("<b>Filter:</b>", GUILayout.Width(75));
+                FilterToggle(MemberFilter.Both, "Both");
+                FilterToggle(MemberFilter.Property, "Properties");
+                FilterToggle(MemberFilter.Field, "Fields");
                 GUILayout.EndHorizontal();
 
                 GUILayout.Space(10);
@@ -97,36 +125,42 @@ namespace Explorer
 
                 GUILayout.Space(10);
 
-                UIStyles.HorizontalLine(Color.white);
-
-                GUILayout.Label("<size=18><b><color=gold>Fields</color></b></size>");
-
-                foreach (var holder in this.m_FieldInfos)
+                if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Field)
                 {
-                    if (m_searchFilter != "" && !holder.fieldInfo.Name.ToLower().Contains(m_searchFilter.ToLower())) 
-                    {
-                        continue;
-                    }
+                    UIStyles.HorizontalLine(Color.grey);
 
-                    GUILayout.BeginHorizontal(GUILayout.Height(25));
-                    holder.Draw(this);
-                    GUILayout.EndHorizontal();
+                    GUILayout.Label("<size=18><b><color=gold>Fields</color></b></size>");
+
+                    foreach (var holder in this.m_FieldInfos)
+                    {
+                        if (m_search != "" && !holder.fieldInfo.Name.ToLower().Contains(m_search.ToLower()))
+                        {
+                            continue;
+                        }
+
+                        GUILayout.BeginHorizontal(GUILayout.Height(25));
+                        holder.Draw(this);
+                        GUILayout.EndHorizontal();
+                    }
                 }
 
-                UIStyles.HorizontalLine(Color.white);
-
-                GUILayout.Label("<size=18><b><color=gold>Properties</color></b></size>");
-
-                foreach (var holder in this.m_PropertyInfos)
+                if (m_filter == MemberFilter.Both || m_filter == MemberFilter.Property)
                 {
-                    if (m_searchFilter != "" && !holder.propInfo.Name.ToLower().Contains(m_searchFilter.ToLower()))
-                    {
-                        continue;
-                    }
+                    UIStyles.HorizontalLine(Color.grey);
 
-                    GUILayout.BeginHorizontal(GUILayout.Height(25));
-                    holder.Draw(this);
-                    GUILayout.EndHorizontal();
+                    GUILayout.Label("<size=18><b><color=gold>Properties</color></b></size>");
+
+                    foreach (var holder in this.m_PropertyInfos)
+                    {
+                        if (m_search != "" && !holder.propInfo.Name.ToLower().Contains(m_search.ToLower()))
+                        {
+                            continue;
+                        }
+
+                        GUILayout.BeginHorizontal(GUILayout.Height(25));
+                        holder.Draw(this);
+                        GUILayout.EndHorizontal();
+                    }
                 }
 
                 GUILayout.EndScrollView();
@@ -141,6 +175,23 @@ namespace Explorer
                 DestroyWindow();
                 return;
             }
+        }
+
+        private void FilterToggle(MemberFilter mode, string label)
+        {
+            if (m_filter == mode)
+            {
+                GUI.color = Color.green;
+            }
+            else
+            {
+                GUI.color = Color.white;
+            }
+            if (GUILayout.Button(label, GUILayout.Width(100)))
+            {
+                m_filter = mode;
+            }
+            GUI.color = Color.white;
         }
 
         public static bool IsList(Type t)

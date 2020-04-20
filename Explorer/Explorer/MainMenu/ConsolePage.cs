@@ -22,43 +22,103 @@ namespace Explorer
         private ScriptEvaluator _evaluator;
         private readonly StringBuilder _sb = new StringBuilder();
 
-        private string m_code = "";
+        private string MethodInput = "";
+        private string UsingInput = "";
+
+        public static List<string> UsingDirectives;
+
+        private static readonly string[] m_defaultUsing = new string[]
+        {
+            "System",
+            "UnityEngine",
+            "System.Linq",
+            "System.Collections",
+            "System.Collections.Generic",
+            "System.Reflection"
+        };
 
         public override void Init()
         {
-            _evaluator = new ScriptEvaluator(new StringWriter(_sb)) { InteractiveBaseClass = typeof(REPL) };
+            ResetConsole();
 
-            m_code = "// Welcome to the Outward Explorer Console!" +
-                    "\r\n// Enter your C# here as though you were declaring a method body. Press 'Run Code' to evaluate." +
-                    "\r\n" +
-                    "\r\nDebug.Log(\"Hello World!\");";
+            MethodInput = @"// This is a basic REPL console used to execute a method.
+// Some common directives are added by default, you can add more below.
+// If you want to return some output, Debug.Log() it.
 
-            var envSetup = "using System;" +
-                           "using UnityEngine;" +
-                           "using System.Linq;" +
-                           "using System.Collections;" +
-                           "using System.Collections.Generic;";
-
-            Evaluate(envSetup);
+var ironSword = ResourcesPrefabManager.Instance.GetItemPrefab(2000010);
+Debug.Log(ironSword.Name);";
         }
 
-        public override void Update() { }
+        public void ResetConsole()
+        {
+            if (_evaluator != null)
+            {
+                _evaluator.Dispose();
+            }
+
+            _evaluator = new ScriptEvaluator(new StringWriter(_sb)) { InteractiveBaseClass = typeof(REPL) };
+
+            UsingDirectives = new List<string>();
+            UsingDirectives.AddRange(m_defaultUsing);
+            foreach (string asm in UsingDirectives)
+            {
+                Evaluate(AsmToUsing(asm));
+            }
+        }
+
+        public string AsmToUsing(string asm, bool richtext = false)
+        {
+            if (richtext)
+            {
+                return $"<color=#569cd6>using</color> {asm};";
+            }
+            return $"using {asm};";
+        }
+
+        public void AddUsing(string asm)
+        {
+            if (!UsingDirectives.Contains(asm))
+            {
+                UsingDirectives.Add(asm);
+                Evaluate(AsmToUsing(asm));
+            }
+        }
+
+        public object Evaluate(string str)
+        {
+            object ret = VoidType.Value;
+
+            _evaluator.Compile(str, out var compiled);
+
+            try
+            {
+                compiled?.Invoke(ref ret);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning(e.ToString());
+            }
+
+            return ret;
+        }
+
 
         public override void DrawWindow()
         {
-            GUILayout.Label("<b><size=15><color=cyan>Dynamic Method Console</color></size></b>");
+            GUILayout.Label("<b><size=15><color=cyan>REPL Console</color></size></b>");
 
-            m_code = GUILayout.TextArea(m_code, GUILayout.Height(500));
+            GUILayout.Label("Method:");
+            MethodInput = GUILayout.TextArea(MethodInput, GUILayout.Height(300));
 
-            if (GUILayout.Button("<color=cyan>Run code</color>"))
+            if (GUILayout.Button("<color=cyan><b>Execute</b></color>"))
             {
                 try
                 {
-                    m_code = m_code.Trim();
+                    MethodInput = MethodInput.Trim();
 
-                    if (!string.IsNullOrEmpty(m_code))
+                    if (!string.IsNullOrEmpty(MethodInput))
                     {
-                        var result = Evaluate(m_code);
+                        var result = Evaluate(MethodInput);
 
                         if (result != null && !Equals(result, VoidType.Value))
                         {
@@ -71,32 +131,27 @@ namespace Explorer
                     Debug.LogError("Exception compiling!\r\nMessage: " + e.Message + "\r\nStack: " + e.StackTrace);
                 }
             }
+
+            GUILayout.Label("<b>Using directives:</b>");
+            foreach (var asm in UsingDirectives)
+            {
+                GUILayout.Label(AsmToUsing(asm, true));
+            }
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Add namespace:", GUILayout.Width(110));
+            UsingInput = GUILayout.TextField(UsingInput, GUILayout.Width(150));
+            if (GUILayout.Button("Add", GUILayout.Width(50)))
+            {
+                AddUsing(UsingInput);
+            }
+            if (GUILayout.Button("<color=red>Reset</color>"))
+            {
+                ResetConsole();
+            }
+            GUILayout.EndHorizontal();
         }
 
-        public object Evaluate(string str)
-        {
-            object ret = VoidType.Value;
-
-            _evaluator.Compile(str, out var compiled);
-
-            try
-            {
-                if (compiled == null)
-                {
-                    Debug.LogWarning("Error compiling!");
-                }
-                else
-                {
-                    compiled.Invoke(ref ret);
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogWarning(e.ToString());
-            }
-
-            return ret;
-        }
+        public override void Update() { }
 
         private class VoidType
         {

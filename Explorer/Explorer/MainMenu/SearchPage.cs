@@ -19,10 +19,24 @@ namespace Explorer
         private string m_typeInput = "";
         private int m_limit = 100;
 
-        private bool m_anyMode = true;
-        private bool m_sceneMode;
-        private bool m_dontDestroyMode;
-        private bool m_noSceneMode;
+        public SceneFilter SceneMode = SceneFilter.Any;
+        public TypeFilter TypeMode = TypeFilter.Object;
+
+        public enum SceneFilter
+        {
+            Any,
+            This,
+            DontDestroy,
+            None
+        }
+
+        public enum TypeFilter
+        {
+            Object,
+            GameObject,
+            Component,
+            Custom
+        }
 
         private List<object> m_searchResults = new List<object>();
         private Vector2 resultsScroll = Vector2.zero;
@@ -48,21 +62,29 @@ namespace Explorer
             try
             {
                 // helpers
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("<b>Helpers:</b>", GUILayout.Width(80));
-                if (GUILayout.Button("Find Instances", GUILayout.Width(120)))
+                GUILayout.BeginVertical(GUI.skin.box);
+                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                GUILayout.Label("<b><color=orange>Helpers</color></b>");
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                if (GUILayout.Button("Find Static Instances", GUILayout.Width(180)))
                 {
                     m_searchResults = GetInstanceClassScanner().ToList();
                 }
-                GUILayout.EndHorizontal();
+                GUILayout.EndVertical();
 
+                // search box
                 SearchBox();
 
-                GUILayout.Space(15);
+                // results
+                GUILayout.BeginVertical(GUI.skin.box);
+
+                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+                GUILayout.Label("<b><color=orange>Results</color></b>");
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
                 resultsScroll = GUILayout.BeginScrollView(resultsScroll);
 
-                var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 180, MainMenu.MainRect.height);
+                var _temprect = new Rect(MainMenu.MainRect.x, MainMenu.MainRect.y, MainMenu.MainRect.width + 160, MainMenu.MainRect.height);
 
                 if (m_searchResults.Count > 0)
                 {
@@ -79,6 +101,8 @@ namespace Explorer
                 }
 
                 GUILayout.EndScrollView();
+
+                GUILayout.EndVertical();
             }
             catch
             {
@@ -88,51 +112,65 @@ namespace Explorer
 
         private void SearchBox()
         {
+            GUILayout.BeginVertical(GUI.skin.box);
+
             // ----- GameObject Search -----
-            GUILayout.Label("<b>Search Objects:</b>");
+            GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Label("<b><color=orange>Search</color></b>");
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
 
             GUILayout.BeginHorizontal();
+
             GUILayout.Label("Name Contains:", GUILayout.Width(100));
-            m_searchInput = GUILayout.TextField(m_searchInput);
-            GUILayout.EndHorizontal();
+            m_searchInput = GUILayout.TextField(m_searchInput, GUILayout.Width(200));
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("Class Type:", GUILayout.Width(100));
-            m_typeInput = GUILayout.TextField(m_typeInput);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
+            GUI.skin.label.alignment = TextAnchor.MiddleRight;
             GUILayout.Label("Result limit:", GUILayout.Width(100));
             var resultinput = m_limit.ToString();
-            resultinput = GUILayout.TextField(resultinput);
+            resultinput = GUILayout.TextField(resultinput, GUILayout.Width(55));
             if (int.TryParse(resultinput, out int _i) && _i > 0)
             {
                 m_limit = _i;
             }
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Scene filter:", GUILayout.Width(100));
-            SceneModeToggleButton(ref m_anyMode, "Any");
-            SceneModeToggleButton(ref m_sceneMode, "This Scene");
-            SceneModeToggleButton(ref m_dontDestroyMode, "DontDestroyOnLoad");
-            SceneModeToggleButton(ref m_noSceneMode, "No Scene");
-            GUILayout.EndHorizontal();
 
-            if (m_sceneMode || m_dontDestroyMode)
+            GUILayout.Label("Class Filter:", GUILayout.Width(100));
+            ClassFilterToggle(TypeFilter.Object, "Object");
+            ClassFilterToggle(TypeFilter.GameObject, "GameObject");
+            ClassFilterToggle(TypeFilter.Component, "Component");
+            ClassFilterToggle(TypeFilter.Custom, "Custom");
+            GUILayout.EndHorizontal();
+            if (TypeMode == TypeFilter.Custom)
             {
-                GUILayout.Label("<i><size=12>note: This search mode restricts results to <color=cyan>GameObject</color> or <color=cyan>Component</color> types!</size></i>");
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Custom Class:", GUILayout.Width(100));
+                m_typeInput = GUILayout.TextField(m_typeInput, GUILayout.Width(100));
+                GUILayout.EndHorizontal();
             }
 
-            if (GUILayout.Button("Search"))
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Scene Filter:", GUILayout.Width(100));
+            SceneFilterToggle(SceneFilter.Any, "Any", 60);
+            SceneFilterToggle(SceneFilter.This, "This Scene", 100);
+            SceneFilterToggle(SceneFilter.DontDestroy, "DontDestroyOnLoad", 140);
+            SceneFilterToggle(SceneFilter.None, "No Scene", 80);
+            GUILayout.EndHorizontal();
+
+            if (GUILayout.Button("<b><color=cyan>Search</color></b>"))
             {
                 Search();
             }
+
+            GUILayout.EndVertical();
         }
 
-        private void SceneModeToggleButton(ref bool toggle, string label)
+        private void ClassFilterToggle(TypeFilter mode, string label)
         {
-            if (toggle)
+            if (TypeMode == mode)
             {
                 GUI.color = Color.green;
             }
@@ -140,9 +178,26 @@ namespace Explorer
             {
                 GUI.color = Color.white;
             }
-            if (GUILayout.Button(label))
+            if (GUILayout.Button(label, GUILayout.Width(100)))
             {
-                SetSceneMode(ref toggle);
+                TypeMode = mode;
+            }
+            GUI.color = Color.white;
+        }
+
+        private void SceneFilterToggle(SceneFilter mode, string label, float width)
+        {
+            if (SceneMode == mode)
+            {
+                GUI.color = Color.green;
+            }
+            else
+            {
+                GUI.color = Color.white;
+            }
+            if (GUILayout.Button(label, GUILayout.Width(width)))
+            {
+                SceneMode = mode;
             }
             GUI.color = Color.white;
         }
@@ -150,18 +205,7 @@ namespace Explorer
 
         // -------------- ACTUAL METHODS (not Gui draw) ----------------- //
 
-
-        private void SetSceneMode(ref bool toggle)
-        {
-            m_anyMode = false;
-            m_noSceneMode = false;
-            m_dontDestroyMode = false;
-            m_sceneMode = false;
-            toggle = true;
-        }
-
-        // ====== get instances ======
-
+        // credit: ManlyMarco (RuntimeUnityEditor)
         public static IEnumerable<object> GetInstanceClassScanner()
         {
             var query = AppDomain.CurrentDomain.GetAssemblies()
@@ -209,9 +253,9 @@ namespace Explorer
 
         private List<object> FindAllObjectsOfType(string _search, string _type)
         {
-            Type type = typeof(Object);
+            Type type = null;
 
-            if (!string.IsNullOrEmpty(_type.Trim()))
+            if (TypeMode == TypeFilter.Custom)
             {
                 if (Explorer.GetType(_type) is Type getType)
                 {
@@ -219,9 +263,21 @@ namespace Explorer
                 }
                 else
                 {
-                    Debug.LogWarning("ERROR! Could not find type: " + _type);
+                    Debug.LogWarning("Could not find type: " + _type);
                     return new List<object>();
                 }
+            }
+            else if (TypeMode == TypeFilter.Object)
+            {
+                type = typeof(Object);
+            }
+            else if (TypeMode == TypeFilter.GameObject)
+            {
+                type = typeof(GameObject);
+            }
+            else if (TypeMode == TypeFilter.Component)
+            {
+                type = typeof(Component);
             }
 
             if (!typeof(Object).IsAssignableFrom(type))
@@ -240,12 +296,19 @@ namespace Explorer
                     break;
                 }
 
-                if (!m_anyMode)
+                if (_search != "" && !obj.name.ToLower().Contains(_search.ToLower()))
                 {
-                    if (m_noSceneMode)
+                    continue;
+                }
+
+                if (SceneMode != SceneFilter.Any)
+                {
+                    if (SceneMode == SceneFilter.None)
                     {
                         if (!NoSceneFilter(obj, obj.GetType()))
+                        {
                             continue;
+                        }
                     }
                     else
                     {
@@ -264,14 +327,14 @@ namespace Explorer
 
                         if (!go) { continue; }
 
-                        if (m_sceneMode)
+                        if (SceneMode == SceneFilter.This)
                         {
                             if (go.scene.name != SceneManagerHelper.ActiveSceneName || go.scene.name == "DontDestroyOnLoad")
                             {
                                 continue;
                             }
                         }
-                        else if (m_dontDestroyMode)
+                        else if (SceneMode == SceneFilter.DontDestroy)
                         {
                             if (go.scene.name != "DontDestroyOnLoad")
                             {

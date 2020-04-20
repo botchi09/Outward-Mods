@@ -40,8 +40,8 @@ namespace Explorer
 
         private static GUISkin _customSkin;
 
-        private static Texture2D m_nofocusTex;
-        private static Texture2D m_focusTex;
+        public static Texture2D m_nofocusTex;
+        public static Texture2D m_focusTex;
 
         private static GUIStyle _horizBarStyle;
 

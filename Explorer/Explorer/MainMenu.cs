@@ -33,11 +33,14 @@ namespace Explorer
 
         public static void SetCurrentPage(int index)
         {
-            if (Pages.Count >= index)
+            if (index < 0 || Pages.Count <= index)
             {
+                Debug.Log("cannot set page " + index);
                 return;
             }
             m_currentPage = index;
+            GUI.BringWindowToFront(MainWindowID);
+            GUI.FocusWindow(MainWindowID);
         }
 
         internal void Update()
@@ -47,7 +50,7 @@ namespace Explorer
 
         internal void OnGUI()
         {
-            if (WindowManager.ShowWindows)
+            if (Explorer.ShowMenu)
             {
                 var origSkin = GUI.skin;
                 GUI.skin = UIStyles.WindowSkin;
@@ -64,7 +67,7 @@ namespace Explorer
 
             if (GUI.Button(new Rect(MainRect.width - 90, 2, 80, 20), "Hide (F7)"))
             {
-                WindowManager.ShowWindows = false;
+                Explorer.ShowMenu = false;
                 return;
             }
 
@@ -84,6 +87,11 @@ namespace Explorer
 
         private void MainHeader()
         {
+            GUILayout.BeginHorizontal();
+            Explorer.QuestDebugging = GUILayout.Toggle(Explorer.QuestDebugging, "Debug Quest Events");
+            Explorer.ShowMouse = GUILayout.Toggle(Explorer.ShowMouse, "Show Mouse");
+            GUILayout.EndHorizontal();
+
             GUILayout.BeginHorizontal();
             for (int i = 0; i < Pages.Count; i++)
             {
