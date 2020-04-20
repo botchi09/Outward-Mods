@@ -97,11 +97,13 @@ namespace Explorer
         // *********************************** METHODS FOR DRAWING VALUES IN GUI ************************************
 
         // helper for "Instantiate" button on UnityEngine.Objects
-        public static void InstantiateBtn(Object obj)
+        public static void InstantiateButton(Object obj, float width = 100)
         {
-            if (GUILayout.Button("Instantiate", GUILayout.Width(100)))
+            if (GUILayout.Button("Instantiate", GUILayout.Width(width)))
             {
-                Object.Instantiate(obj);
+                var newobj = Object.Instantiate(obj);
+
+                WindowManager.InspectObject(newobj, out _);
             }
         }
 
@@ -161,7 +163,7 @@ namespace Explorer
                 }
                 else
                 {
-                    WindowManager.InspectGameObject(obj, out bool _);
+                    WindowManager.InspectObject(obj, out bool _);
                 }
             }
 
@@ -174,7 +176,7 @@ namespace Explorer
             {
                 if (GUILayout.Button("Inspect"))
                 {
-                    WindowManager.InspectGameObject(obj, out bool _);
+                    WindowManager.InspectObject(obj, out bool _);
                 }
             }
 
@@ -242,24 +244,24 @@ namespace Explorer
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUILayout.Button("<color=yellow>[" + m_array.Length + "] " + valueType + "</color>", GUILayout.MaxWidth(rect.width - 230)))
                     {
-                        WindowManager.ReflectObject(value, out bool _);
+                        WindowManager.InspectObject(value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
                     int drawn = 0;
                     foreach (var entry in m_array)
                     {
-                        if (drawn > 100)
-                        {
-                            GUILayout.Label("<i>Some results emitted, array exceeded 100 entries...</i>");
-                            break;
-                        }
-                        drawn++;
-
                         // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
                         GUILayout.Space(190);
+
+                        if (drawn > Explorer.ArrayLimit)
+                        {
+                            GUILayout.Label($"<i><color=red>{m_array.Length - Explorer.ArrayLimit} results omitted, array is too long!</color></i>");
+                            break;
+                        }
+                        drawn++;
 
                         if (entry == null)
                         {
@@ -277,7 +279,7 @@ namespace Explorer
                                 GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                                 if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(rect.width - 230)))
                                 {
-                                    WindowManager.ReflectObject(entry, out bool _);
+                                    WindowManager.InspectObject(entry, out bool _);
                                 }
                                 GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                             }
@@ -289,7 +291,7 @@ namespace Explorer
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
                     if (GUILayout.Button("<color=yellow>" + value.ToString() + "</color>", GUILayout.MaxWidth(rect.width - 230)))
                     {
-                        WindowManager.ReflectObject(value, out bool _);
+                        WindowManager.InspectObject(value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                 }

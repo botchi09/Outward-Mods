@@ -15,7 +15,6 @@ namespace Explorer
         public static List<UIWindow> Windows = new List<UIWindow>();
         public static int CurrentWindowID { get; set; } = 500000;
         private static Rect m_lastWindowRect;
-        private static Rect m_lastReflectRect;
 
         internal void Awake()
         {
@@ -70,14 +69,9 @@ namespace Explorer
             return CurrentWindowID++;
         }
 
-        public static Rect NewGamebjectRect()
+        public static Rect GetNewWindowRect()
         {
             return GetNewWindowRect(ref m_lastWindowRect);
-        }
-
-        public static Rect NewReflectionRect()
-        {
-            return GetNewWindowRect(ref m_lastReflectRect);
         }
 
         public static Rect GetNewWindowRect(ref Rect lastRect)
@@ -100,40 +94,41 @@ namespace Explorer
             return rect;
         }
 
-        public static UIWindow InspectGameObject(GameObject obj, out bool createdNew)
+        public static UIWindow InspectObject(object obj, out bool createdNew)
         {
-            foreach (GameObjectWindow window in Windows.Where(x => x is GameObjectWindow))
+            createdNew = false;
+
+            foreach (var window in Windows)
             {
-                if (obj == window.m_object)
+                if (obj == window.Target)
                 {
                     GUI.BringWindowToFront(window.windowID);
                     GUI.FocusWindow(window.windowID);
-                    createdNew = false;
                     return window;
                 }
             }
 
             createdNew = true;
+            if (obj is GameObject || obj is Transform)
+            {
+                return InspectGameObject(obj as GameObject ?? (obj as Transform).gameObject);
+            }
+            else
+            {
+                return InspectReflection(obj);
+            }
+        }
+
+        private static UIWindow InspectGameObject(GameObject obj)
+        {
             var new_window = UIWindow.CreateWindow<GameObjectWindow>(obj);
             GUI.FocusWindow(new_window.windowID);
 
             return new_window;
         }
 
-        public static UIWindow ReflectObject(object obj, out bool createdNew)
+        public static UIWindow InspectReflection(object obj)
         {
-            foreach (ReflectionWindow window in Windows.Where(x => x is ReflectionWindow))
-            {
-                if (obj == window.m_object)
-                {
-                    GUI.BringWindowToFront(window.windowID);
-                    GUI.FocusWindow(window.windowID);
-                    createdNew = false;
-                    return window;
-                }
-            }
-
-            createdNew = true;
             var new_window = UIWindow.CreateWindow<ReflectionWindow>(obj);
             GUI.FocusWindow(new_window.windowID);
 
@@ -160,15 +155,7 @@ namespace Explorer
 
                 component.Target = target;
                 component.windowID = NextWindowID();
-                
-                if (component is GameObjectWindow)
-                {
-                    component.m_rect = NewGamebjectRect();
-                }
-                else
-                {
-                    component.m_rect = NewReflectionRect();
-                }
+                component.m_rect = GetNewWindowRect();
 
                 Windows.Add(component);
 

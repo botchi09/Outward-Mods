@@ -62,15 +62,13 @@ namespace Explorer
             try
             {
                 // helpers
-                GUILayout.BeginVertical(GUI.skin.box);
-                GUI.skin.label.alignment = TextAnchor.MiddleCenter;
-                GUILayout.Label("<b><color=orange>Helpers</color></b>");
-                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                GUILayout.Label("<b><color=orange>Helpers</color></b>", GUILayout.Width(70));
                 if (GUILayout.Button("Find Static Instances", GUILayout.Width(180)))
                 {
                     m_searchResults = GetInstanceClassScanner().ToList();
                 }
-                GUILayout.EndVertical();
+                GUILayout.EndHorizontal();
 
                 // search box
                 SearchBox();
@@ -147,8 +145,10 @@ namespace Explorer
             if (TypeMode == TypeFilter.Custom)
             {
                 GUILayout.BeginHorizontal();
+                GUI.skin.label.alignment = TextAnchor.MiddleRight;
                 GUILayout.Label("Custom Class:", GUILayout.Width(250));
-                m_typeInput = GUILayout.TextField(m_typeInput, GUILayout.Width(100));
+                GUI.skin.label.alignment = TextAnchor.UpperLeft;
+                m_typeInput = GUILayout.TextField(m_typeInput, GUILayout.Width(250));
                 GUILayout.EndHorizontal();
             }
 

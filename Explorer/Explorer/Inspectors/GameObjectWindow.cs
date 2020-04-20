@@ -58,7 +58,7 @@ namespace Explorer
 
         private void InspectGameObject(GameObject obj)
         {
-            var window = WindowManager.InspectGameObject(obj, out bool created);
+            var window = WindowManager.InspectObject(obj, out bool created);
             
             if (created)
             {
@@ -69,7 +69,7 @@ namespace Explorer
 
         private void ReflectObject(object obj)
         {
-            var window = WindowManager.ReflectObject(obj, out bool created);
+            var window = WindowManager.InspectObject(obj, out bool created);
 
             if (created)
             {
@@ -124,13 +124,6 @@ namespace Explorer
             GUILayout.BeginHorizontal();
             GUILayout.Label("Name:", GUILayout.Width(50));
             GUILayout.TextArea(m_name);
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Label("GameObject Active:", GUILayout.Width(150));
-            bool m_active = m_object.activeSelf;
-            m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>");
-            if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
             GUILayout.EndHorizontal();
 
             // --- Horizontal Columns section ---
@@ -210,13 +203,22 @@ namespace Explorer
 
         private void GameObjectControls()
         {
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(500));
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(530));
             GUILayout.Label("<b><size=15>GameObject Controls</size></b>");
+
+            GUILayout.BeginHorizontal();
+            bool m_active = m_object.activeSelf;
+            m_active = GUILayout.Toggle(m_active, (m_active ? "<color=lime>Enabled " : "<color=red>Disabled") + "</color>", GUILayout.Width(80));
+            if (m_object.activeSelf != m_active) { m_object.SetActive(m_active); }
+
+            UIStyles.InstantiateButton(m_object, 100);
 
             if (CharacterManager.Instance.GetFirstLocalCharacter() is Character c)
             {
                 CharacterCheats(c);
             }
+
+            GUILayout.EndHorizontal();
 
             GUILayout.BeginVertical(GUI.skin.box);
 
@@ -227,18 +229,12 @@ namespace Explorer
 
             GUILayout.EndVertical();
 
-            GUILayout.BeginHorizontal();
-
-            UIStyles.InstantiateBtn(m_object);
-
             if (GUILayout.Button("<color=red><b>Destroy</b></color>"))
             {
                 Destroy(m_object);
                 DestroyWindow();
                 return;
             }
-
-            GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
         }
@@ -310,7 +306,6 @@ namespace Explorer
 
         private void CharacterCheats(Character player)
         {
-            GUILayout.BeginHorizontal();
             if (GUILayout.Button("<color=lime>Teleport SELF to</color>"))
             {
                 player.Teleport(m_object.transform.position, Quaternion.identity);
@@ -331,7 +326,6 @@ namespace Explorer
                     m_object.transform.position = pos;
                 }
             }
-            GUILayout.EndHorizontal();
         }
     }
 }

@@ -16,18 +16,20 @@ namespace Explorer
     //[BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
     public class Explorer : BaseUnityPlugin
     {
-        public static Explorer Instance;
-
-        public static bool ShowMenu { get; set; } = false;
-
         const string ID = "com.sinai.explorer";
         const string NAME = "Explorer";
         const string VERSION = "2.0";
+
+        public static Explorer Instance;
+
+        public static bool ShowMenu { get; set; } = false;
 
         public static bool ShowMouse { get; set; }
         private static bool m_mouseShowing;
 
         public static bool QuestDebugging { get; set; } = true;
+
+        public static int ArrayLimit { get; set; } = 100;
 
         internal void Awake()
         {
@@ -75,6 +77,11 @@ namespace Explorer
             if (Input.GetKeyDown(KeyCode.F7))
             {
                 ShowMenu = !ShowMenu;
+            }
+
+            if (ShowMenu && Input.GetKeyDown(KeyCode.F8))
+            {
+                ShowMouse = !ShowMouse;
             }
 
             MouseFix();

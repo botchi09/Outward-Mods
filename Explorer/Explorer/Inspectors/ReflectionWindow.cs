@@ -83,37 +83,38 @@ namespace Explorer
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("<b>Type:</b> <color=cyan>" + m_object.GetType() + "</color>");
-                if (m_object is Component comp && comp.gameObject is GameObject obj)
+
+                bool unityObj = m_object is UnityEngine.Object;
+
+                if (unityObj)
+                {
+                    GUILayout.Label("Name: " + (m_object as UnityEngine.Object).name);
+                }
+                GUILayout.EndHorizontal();
+
+                if (unityObj)
                 {
                     GUILayout.BeginHorizontal();
-                    GUI.skin.label.alignment = TextAnchor.MiddleRight;
-                    GUILayout.Label("GameObject:");
-                    if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", GUILayout.MaxWidth(m_rect.width - 350)))
+
+                    GUILayout.Label("<b>Tools:</b>", GUILayout.Width(80));
+
+                    UIStyles.InstantiateButton((UnityEngine.Object)m_object);
+
+                    if (m_object is Component comp && comp.gameObject is GameObject obj)
                     {
-                        WindowManager.InspectGameObject(obj, out bool _);
+                        GUI.skin.label.alignment = TextAnchor.MiddleRight;
+                        GUILayout.Label("GameObject:");
+                        if (GUILayout.Button("<color=#00FF00>" + obj.name + "</color>", GUILayout.MaxWidth(m_rect.width - 350)))
+                        {
+                            WindowManager.InspectObject(obj, out bool _);
+                        }
+                        GUI.skin.label.alignment = TextAnchor.UpperLeft;
                     }
-                    GUI.skin.label.alignment = TextAnchor.UpperLeft;
-                    GUILayout.EndHorizontal();
-                }
-                GUILayout.EndHorizontal();
 
-                if (m_object is UnityEngine.Object)
-                {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label("<b>Tools:</b>");
-                    UIStyles.InstantiateBtn((UnityEngine.Object)m_object);
                     GUILayout.EndHorizontal();
                 }
 
-                GUILayout.BeginHorizontal();
-                if (GUILayout.Button("Update values"))
-                {
-                    UpdateValues();
-                }
-                GUI.color = m_autoUpdate ? Color.green : Color.red;
-                m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update values?");
-                GUI.color = Color.white;
-                GUILayout.EndHorizontal();
+                UIStyles.HorizontalLine(Color.grey);
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("<b>Search:</b>", GUILayout.Width(75));
@@ -125,6 +126,17 @@ namespace Explorer
                 FilterToggle(MemberFilter.Both, "Both");
                 FilterToggle(MemberFilter.Property, "Properties");
                 FilterToggle(MemberFilter.Field, "Fields");
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("<b>Values:</b>", GUILayout.Width(75));
+                if (GUILayout.Button("Update", GUILayout.Width(100)))
+                {
+                    UpdateValues();
+                }
+                GUI.color = m_autoUpdate ? Color.green : Color.red;
+                m_autoUpdate = GUILayout.Toggle(m_autoUpdate, "Auto-update?", GUILayout.Width(100));
+                GUI.color = Color.white;
                 GUILayout.EndHorizontal();
 
                 GUILayout.Space(10);

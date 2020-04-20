@@ -88,8 +88,17 @@ namespace Explorer
         private void MainHeader()
         {
             GUILayout.BeginHorizontal();
-            Explorer.QuestDebugging = GUILayout.Toggle(Explorer.QuestDebugging, "Debug Quest Events");
-            Explorer.ShowMouse = GUILayout.Toggle(Explorer.ShowMouse, "Show Mouse");
+            GUILayout.Label("<b>Options:</b>", GUILayout.Width(70));
+            Explorer.QuestDebugging = GUILayout.Toggle(Explorer.QuestDebugging, "Debug Quest Events", GUILayout.Width(160));
+            Explorer.ShowMouse = GUILayout.Toggle(Explorer.ShowMouse, "Show Mouse (F8)", GUILayout.Width(140));
+            GUI.skin.label.alignment = TextAnchor.MiddleRight;
+            GUILayout.Label("Array Limit:", GUILayout.Width(70));
+            GUI.skin.label.alignment = TextAnchor.UpperLeft;
+            var _input = GUILayout.TextField(Explorer.ArrayLimit.ToString(), GUILayout.Width(60));
+            if (int.TryParse(_input, out int _lim))
+            {
+                Explorer.ArrayLimit = _lim;
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
