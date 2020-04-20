@@ -49,16 +49,16 @@ namespace Explorer
 
         private void LoadMCS()
         {
-            var mcsPath = Path.GetDirectoryName(Info.Location) + @"\mcs.dll";
-            if (File.Exists(mcsPath))
-            {
-                Assembly.LoadFile(mcsPath);
-                Logger.LogMessage("Loaded mcs.dll");
-            }
-            else
-            {
-                Logger.LogError("Could not find mcs.dll!");
-            }
+            //var mcsPath = Path.GetDirectoryName(Info.Location) + @"\mcs.dll";
+            //if (File.Exists(mcsPath))
+            //{
+            //    Assembly.Load(File.ReadAllBytes(mcsPath));
+            //    Logger.LogMessage("Loaded mcs.dll");
+            //}
+            //else
+            //{
+            //    Logger.LogError("Could not find mcs.dll!");
+            //}
         }
 
         internal void Start()

@@ -28,10 +28,134 @@ namespace CombatHUD
             SceneManager.sceneLoaded += OnSceneChange;
 
             // hooks
-            On.PunctualDamage.DealHit += PunctualHook; // non-weapon skill hits, traps, effects, etc
-            On.WeaponDamage.DealHit += WeaponSkillHook; // weapon skill hits
-            On.Weapon.HasHit += WeaponHitHook; // melee weapon hit
-            On.ProjectileWeapon.HasHit += ProjectileHitHook;
+            On.PunctualDamage.DealHit += PunctualDamage_DealHit;
+            On.WeaponDamage.DealHit += WeaponDamage_DealHit;
+            On.Weapon.HasHit += Weapon_HasHit;
+            On.ProjectileWeapon.HasHit += ProjectileWeapon_HasHit;
+        }
+
+        private void Weapon_HasHit(On.Weapon.orig_HasHit orig, Weapon self, RaycastHit _hit, Vector3 _dir)
+        {
+            orig(self, _hit, _dir);
+        }
+
+        //private void Weapon_HasHit(On.Weapon.orig_HasHit orig, Weapon self, RaycastHit _hit, Vector3 _dir)
+        //{
+        //    try
+        //    {
+        //        orig(self, _hit, _dir);
+        //    }
+        //    catch { }
+
+        //    // orig
+        //    try
+        //    {
+        //        Hitbox hitbox = _hit.collider.GetComponent<Hitbox>();
+        //        var owner = self.OwnerCharacter;
+        //        var target = hitbox.OwnerChar;
+        //        var alreadyHit = At.GetValue(typeof(Weapon), self, "m_alreadyHitChars") as List<Character>;
+
+        //        if (IsElligable(self, self.OwnerCharacter, hitbox.OwnerChar) && !alreadyHit.Contains(target))
+        //        {
+        //            bool blocked = false;
+        //            float num = Vector3.Angle(hitbox.OwnerChar.transform.forward, owner.transform.position - hitbox.OwnerChar.transform.position);
+        //            float angleDir = _dir.AngleDir(hitbox.OwnerChar.transform.forward, Vector3.up);
+        //            if (!self.Unblockable && hitbox.OwnerChar.Blocking && num < (float)(hitbox.OwnerChar.ShieldEquipped ? Weapon.SHIELD_BLOCK_ANGLE : Weapon.BLOCK_ANGLE))
+        //            {
+        //                blocked = true;
+        //            }
+        //            if (!blocked)
+        //            {
+        //                var getID = At.GetValue(typeof(Weapon), self, "m_attackID");
+        //                if (getID is int attackID && attackID >= 0)
+        //                {
+        //                    DamageList damages = self.GetDamage(attackID).Clone();
+
+        //                    owner.Stats.GetMitigatedDamage(null, ref damages);
+
+        //                    AddDamageLabel(damages, _hit.point, target);
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch
+        //    { }
+        //}
+
+        private static bool IsElligable(Weapon weapon, Character owner, Character _character)
+        {
+            return _character != null && _character != owner && (weapon.CanHitEveryoneButOwner || owner.TargetingSystem.IsTargetable(_character));
+        }
+
+        private void ProjectileWeapon_HasHit(On.ProjectileWeapon.orig_HasHit orig, ProjectileWeapon self, Character _hitCharacter, Vector3 _hitPos, Vector3 _dir, bool _blocked)
+        {
+            try
+            {
+                orig(self, _hitCharacter, _hitPos, _dir, _blocked);
+
+                Character selfChar = At.GetValue(typeof(Item), self as Item, "m_ownerCharacter") as Character;
+
+                if (At.GetValue(typeof(Weapon), self as Weapon, "m_alreadyHitChars") is List<Character> alreadyhit)
+                {
+                    bool eligible = (_hitCharacter != null) && (_hitCharacter != selfChar) && (self.CanHitEveryoneButOwner || selfChar.TargetingSystem.IsTargetable(_hitCharacter));
+
+                    if (eligible && !alreadyhit.Contains((Character)_hitCharacter))
+                    {
+                        if (!_blocked)
+                        {
+                            DamageList damages = self.GetDamage(0);
+                            _hitCharacter.Stats.GetMitigatedDamage((Tag[])null, ref damages);
+
+                            AddDamageLabel(damages, _hitPos, _hitCharacter);
+                        }
+                        else
+                        {
+                            // Attack was blocked.
+                        }
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private DamageList PunctualDamage_DealHit(On.PunctualDamage.orig_DealHit orig, PunctualDamage self, Character target)
+        {
+            var ret = orig(self, target);
+
+            // custom
+            if (target.Alive)
+            {
+                PunctualDamage punctualSelf = self as PunctualDamage;
+
+                if (At.GetValue(typeof(PunctualDamage), punctualSelf, "m_tempList") is DamageList damagelist)
+                {
+                    DamageList damages = damagelist.Clone();
+                    target.Stats.GetMitigatedDamage(null, ref damages);
+
+                    AddDamageLabel(damages, target.CenterPosition, target);
+                }
+            }
+
+            return ret;
+        }
+
+        private DamageList WeaponDamage_DealHit(On.WeaponDamage.orig_DealHit orig, WeaponDamage self, Character target)
+        {
+            var ret = orig(self, target);
+
+            // custom
+            if (target.Alive)
+            {
+                if (At.GetValue(typeof(PunctualDamage), self, "m_tempList") is DamageList damagelist)
+                {
+                    DamageList damages = damagelist.Clone();
+                    target.Stats.GetMitigatedDamage(null, ref damages);
+
+                    AddDamageLabel(damages, target.CenterPosition, target);
+                }
+            }
+
+            return ret;
         }
 
         private void OnSceneChange(Scene scene, LoadSceneMode mode)
@@ -256,112 +380,7 @@ namespace CombatHUD
             g = 0.51f,
             b = 0.51f,
             a = 1.0f
-        };
-
-        // =============== HOOKS ================ //
-
-        private void ProjectileHitHook(On.ProjectileWeapon.orig_HasHit orig, ProjectileWeapon self, Character _hitCharacter, Vector3 _hitPos, Vector3 _dir, bool _blocked)
-        {
-            Character selfChar = At.GetValue(typeof(Item), self as Item, "m_ownerCharacter") as Character;
-
-            if (At.GetValue(typeof(Weapon), self as Weapon, "m_alreadyHitChars") is List<Character> alreadyhit)
-            {
-                bool eligible = (_hitCharacter != null) && (_hitCharacter != selfChar) && (self.CanHitEveryoneButOwner || selfChar.TargetingSystem.IsTargetable(_hitCharacter));
-
-                if (eligible && !alreadyhit.Contains((Character)_hitCharacter))
-                {
-                    if (!_blocked)
-                    {
-                        DamageList damages = self.GetDamage(0);
-                        _hitCharacter.Stats.GetMitigatedDamage((Tag[])null, ref damages);
-
-                        AddDamageLabel(damages, _hitPos, _hitCharacter);
-                    }
-                    else
-                    {
-                        // Attack was blocked.
-                    }
-                }
-            }
-
-            orig(self, _hitCharacter, _hitPos, _dir, _blocked);
-        }
-
-        private void WeaponHitHook(On.Weapon.orig_HasHit orig, Weapon self, RaycastHit _hit, Vector3 _dir)
-        {
-            // basically copies the orig function, but instead of applying any damage, it just adds the label
-            var target = _hit.collider.GetComponent<Hitbox>();
-            var item = self as Item;
-            Character selfChar = At.GetValue(typeof(Item), item, "m_ownerCharacter") as Character;
-
-            if (At.GetValue(typeof(Weapon), self, "m_alreadyHitChars") is List<Character> alreadyhit)
-            {
-                bool eligible = (target.OwnerChar != null) && (target.OwnerChar != selfChar) && (self.CanHitEveryoneButOwner || selfChar.TargetingSystem.IsTargetable(target.OwnerChar));
-
-                if (eligible && !alreadyhit.Contains(target.OwnerChar))
-                {
-                    float num = Vector3.Angle(target.OwnerChar.transform.forward, selfChar.transform.position - target.OwnerChar.transform.position);
-
-                    if (!self.Unblockable && target.OwnerChar.Blocking && num < (float)((!target.OwnerChar.ShieldEquipped) ? Weapon.BLOCK_ANGLE : Weapon.SHIELD_BLOCK_ANGLE))
-                    {
-                        // Debug.Log("Blocked!");
-                    }
-                    else
-                    {
-                        var getID = At.GetValue(typeof(Weapon), self, "m_attackID");
-                        if (getID is int attackID && attackID >= 0)
-                        {
-                            DamageList damages = self.GetDamage(attackID);
-
-                            target.OwnerChar.Stats.GetMitigatedDamage(null, ref damages);
-
-                            AddDamageLabel(damages, _hit.point, target.OwnerChar);
-                        }
-                    }
-                }
-            }
-
-            // orig
-            orig(self, _hit, _dir);
-        }
-
-        private void PunctualHook(On.PunctualDamage.orig_DealHit orig, PunctualDamage self, Character target)
-        {
-            // orig
-            orig(self, target);
-
-            // custom
-            if (target.Alive)
-            {
-                if (At.GetValue(typeof(PunctualDamage), self, "m_tempList") is DamageList damagelist)
-                {
-                    DamageList damages = damagelist.Clone();
-                    target.Stats.GetMitigatedDamage(null, ref damages);
-
-                    AddDamageLabel(damages, target.CenterPosition, target);
-                }
-            }
-        }
-
-        private void WeaponSkillHook(On.WeaponDamage.orig_DealHit orig, WeaponDamage self, Character target)
-        {
-            // orig
-            orig(self, target);
-
-            // custom
-            if (target.Alive)
-            {
-                PunctualDamage punctualSelf = self as PunctualDamage;
-
-                if (At.GetValue(typeof(PunctualDamage), punctualSelf, "m_tempList") is DamageList damagelist)
-                {
-                    DamageList damages = damagelist.Clone();
-                    target.Stats.GetMitigatedDamage(null, ref damages);
-
-                    AddDamageLabel(damages, target.CenterPosition, target);
-                }
-            }
-        }
+        };   
 
         public class DamageLabel
         {

@@ -56,31 +56,29 @@ namespace Explorer
         private string m_currentOutputText;
         private bool m_updateCurrentText;
 
-        public DebugBox(string _boxName, Rect _rect, int _maxStoredLines, int _GUIID, bool _writeToDisk)
+        public static DebugBox CreateDebugBox(GameObject obj, string _boxName, Rect _rect, int _maxStoredLines, int _GUIID, bool _writeToDisk)
         {
+            var box = obj.AddComponent<DebugBox>();
+
             //setup basic variables required
-            m_BoxName = _boxName;
-            m_showGUI = false;
-            m_writeToDisk = _writeToDisk;
-
-            m_GUIID = _GUIID;
-            maxLines = _maxStoredLines;
-
-            textLines = new List<DebugType>();
-
-            m_offset = 0;
-            m_currentScroll = maxLines;
-            m_scrollStart = m_currentScroll;
-
+            box.m_BoxName = _boxName;
+            box.m_showGUI = false;
+            box.m_writeToDisk = _writeToDisk;
+            box.m_GUIID = _GUIID;
+            box.maxLines = _maxStoredLines;
+            box.textLines = new List<DebugType>();
+            box.m_offset = 0;
+            box.m_currentScroll = box.maxLines;
+            box.m_scrollStart = box.m_currentScroll;
             //used to scale GUI at a later point
-            m_windowRect = _rect;
-            m_virtualSize = new Vector2(1920, 1080);
-            m_currentSize = new Vector2(Screen.width, Screen.height);
-            m_scaledMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(Screen.width / m_virtualSize.x, Screen.height / m_virtualSize.y, 1));
+            box.m_windowRect = _rect;
+            box.m_virtualSize = new Vector2(1920, 1080);
+            box.m_currentSize = new Vector2(Screen.width, Screen.height);
+            box.m_scaledMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(Screen.width / box.m_virtualSize.x, Screen.height / box.m_virtualSize.y, 1));
 
             //used to setup output string
-            m_currentOutputText = "";
-            m_updateCurrentText = true;
+            box.m_currentOutputText = "";
+            box.m_updateCurrentText = true;
 
             if (_writeToDisk)
             {
@@ -89,9 +87,15 @@ namespace Explorer
                 OLogger.SetupDirectory();
 
                 //Setup debug text file
-                m_writer = new StreamWriter("mods/Debug/" + m_BoxName + ".txt", false);
-
+                box.m_writer = new StreamWriter("mods/Debug/" + box.m_BoxName + ".txt", false);
             }
+
+            return box;
+        }
+
+        public DebugBox(string _boxName, Rect _rect, int _maxStoredLines, int _GUIID, bool _writeToDisk)
+        {
+            
         }
 
         public void OnApplicationQuit()

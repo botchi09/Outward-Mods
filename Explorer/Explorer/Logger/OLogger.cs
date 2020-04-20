@@ -171,7 +171,9 @@ namespace Explorer
             GameObject.DontDestroyOnLoad(DebugObj);
             DebugObj.transform.parent = m_obj.transform;
 
-            DebugBox ret = DebugObj.AddComponent<DebugBox>(new DebugBox(_panel, _rect, 100, m_currentGUIID++, _writeToDisk));
+            //var box = new DebugBox(_panel, _rect, 100, m_currentGUIID++, _writeToDisk);
+            DebugBox ret = DebugBox.CreateDebugBox(DebugObj, _panel, _rect, 100, m_currentGUIID++, _writeToDisk);
+
             ret.SetGUIEnabled(_enabledOnCreation);
 
             //add panel then return
