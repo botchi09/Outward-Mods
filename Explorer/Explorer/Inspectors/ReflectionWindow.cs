@@ -97,6 +97,14 @@ namespace Explorer
                 }
                 GUILayout.EndHorizontal();
 
+                if (m_object is UnityEngine.Object)
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("<b>Tools:</b>");
+                    UIStyles.InstantiateBtn((UnityEngine.Object)m_object);
+                    GUILayout.EndHorizontal();
+                }
+
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Update values"))
                 {

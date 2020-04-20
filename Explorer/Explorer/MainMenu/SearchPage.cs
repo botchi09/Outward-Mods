@@ -147,7 +147,7 @@ namespace Explorer
             if (TypeMode == TypeFilter.Custom)
             {
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Custom Class:", GUILayout.Width(100));
+                GUILayout.Label("Custom Class:", GUILayout.Width(250));
                 m_typeInput = GUILayout.TextField(m_typeInput, GUILayout.Width(100));
                 GUILayout.EndHorizontal();
             }

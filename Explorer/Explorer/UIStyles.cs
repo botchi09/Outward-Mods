@@ -96,6 +96,14 @@ namespace Explorer
 
         // *********************************** METHODS FOR DRAWING VALUES IN GUI ************************************
 
+        // helper for "Instantiate" button on UnityEngine.Objects
+        public static void InstantiateBtn(Object obj)
+        {
+            if (GUILayout.Button("Instantiate", GUILayout.Width(100)))
+            {
+                Object.Instantiate(obj);
+            }
+        }
 
         // helper for drawing a styled button for a GameObject or Transform
         public static void GameobjButton(GameObject obj, Action<GameObject> specialInspectMethod = null, bool showSmallInspectBtn = true, float width = 380)
@@ -238,8 +246,16 @@ namespace Explorer
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
+                    int drawn = 0;
                     foreach (var entry in m_array)
                     {
+                        if (drawn > 100)
+                        {
+                            GUILayout.Label("<i>Some results emitted, array exceeded 100 entries...</i>");
+                            break;
+                        }
+                        drawn++;
+
                         // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();

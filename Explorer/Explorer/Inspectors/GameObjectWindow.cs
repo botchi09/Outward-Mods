@@ -227,12 +227,18 @@ namespace Explorer
 
             GUILayout.EndVertical();
 
+            GUILayout.BeginHorizontal();
+
+            UIStyles.InstantiateBtn(m_object);
+
             if (GUILayout.Button("<color=red><b>Destroy</b></color>"))
             {
                 Destroy(m_object);
                 DestroyWindow();
                 return;
             }
+
+            GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
         }
