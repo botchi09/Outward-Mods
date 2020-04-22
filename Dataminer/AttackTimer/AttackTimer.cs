@@ -2,36 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Partiality.Modloader;
 using UnityEngine;
 using System.Reflection;
 using System.Collections;
+using BepInEx;
+using HarmonyLib;
 
 namespace AttackTimer
 {
-    public class ModLoader : PartialityMod
+    [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    public class AttackTimer : BaseUnityPlugin
     {
-        public ModLoader()
-        {
-            author = "Sinai";
-            Version = "1.0";
-            ModID = "AttackTimer";
-        }
+        const string GUID = "com.sinai.dataminer.attacktimer";
+        const string NAME = "Attack Timer";
+        const string VERSION = "1.1";
 
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            var obj = new GameObject("AttackTimer");
-            GameObject.DontDestroyOnLoad(obj);
-
-            obj.AddComponent<AttackTimer>();
-            obj.AddComponent<TimerGUI>();
-        }
-    }
-
-    public class AttackTimer : MonoBehaviour
-    {
         public static AttackTimer Instance;
 
         public static bool TimerStarted = false;
@@ -48,20 +34,9 @@ namespace AttackTimer
         {
             Instance = this;
 
-            On.Character.StartAttack += StartAttackHook;
-
-            On.Character.ReceiveDamage += Character_ReceiveDamage;
+            var h = new Harmony(GUID);
+            h.PatchAll();
         }
-
-        // debug damage on enemy hit hook
-        private void Character_ReceiveDamage(On.Character.orig_ReceiveDamage orig, Character self, float _damage, Vector3 _hitVec, bool _syncIfClient)
-        {
-            Debug.Log(string.Format("{0} | {1} received {2} damage", Math.Round(Time.time, 1), self.Name, Math.Round(_damage, 2)));
-
-            orig(self, _damage, _hitVec, _syncIfClient);
-        }
-
-
 
         internal void Update()
         {
@@ -71,29 +46,47 @@ namespace AttackTimer
             }
         }
 
-        private void StartAttackHook(On.Character.orig_StartAttack orig, Character self, int i, int ii)
+        [HarmonyPatch(typeof(Character), "ReceiveDamage")]
+        public class Character_ReceiveDamage
         {
-            orig(self, i, ii);
-
-            StartCoroutine(GetDamageCoroutine(self));
-
-            if (ComboStep < ComboLength)
+            [HarmonyPrefix]
+            public static bool Prefix(Character __instance, float _damage, Vector3 _hitVec, bool _syncIfClient = true)
             {
-                if (!TimerStarted)
+                var self = __instance;
+
+                Debug.Log(string.Format("{0} | {1} received {2} damage", Math.Round(Time.time, 1), self.Name, Math.Round(_damage, 2)));
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(Character), "StartAttack")]
+        public class Character_StartAttack
+        {
+            public static void Postfix(Character __instance, int _type, int _id)
+            {
+                var self = __instance;
+
+                Instance.StartCoroutine(Instance.GetDamageCoroutine(self));
+
+                if (ComboStep < ComboLength)
+                {
+                    if (!TimerStarted)
+                    {
+                        LastComboTime = ComboTimer;
+                        ComboTimer = 0f;
+                        TimerStarted = true;
+                    }
+
+                    ComboStep++;
+                }
+                else
                 {
                     LastComboTime = ComboTimer;
                     ComboTimer = 0f;
+                    ComboStep = 1;
                     TimerStarted = true;
                 }
-
-                ComboStep++;
-            }
-            else
-            {
-                LastComboTime = ComboTimer;
-                ComboTimer = 0f;
-                ComboStep = 1;
-                TimerStarted = true;
             }
         }
 

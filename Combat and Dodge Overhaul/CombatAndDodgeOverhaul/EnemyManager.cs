@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using System.Reflection;
 using SharedModConfig;
+using HarmonyLib;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -26,8 +27,6 @@ namespace CombatAndDodgeOverhaul
         internal void Awake()
         {
             Instance = this;
-
-            On.CharacterStats.ApplyCoopStats += new On.CharacterStats.hook_ApplyCoopStats(ApplyCoopStatsHook);
         }
 
         // just for resetting FixedEnemies on any scene change
@@ -52,82 +51,87 @@ namespace CombatAndDodgeOverhaul
             }
         }
 
-        // hook for when the game applies Co-op stats
-        private void ApplyCoopStatsHook(On.CharacterStats.orig_ApplyCoopStats orig, CharacterStats self)
+        [HarmonyPatch(typeof(CharacterStats), "ApplyCoopStats")]
+        public class CharacterStats_ApplyCoopStats
         {
-            var character = self.GetComponent<Character>();
-            if (!character.IsAI)
+            public static bool Prefix(CharacterStats __instance)
             {
-                self.RemoveStatStack(TagSourceManager.Instance.GetTag("81"), "CombatOverhaul", true);
-                self.AddStatStack(
-                    TagSourceManager.Instance.GetTag("81"),
-                    new StatStack(
-                        "CombatOverhaul", 
-                        0.01f * (float)OverhaulGlobal.config.GetValue(Settings.Stamina_Cost_Stat)), 
-                    true);
+                var self = __instance;
 
-                orig(self);
-                return;
-            }
+                var character = self.GetComponent<Character>();
+                if (!character.IsAI)
+                {
+                    self.RemoveStatStack(TagSourceManager.Instance.GetTag("81"), "CombatOverhaul", true);
+                    self.AddStatStack(
+                        TagSourceManager.Instance.GetTag("81"),
+                        new StatStack(
+                            "CombatOverhaul",
+                            0.01f * (float)CombatOverhaul.config.GetValue(Settings.Stamina_Cost_Stat)),
+                        true);
 
-            if (!PhotonNetwork.isNonMasterClientInRoom)
-            {
-                // if we are world host....
-                if (!(bool)OverhaulGlobal.config.GetValue(Settings.Enemy_Balancing))
-                {
-                    orig(self);
-                    return;
+                    return true;
                 }
-                else
+
+                if (!PhotonNetwork.isNonMasterClientInRoom)
                 {
-                    SetEnemyMods(OverhaulGlobal.config, self, character);
-                }
-            }
-            else // else we are not host
-            {
-                //Debug.Log("non-host Apply stats hook");
-                if (UpdateSyncStats() || m_currentSyncInfos == null)
-                {
-                    //Debug.Log("Settings need update - sent request for sync, and starting delayed orig(self)");
-                    StartCoroutine(DelayedOrigSelf(orig, self));
-                }
-                else
-                {
-                    if (m_currentSyncInfos != null && (bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
+                    // if we are world host....
+                    if (!(bool)CombatOverhaul.config.GetValue(Settings.Enemy_Balancing))
                     {
-                        //Debug.Log("No sync required, setting up stats from current cache");
-                        SetEnemyMods(m_currentSyncInfos, self, character); 
+                        return true;
                     }
-                    if (m_currentSyncInfos == null || !(bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
+                    else
                     {
-                        orig(self);
-                        return;
+                        Instance.SetEnemyMods(CombatOverhaul.config, self, character);
                     }
                 }
+                else // else we are not host
+                {
+                    //Debug.Log("non-host Apply stats hook");
+                    if (Instance.UpdateSyncStats() || Instance.m_currentSyncInfos == null)
+                    {
+                        //Debug.Log("Settings need update - sent request for sync, and starting delayed orig(self)");
+                        // StartCoroutine(Instance.DelayedOrigSelf(orig, self));
+                    }
+                    else
+                    {
+                        if (Instance.m_currentSyncInfos != null && (bool)Instance.m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
+                        {
+                            //Debug.Log("No sync required, setting up stats from current cache");
+                            Instance.SetEnemyMods(Instance.m_currentSyncInfos, self, character);
+                        }
+                        if (Instance.m_currentSyncInfos == null || !(bool)Instance.m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
         }
 
-        private IEnumerator DelayedOrigSelf(On.CharacterStats.orig_ApplyCoopStats orig, CharacterStats self)
-        {
-            float start = Time.time;
-            while (Time.time - start < 5f && m_currentSyncInfos == null)
-            {
-                //Debug.Log("Delayed orig self - waiting for sync infos");
-                if (!NetworkLevelLoader.Instance.AllPlayerDoneLoading)
-                {
-                    start += 1f;
-                }
-                yield return new WaitForSeconds(1.0f);
-            }
-            if (m_currentSyncInfos == null || !(bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
-            {
-                try 
-                { 
-                    orig(self);
-                }
-                catch { }
-            }
-        }
+
+        //private IEnumerator DelayedOrigSelf(On.CharacterStats.orig_ApplyCoopStats orig, CharacterStats self)
+        //{
+        //    float start = Time.time;
+        //    while (Time.time - start < 5f && m_currentSyncInfos == null)
+        //    {
+        //        //Debug.Log("Delayed orig self - waiting for sync infos");
+        //        if (!NetworkLevelLoader.Instance.AllPlayerDoneLoading)
+        //        {
+        //            start += 1f;
+        //        }
+        //        yield return new WaitForSeconds(1.0f);
+        //    }
+        //    if (m_currentSyncInfos == null || !(bool)m_currentSyncInfos.GetValue(Settings.Enemy_Balancing))
+        //    {
+        //        try 
+        //        { 
+        //            orig(self);
+        //        }
+        //        catch { }
+        //    }
+        //}
 
         private bool UpdateSyncStats() // returns true if update is performed, false if no change.
         {
@@ -147,7 +151,7 @@ namespace CombatAndDodgeOverhaul
                     else
                     {
                         m_currentHostUID = host.UID;
-                        m_currentSyncInfos = OverhaulGlobal.config;
+                        m_currentSyncInfos = CombatOverhaul.config;
                     }
                     return true;
                 }

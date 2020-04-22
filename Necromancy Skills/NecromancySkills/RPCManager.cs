@@ -5,9 +5,8 @@ using System.Linq;
 using System.Text;
 using Photon;
 using UnityEngine;
-//using SinAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class RPCManager : Photon.MonoBehaviour
     {
@@ -23,7 +22,8 @@ namespace NecromancerSkills
         {
             Instance = this;
 
-            this.gameObject.AddComponent(new PhotonView() { viewID = 900 });
+            var view = this.gameObject.AddComponent<PhotonView>();
+            view.viewID = 900;
             Debug.Log("Registered NecromancySkills with ViewID " + this.photonView.viewID);
         }
 

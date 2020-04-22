@@ -6,40 +6,21 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-using Partiality.Modloader;
+using BepInEx;
+using HarmonyLib;
 using SharedModConfig;
 
 namespace OutSoulsMod
 {
-    public class ModBase : PartialityMod
+    [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]    
+    public class OutSouls : BaseUnityPlugin
     {
-        public ModBase()
-        {
-            this.ModID = "OutSouls";
-            this.Version = OutSouls.version.ToString("0.00");
-            this.author = "Sinai";
-        }
+        public const string GUID = "com.sinai.outsouls";
+        public const string VERSION = "2.1";
+        public const string NAME = "OutSouls";
 
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            var _obj = new GameObject(this.ModID);
-            GameObject.DontDestroyOnLoad(_obj);
-
-            _obj.AddComponent<OutSouls>();
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-        }
-    }    
-
-    public class OutSouls : MonoBehaviour
-    {
         public static OutSouls Instance;
-        public static double version = 2.0;
 
         public static ModConfig config;
 
@@ -50,6 +31,9 @@ namespace OutSoulsMod
             this.gameObject.AddComponent<BonfireManager>();
             this.gameObject.AddComponent<BonfireGUI>();
             this.gameObject.AddComponent<RPCManager>();
+
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
         }
 
         internal void Start()

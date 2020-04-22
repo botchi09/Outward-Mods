@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
-//using SinAPI;
+using HarmonyLib;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -18,108 +18,106 @@ namespace CombatAndDodgeOverhaul
         internal void Awake()
         {
             Instance = this;
-
-            // allow dodge cancelling
-            On.Character.DodgeInput_1 += DodgeHook;
-            On.Character.HasHit += HasHitHook;
-
-            // bag dodge stuff
-            On.Character.SendDodgeTriggerTrivial += DodgeTriggerHook;
-
-            // attack cancels blocking
-            On.Character.AttackInput += AttackInputHook;
-
-            //stamina hook
-            On.CharacterStats.UpdateVitalStats += new On.CharacterStats.hook_UpdateVitalStats(UpdateVitalHook);
         }
 
-        // for disallowing dodge cancel after you hit an enemy
-        private void HasHitHook(On.Character.orig_HasHit orig, Character self, Weapon _weapon, float _damage, Vector3 _hitDir, Vector3 _hitPoint, float _angle, bool _blocked, Character _target, float _knockback, int _attackID = -999)
+        [HarmonyPatch(typeof(Character), "HasHit")]
+        public class Character_HasHit
         {
-            orig(self, _weapon, _damage, _hitDir, _hitPoint, _angle, _blocked, _target, _knockback, _attackID);
-
-            if (_weapon is MeleeWeapon)
+            [HarmonyPrefix]
+            public static bool Prefix(Character __instance, Weapon _weapon, float _damage, Vector3 _hitDir, Vector3 _hitPoint, float _angle, bool _blocked, Character _target, float _knockback, int _attackID = -999)
             {
-                if (PlayerLastHitTimes.ContainsKey(self.UID))
+                var self = __instance;
+
+                if (Instance.PlayerLastHitTimes.ContainsKey(self.UID))
                 {
-                    PlayerLastHitTimes[self.UID] = Time.time;
+                    Instance.PlayerLastHitTimes[self.UID] = Time.time;
                 }
                 else
                 {
-                    PlayerLastHitTimes.Add(self.UID, Time.time);
+                    Instance.PlayerLastHitTimes.Add(self.UID, Time.time);
                 }
+
+                return true;
             }
         }
 
-        // Dodge Cancelling Hook
-        private void DodgeHook(On.Character.orig_DodgeInput_1 orig, Character self, Vector3 _direction)
+        [HarmonyPatch(typeof(Character), "DodgeInput", new Type[] { typeof(Vector3) })]
+        public class Character_DodgeInput
         {
-            // only use this hook for local players. return orig everything else
-            if (self.IsAI || !self.IsPhotonPlayerLocal)
+            [HarmonyPrefix]
+            public static bool Prefix(Character __instance, Vector3 _direction)
             {
-                orig(self, _direction);
-                return;
-            }
+                var self = __instance;
 
-            float staminaCost = (float)OverhaulGlobal.config.GetValue(Settings.Custom_Dodge_Cost);
-            if (self.Inventory.SkillKnowledge.GetItemFromItemID(8205130)) // feather dodge
-            {
-                staminaCost *= 0.5f;
-            }
-
-            // if dodge cancelling is NOT enabled, just do a normal dodge check.
-            if (!(bool)OverhaulGlobal.config.GetValue(Settings.Dodge_Cancelling))
-            {
-                if (At.GetValue(typeof(Character), self, "m_currentlyChargingAttack") is bool m_currentlyChargingAttack
-                   && At.GetValue(typeof(Character), self, "m_preparingToSleep") is bool m_preparingToSleep
-                   && At.GetValue(typeof(Character), self, "m_nextIsLocomotion") is bool m_nextIsLocomotion
-                   && At.GetValue(typeof(Character), self, "m_dodgeAllowedInAction") is int m_dodgeAllowedInAction)
+                // only use this hook for local players. return orig everything else
+                if (self.IsAI || !self.IsPhotonPlayerLocal)
                 {
-                    if (self.Stats.MovementSpeed > 0f
-                        && !m_preparingToSleep
-                        && (!self.LocomotionAction || m_currentlyChargingAttack)
-                        && (m_nextIsLocomotion || m_dodgeAllowedInAction > 0))
+                    return true;
+                }
+
+                float staminaCost = (float)CombatOverhaul.config.GetValue(Settings.Custom_Dodge_Cost);
+                if (self.Inventory.SkillKnowledge.GetItemFromItemID(8205130)) // feather dodge
+                {
+                    staminaCost *= 0.5f;
+                }
+
+                // if dodge cancelling is NOT enabled, just do a normal dodge check.
+                if (!(bool)CombatOverhaul.config.GetValue(Settings.Dodge_Cancelling))
+                {
+                    if (At.GetValue(typeof(Character), self, "m_currentlyChargingAttack") is bool m_currentlyChargingAttack
+                       && At.GetValue(typeof(Character), self, "m_preparingToSleep") is bool m_preparingToSleep
+                       && At.GetValue(typeof(Character), self, "m_nextIsLocomotion") is bool m_nextIsLocomotion
+                       && At.GetValue(typeof(Character), self, "m_dodgeAllowedInAction") is int m_dodgeAllowedInAction)
                     {
-                        if (!self.Dodging)
+                        if (self.Stats.MovementSpeed > 0f
+                            && !m_preparingToSleep
+                            && (!self.LocomotionAction || m_currentlyChargingAttack)
+                            && (m_nextIsLocomotion || m_dodgeAllowedInAction > 0))
                         {
-                            SendDodge(self, staminaCost, _direction);
+                            if (!self.Dodging)
+                            {
+                                Instance.SendDodge(self, staminaCost, _direction);
+                            }
+                            return false;
                         }
-                        return;
                     }
                 }
-            }
-            else // cancelling enabled. check if we should allow the dodge
-            {
-                if (PlayerLastHitTimes.ContainsKey(self.UID) && Time.time - PlayerLastHitTimes[self.UID] < (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterHit))
+                else // cancelling enabled. check if we should allow the dodge
                 {
-                    //  Debug.Log("Player has hit within the last few seconds. Dodge not allowed!");
-                    return;
+                    if (Instance.PlayerLastHitTimes.ContainsKey(self.UID) 
+                        && Time.time - Instance.PlayerLastHitTimes[self.UID] < (float)CombatOverhaul.config.GetValue(Settings.Dodge_DelayAfterHit))
+                    {
+                        //  Debug.Log("Player has hit within the last few seconds. Dodge not allowed!");
+                        return false;
+                    }
+
+                    Character.HurtType hurtType = (Character.HurtType)At.GetValue(typeof(Character), self, "m_hurtType");
+
+                    // manual fix (game sometimes does not reset HurtType to NONE when animation ends.
+                    float timeout = (float)CombatOverhaul.config.GetValue(Settings.Dodge_DelayAfterStagger);
+                    if (hurtType == Character.HurtType.Knockdown)
+                    {
+                        timeout = (float)CombatOverhaul.config.GetValue(Settings.Dodge_DelayAfterKD);
+                    }
+
+                    if ((float)At.GetValue(typeof(Character), self, "m_timeOfLastStabilityHit") is float lasthit && Time.time - lasthit > timeout)
+                    {
+                        hurtType = Character.HurtType.NONE;
+                        At.SetValue(hurtType, typeof(Character), self, "m_hurtType");
+                    }
+
+                    // if we're not currently dodging or staggered, force an animation cancel dodge (provided we have enough stamina).
+                    if (!self.Dodging && hurtType == Character.HurtType.NONE)
+                    {
+                        Instance.SendDodge(self, staminaCost, _direction);
+                    }
+
+                    // send a fix to force m_dodging to false after a short delay.
+                    // this is a fix for if the player dodges while airborne, the game wont reset their m_dodging to true when they land.
+                    Instance.StartCoroutine(Instance.DodgeLateFix(self));
                 }
 
-                Character.HurtType hurtType = (Character.HurtType)At.GetValue(typeof(Character), self, "m_hurtType");
-
-                // manual fix (game sometimes does not reset HurtType to NONE when animation ends.
-                float timeout = (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterStagger);
-                if (hurtType == Character.HurtType.Knockdown)
-                {
-                    timeout = (float)OverhaulGlobal.config.GetValue(Settings.Dodge_DelayAfterKD);
-                }
-
-                if ((float)At.GetValue(typeof(Character), self, "m_timeOfLastStabilityHit") is float lasthit && Time.time - lasthit > timeout)
-                {
-                    hurtType = Character.HurtType.NONE;
-                    At.SetValue(hurtType, typeof(Character), self, "m_hurtType");
-                }
-
-                // if we're not currently dodging or staggered, force an animation cancel dodge (provided we have enough stamina).
-                if (!self.Dodging && hurtType == Character.HurtType.NONE)
-                {
-                    SendDodge(self, staminaCost, _direction);
-                }
-
-                // send a fix to force m_dodging to false after a short delay.
-                // this is a fix for if the player dodges while airborne, the game wont reset their m_dodging to true when they land.
-                StartCoroutine(DodgeLateFix(self));
+                return false;
             }
         }
 
@@ -161,47 +159,56 @@ namespace CombatAndDodgeOverhaul
             }
         }
 
-        // Dodge Burden hook
-        private void DodgeTriggerHook(On.Character.orig_SendDodgeTriggerTrivial orig, Character self, Vector3 _direction)
+
+        [HarmonyPatch(typeof(Character), "SendDodgeTriggerTrivial")]
+        public class Character_SendDodgeTriggerTrivial
         {
-            if (!(bool)OverhaulGlobal.config.GetValue(Settings.Custom_Bag_Burden))
+            [HarmonyPrefix]
+            public static bool Prefix(Character __instance, Vector3 _direction)
             {
-                orig(self, _direction);
-                return;
-            }
+                var self = __instance;
 
-            if (self.CurrentWeapon)
+                if (!(bool)CombatOverhaul.config.GetValue(Settings.Custom_Bag_Burden))
+                {
+                    return true;
+                }
 
-            if (self.HasDodgeDirection)
-            {
-                self.Animator.SetFloat("DodgeBlend", !self.DodgeRestricted ? 0.0f : GetDodgeRestriction(self));
-            }
-            self.Animator.SetTrigger("Dodge");
+                if (self.CurrentWeapon)
 
-            if (self.CurrentlyChargingAttack)
-            {
-                //self.SendCancelCharging();
-                At.Call(self, "SendCancelCharging", new object[0]);
-            }
+                    if (self.HasDodgeDirection)
+                    {
+                        self.Animator.SetFloat("DodgeBlend", !self.DodgeRestricted ? 0.0f : Instance.GetDodgeRestriction(self));
+                    }
+                self.Animator.SetTrigger("Dodge");
+
+                if (self.CurrentlyChargingAttack)
+                {
+                    //self.SendCancelCharging();
+                    At.Call(self, "SendCancelCharging", new object[0]);
+                }
 
             // get sound player with null coalescing operator
             (At.GetValue(typeof(Character), self, "m_dodgeSoundPlayer") as SoundPlayer)?.Play(false);
 
-            //self.m_dodging = true;
-            At.SetValue(true, typeof(Character), self, "m_dodging");
+                //self.m_dodging = true;
+                At.SetValue(true, typeof(Character), self, "m_dodging");
 
-            //self.StopBlocking();
-            At.Call(self, "StopBlocking", new object[0]);
+                //self.StopBlocking();
+                At.Call(self, "StopBlocking", new object[0]);
 
-            // null coalescing OnDodgeEvent invoke
-            self.OnDodgeEvent?.Invoke();
+                // null coalescing OnDodgeEvent invoke
+                self.OnDodgeEvent?.Invoke();
 
-            if (At.GetValue(typeof(Character), self, "m_characterSoundManager") is CharacterSoundManager charSounds)
-            {
-                Global.AudioManager.PlaySoundAtPosition(charSounds.GetDodgeSound(), self.transform, 0f, 1f, 1f, 1f, 1f);
+                if (At.GetValue(typeof(Character), self, "m_characterSoundManager") is CharacterSoundManager charSounds)
+                {
+                    Global.AudioManager.PlaySoundAtPosition(charSounds.GetDodgeSound(), self.transform, 0f, 1f, 1f, 1f, 1f);
+                }
+
+                self.SendMessage("DodgeTrigger", _direction, SendMessageOptions.DontRequireReceiver);
+
+
+                return false;
             }
-
-            self.SendMessage("DodgeTrigger", _direction, SendMessageOptions.DontRequireReceiver);
         }
 
         // dodge burden helper
@@ -219,27 +226,33 @@ namespace CombatAndDodgeOverhaul
             float weight = bag.Weight * 100;
             float ratio = (weight / bag.BagCapacity) * 0.01f;
 
-            if (ratio < ((float)OverhaulGlobal.config.GetValue(Settings.min_burden_weight) * 0.01f))
+            if (ratio < ((float)CombatOverhaul.config.GetValue(Settings.min_burden_weight) * 0.01f))
             {
-                return (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect) * 0.01f;
+                return (float)CombatOverhaul.config.GetValue(Settings.min_slow_effect) * 0.01f;
             }
             else
             {
-                return Mathf.Clamp(ratio * 100f, (float)OverhaulGlobal.config.GetValue(Settings.min_slow_effect), (float)OverhaulGlobal.config.GetValue(Settings.max_slow_effect)) * 0.01f;
+                return Mathf.Clamp(ratio * 100f, (float)CombatOverhaul.config.GetValue(Settings.min_slow_effect), (float)CombatOverhaul.config.GetValue(Settings.max_slow_effect)) * 0.01f;
             }
         }
 
-        // attacking cancels blocking hook
-        private bool AttackInputHook(On.Character.orig_AttackInput orig, Character self, int _type, int _id = 0)
+        [HarmonyPatch(typeof(Character), "AttackInput")]
+        public class Character_AttackInput
         {
-            if (self.IsLocalPlayer && (bool)OverhaulGlobal.config.GetValue(Settings.Attack_Cancels_Blocking) && !self.IsAI && self.Blocking)
+            public static bool Prefix(Character __instance, int _type, int _id = 0)
             {
-                StartCoroutine(StopBlockingCoroutine(self));
-                At.Call(self, "StopBlocking", null);
-                At.SetValue(false, typeof(Character), self, "m_blockDesired");
-            }
+                var self = __instance;
 
-            return orig(self, _type, _id);
+                if (self.IsLocalPlayer && (bool)CombatOverhaul.config.GetValue(Settings.Attack_Cancels_Blocking) && !self.IsAI && self.Blocking)
+                {
+                    Instance.StartCoroutine(Instance.StopBlockingCoroutine(self));
+                    At.Call(self, "StopBlocking", null);
+                    At.SetValue(false, typeof(Character), self, "m_blockDesired");
+                }
+
+
+                return true;
+            }
         }
 
         private IEnumerator StopBlockingCoroutine(Character character)
@@ -250,22 +263,25 @@ namespace CombatAndDodgeOverhaul
             At.SetValue(false, typeof(Character), character, "m_blockDesired");
         }
 
-        // stamina regen buff
-        private void UpdateVitalHook(On.CharacterStats.orig_UpdateVitalStats orig, CharacterStats self)
+        [HarmonyPatch(typeof(CharacterStats), "UpdateVitalStats")]
+        public class CharacterStats_UpdateVitalStats
         {
-            if (At.GetValue(typeof(CharacterStats), self, "m_timeOfLastStamUse") is float timeOfLast && Time.time - timeOfLast > (float)OverhaulGlobal.config.GetValue(Settings.Stamina_Regen_Delay)
+            public static bool Prefix(CharacterStats __instance)
+            {
+                var self = __instance;
+
+                if (At.GetValue(typeof(CharacterStats), self, "m_timeOfLastStamUse") is float timeOfLast && Time.time - timeOfLast > (float)CombatOverhaul.config.GetValue(Settings.Stamina_Regen_Delay)
                 && At.GetValue(typeof(CharacterStats), self, "m_stamina") is float m_stamina
                 && At.GetValue(typeof(CharacterStats), self, "m_character") is Character character
                 && !character.Blocking)
-            {
-                float regen = (float)OverhaulGlobal.config.GetValue(Settings.Extra_Stamina_Regen) * Time.deltaTime;
-                float newStamina = Mathf.Clamp(m_stamina + regen, 0, self.ActiveMaxStamina);
-                At.SetValue(newStamina, typeof(CharacterStats), self, "m_stamina");
+                {
+                    float regen = (float)CombatOverhaul.config.GetValue(Settings.Extra_Stamina_Regen) * Time.deltaTime;
+                    float newStamina = Mathf.Clamp(m_stamina + regen, 0, self.ActiveMaxStamina);
+                    At.SetValue(newStamina, typeof(CharacterStats), self, "m_stamina");
+                }
+
+                return true;
             }
-
-            orig(self);
         }
-
-        
     }
 }

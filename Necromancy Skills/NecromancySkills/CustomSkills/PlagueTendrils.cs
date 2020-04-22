@@ -7,7 +7,7 @@ using UnityEngine;
 //using SinAPI;
 //using OModAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 { 
     public class PlagueTendrils : ShootBlast
     {
@@ -44,9 +44,12 @@ namespace NecromancerSkills
 
             // change damage and hit effects
             var hit = blast.transform.Find("Effects").gameObject;
-            hit.GetComponent<PunctualDamage>().Damages = ModBase.settings.PlagueAura_TendrilDamage;
-            hit.GetComponent<PunctualDamage>().Knockback = ModBase.settings.PlagueAura_TendrilKnockback;
-            hit.AddComponent(new AddStatusEffectBuildUp() { Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Cripple"), BuildUpValue = 100 });
+            hit.GetComponent<PunctualDamage>().Damages = NecromancyBase.settings.PlagueAura_TendrilDamage;
+            hit.GetComponent<PunctualDamage>().Knockback = NecromancyBase.settings.PlagueAura_TendrilKnockback;
+            var comp = hit.AddComponent<AddStatusEffectBuildUp>();
+            comp.Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Cripple"); 
+            comp.BuildUpValue = 100;
+
         }
         #endregion
 
@@ -75,9 +78,9 @@ namespace NecromancerSkills
 
         private IEnumerator TendrilsCoroutine(object[] _infos)
         {
-            while (Time.time - m_timeOfLastActivation < ModBase.settings.PlagueAura_SigilLifespan)
+            while (Time.time - m_timeOfLastActivation < NecromancyBase.settings.PlagueAura_SigilLifespan)
             {
-                if (Time.time - m_timeOfLastBlast > ModBase.settings.PlagueAura_TendrilInterval)
+                if (Time.time - m_timeOfLastBlast > NecromancyBase.settings.PlagueAura_TendrilInterval)
                 {
                     List<Character> nearCharacters = new List<Character>();
 

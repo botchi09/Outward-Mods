@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 using System.IO;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class SummonSkeleton : Effect // Inherits from the game's "Effect" class, so it works with those systems automatically.
     {
@@ -38,7 +38,7 @@ namespace NecromancerSkills
 
 		protected override bool TryTriggerConditions() // The game checks this before it activates the effect. Note that any mana/stamina/item costs will already be consumed.
 		{
-			float healthcost = ModBase.settings.Summon_HealthCost * this.m_affectedCharacter.Stats.MaxHealth;
+			float healthcost = NecromancyBase.settings.Summon_HealthCost * this.m_affectedCharacter.Stats.MaxHealth;
 			// check player has enough HP
 			if (this.m_affectedCharacter.Stats.CurrentHealth - healthcost <= 0)
 			{
@@ -63,7 +63,7 @@ namespace NecromancerSkills
 
 			bool armyOfDeathLearned = _affectedCharacter.Inventory.SkillKnowledge.IsItemLearned(8890108);
 
-			int MaxSummons = armyOfDeathLearned ? ModBase.settings.Summon_MaxSummons_WithArmyOfDeath : ModBase.settings.Summon_MaxSummons_NoArmyOfDeath;
+			int MaxSummons = armyOfDeathLearned ? NecromancyBase.settings.Summon_MaxSummons_WithArmyOfDeath : NecromancyBase.settings.Summon_MaxSummons_NoArmyOfDeath;
 
 			if (SummonManager.Instance.SummonedCharacters.ContainsKey(_affectedCharacter.UID))
 			{
@@ -78,8 +78,8 @@ namespace NecromancerSkills
 			}
 
 			// custom health cost for casting
-			_affectedCharacter.Stats.UseBurntHealth = ModBase.settings.Summon_BurnsHealth;
-			float healthcost = ModBase.settings.Summon_HealthCost * _affectedCharacter.Stats.MaxHealth;
+			_affectedCharacter.Stats.UseBurntHealth = NecromancyBase.settings.Summon_BurnsHealth;
+			float healthcost = NecromancyBase.settings.Summon_HealthCost * _affectedCharacter.Stats.MaxHealth;
 			_affectedCharacter.Stats.ReceiveDamage(healthcost);
 			_affectedCharacter.Stats.UseBurntHealth = true;
 

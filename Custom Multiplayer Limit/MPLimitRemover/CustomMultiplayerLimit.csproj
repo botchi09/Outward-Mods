@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CustomMultiplayerLimit</RootNamespace>
     <AssemblyName>CustomMultiplayerLimit</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -49,6 +49,10 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\PartialityWrapper\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="netstandard">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Partiality">
       <HintPath>..\..\..\PartialityWrapper\Release\BepInEx\plugins\PartialityWrapper\Partiality.dll</HintPath>
       <Private>False</Private>
@@ -77,16 +81,23 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PlayerLimitRemover.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="util\CustomKeybindings.cs" />
     <Compile Include="util\SinAPI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

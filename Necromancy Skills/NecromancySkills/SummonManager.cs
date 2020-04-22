@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.AI;
 //using SinAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
 	public class SummonManager : MonoBehaviour
     {
@@ -117,8 +117,8 @@ namespace NecromancerSkills
 			_char.SetUID(summonUID);
 			//_char.photonView.viewID = sceneViewID;
 
-			float healthLoss = insidePlagueAura ? ModBase.settings.StrongSummon_HealthLoss : ModBase.settings.Summon_HealthLoss;
-			float maxHealth = insidePlagueAura ? ModBase.settings.StrongSummon_MaxHealth : ModBase.settings.Summon_MaxHealth;
+			float healthLoss = insidePlagueAura ? NecromancyBase.settings.StrongSummon_HealthLoss : NecromancyBase.settings.Summon_HealthLoss;
+			float maxHealth = insidePlagueAura ? NecromancyBase.settings.StrongSummon_MaxHealth : NecromancyBase.settings.Summon_MaxHealth;
 
 			// set custom stats
 			At.SetValue(new Stat(healthLoss), typeof(CharacterStats), _char.Stats, "m_healthRegen");
@@ -181,7 +181,10 @@ namespace NecromancerSkills
 				wander.FollowTransform = owner.transform;
 
 				// add auto-teleport component
-				summonChar.gameObject.AddComponent(new SummonTeleport { m_character = summonChar, TargetCharacter = wander.FollowTransform });
+				var tele = summonChar.gameObject.AddComponent<SummonTeleport>();
+				tele.m_character = summonChar;
+				tele.TargetCharacter = wander.FollowTransform;
+
 			}
 
 			// setup photonview
@@ -190,13 +193,12 @@ namespace NecromancerSkills
 				Debug.Log("Removing PhotonView");
 				DestroyImmediate(view);
 			}
-			summonChar.gameObject.AddComponent(new PhotonView
-			{
-				viewID = sceneViewID,
-				onSerializeTransformOption = OnSerializeTransform.PositionAndRotation,
-				onSerializeRigidBodyOption = OnSerializeRigidBody.All,
-				synchronization = ViewSynchronization.Unreliable
-			});
+			var pView = summonChar.gameObject.AddComponent<PhotonView>();
+			pView.viewID = sceneViewID;
+			pView.onSerializeTransformOption = OnSerializeTransform.PositionAndRotation;
+			pView.onSerializeRigidBodyOption = OnSerializeRigidBody.All;
+			pView.synchronization = ViewSynchronization.Unreliable;
+
 			// add observed components after setting active?
 			if (summonChar.photonView.ObservedComponents == null)
 			{

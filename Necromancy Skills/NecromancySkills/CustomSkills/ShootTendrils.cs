@@ -6,7 +6,7 @@ using System.Text;
 //using OModAPI;
 using UnityEngine;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     // this custom effect class duplicates a ShootProjectile effect onto any summoned AIs
 
@@ -72,14 +72,16 @@ namespace NecromancerSkills
             // heal on hit
             if (projectile.GetComponentInChildren<AffectHealthParentOwner>() is AffectHealthParentOwner heal)
             {
-                heal.AffectQuantity = ModBase.settings.ShootTendrils_Heal_NoPlagueAura;
+                heal.AffectQuantity = NecromancyBase.settings.ShootTendrils_Heal_NoPlagueAura;
             }
 
             // change damage and hit effects
             var hit = projectile.transform.Find("HitEffects").gameObject;
-            hit.GetComponent<PunctualDamage>().Damages = ModBase.settings.ShootTendrils_Damage_NoPlagueAura;
-            hit.GetComponent<PunctualDamage>().Knockback = ModBase.settings.ShootTendrils_Knockback_NoPlagueAura;
-            hit.AddComponent(new AddStatusEffectBuildUp() { Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Curse"), BuildUpValue = 25 });
+            hit.GetComponent<PunctualDamage>().Damages = NecromancyBase.settings.ShootTendrils_Damage_NoPlagueAura;
+            hit.GetComponent<PunctualDamage>().Knockback = NecromancyBase.settings.ShootTendrils_Knockback_NoPlagueAura;
+            var comp = hit.AddComponent<AddStatusEffectBuildUp>();
+            comp.Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Curse");
+            comp.BuildUpValue = 25;
 
             // adjust visuals
             foreach (ParticleSystem ps in projectileObj.GetComponentsInChildren<ParticleSystem>())
@@ -132,14 +134,16 @@ namespace NecromancerSkills
             if (strongProj.GetComponentInChildren<AffectHealthParentOwner>() is AffectHealthParentOwner strongHeal)
             {
                 //DestroyImmediate(heal);
-                strongHeal.AffectQuantity = ModBase.settings.ShootTendrils_Heal_InsideAura;
+                strongHeal.AffectQuantity = NecromancyBase.settings.ShootTendrils_Heal_InsideAura;
             }
 
             // change damage and hit effects.
             var strongHit = strongProj.transform.Find("HitEffects").gameObject;
-            strongHit.GetComponent<PunctualDamage>().Damages = ModBase.settings.ShootTendrils_Damage_InsideAura;
-            strongHit.GetComponent<PunctualDamage>().Knockback = ModBase.settings.ShootTendrils_Knockback_InsideAura;
-            strongHit.AddComponent(new AddStatusEffectBuildUp() { Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Curse"), BuildUpValue = 60 });
+            strongHit.GetComponent<PunctualDamage>().Damages = NecromancyBase.settings.ShootTendrils_Damage_InsideAura;
+            strongHit.GetComponent<PunctualDamage>().Knockback = NecromancyBase.settings.ShootTendrils_Knockback_InsideAura;
+            comp = strongHit.AddComponent<AddStatusEffectBuildUp>();
+            comp.Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Curse");
+            comp.BuildUpValue = 60;
 
             // adjust visuals
             foreach (ParticleSystem ps in strongProjObj.GetComponentsInChildren<ParticleSystem>())

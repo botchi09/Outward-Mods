@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 // using OModAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class ManaPointAffectStat : AffectStat
     {
@@ -20,9 +20,9 @@ namespace NecromancerSkills
             {
                 lastUpdateTime = Time.time;
 
-                if (Value != OwnerCharacter.Stats.ManaPoint * ModBase.settings.Transcendence_DamageBonus)
+                if (Value != OwnerCharacter.Stats.ManaPoint * NecromancyBase.settings.Transcendence_DamageBonus)
                 {
-                    Value = OwnerCharacter.Stats.ManaPoint * ModBase.settings.Transcendence_DamageBonus;
+                    Value = OwnerCharacter.Stats.ManaPoint * NecromancyBase.settings.Transcendence_DamageBonus;
                     
                     if (IsRegistered)
                     {

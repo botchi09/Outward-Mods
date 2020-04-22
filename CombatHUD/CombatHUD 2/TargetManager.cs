@@ -35,7 +35,7 @@ namespace CombatHUD
         private Vector2 m_startPos;
         private Vector2 m_currentOffset = new Vector2(0, 0);
 
-        #region Awake (setup global vars from the prefab asset)
+        // setup global vars from the prefab asset
         internal void Awake()
         {
             // Setup TargetHUD
@@ -71,7 +71,6 @@ namespace CombatHUD
             m_infoboxPoisonSprite   = statusIcons.Find("Poison").GetComponent<Image>();
             m_infoboxNoImmuneText   = statusIcons.Find("None").GetComponent<Text>();
         }
-        #endregion
 
         internal void Update()
         {
@@ -111,7 +110,7 @@ namespace CombatHUD
 
             UpdateTargetHUD(target);
 
-            if ((bool)HUDManager.config.GetValue(Settings.EnemyInfobox))
+            if ((bool)CombatHUD.config.GetValue(Settings.EnemyInfobox))
             {
                 UpdateInfobox(target);
             }
@@ -125,13 +124,13 @@ namespace CombatHUD
             float y;
             if (Split_ID == 0)
             {
-                x = (float)HUDManager.config.GetValue(Settings.Infobox_P1_X);
-                y = (float)HUDManager.config.GetValue(Settings.Infobox_P1_Y);
+                x = (float)CombatHUD.config.GetValue(Settings.Infobox_P1_X);
+                y = (float)CombatHUD.config.GetValue(Settings.Infobox_P1_Y);
             }
             else
             {
-                x = (float)HUDManager.config.GetValue(Settings.Infobox_P2_X);
-                y = (float)HUDManager.config.GetValue(Settings.Infobox_P2_Y);
+                x = (float)CombatHUD.config.GetValue(Settings.Infobox_P2_X);
+                y = (float)CombatHUD.config.GetValue(Settings.Infobox_P2_Y);
             }
 
             var rect = m_infoboxHolder.GetComponent<RectTransform>();
@@ -171,7 +170,7 @@ namespace CombatHUD
         private void UpdateTargetHUD(Character target)
         {
             // update health text
-            if ((bool)HUDManager.config.GetValue(Settings.EnemyHealth))
+            if ((bool)CombatHUD.config.GetValue(Settings.EnemyHealth))
             {
                 if (!m_targetHealthText.gameObject.activeSelf)
                 {
@@ -179,14 +178,14 @@ namespace CombatHUD
                 }
                 m_targetHealthText.text = Math.Round(target.Stats.CurrentHealth) + " / " + Math.Round(target.Stats.ActiveMaxHealth);
                 m_targetHealthText.rectTransform.position = RectTransformUtility.WorldToScreenPoint(m_LinkedCharacter.CharacterCamera.CameraScript, target.UIBarPosition);
-                m_targetHealthText.rectTransform.position += Vector3.up * HUDManager.Rel(10f, true);
+                m_targetHealthText.rectTransform.position += Vector3.up * CombatHUD.Rel(10f, true);
             }
             else if (m_targetHealthText.gameObject.activeSelf)
             {
                 m_targetHealthText.gameObject.SetActive(false);
             }
 
-            if ((bool)HUDManager.config.GetValue(Settings.EnemyStatus))
+            if ((bool)CombatHUD.config.GetValue(Settings.EnemyStatus))
             {
                 if (!m_StatusHolder.activeSelf)
                 {
@@ -204,10 +203,10 @@ namespace CombatHUD
         {
             // update status icons
             float offset = 0f;
-            float offsetInterval = HUDManager.Rel(30f, true);
+            float offsetInterval = CombatHUD.Rel(30f, true);
 
             var barPos = RectTransformUtility.WorldToScreenPoint(m_LinkedCharacter.CharacterCamera.CameraScript, target.UIBarPosition);
-            var pos = barPos + new Vector2(HUDManager.Rel(225f), 0);
+            var pos = barPos + new Vector2(CombatHUD.Rel(225f), 0);
 
             for (int i = 0; i < m_StatusHolder.transform.childCount; i++)
             {
@@ -226,7 +225,7 @@ namespace CombatHUD
 
                     var text = parentRect.transform.Find("Text").GetComponent<Text>();
                     
-                    if ((bool)HUDManager.config.GetValue(Settings.EnemyStatusTimers))
+                    if ((bool)CombatHUD.config.GetValue(Settings.EnemyStatusTimers))
                     {
                         TimeSpan t = TimeSpan.FromSeconds(status.RemainingLifespan);
                         var s = string.Format("{0}:{1}", t.Minutes, t.Seconds.ToString("00"));
@@ -252,7 +251,7 @@ namespace CombatHUD
             }
 
             // buildups
-            if ((bool)HUDManager.config.GetValue(Settings.EnemyBuildup))
+            if ((bool)CombatHUD.config.GetValue(Settings.EnemyBuildup))
             {
                 var m_statusBuildup = At.GetValue(typeof(StatusEffectManager), target.StatusEffectMngr, "m_statusBuildUp") as IDictionary;
                 IDictionary dict = m_statusBuildup as IDictionary;
@@ -322,7 +321,7 @@ namespace CombatHUD
                 {
                     m_infoboxBleedingSprite.gameObject.SetActive(true);
                     m_infoboxBleedingSprite.rectTransform.position = new Vector3(pos.x, pos.y - 2f, 0);
-                    offset += HUDManager.Rel(22f);
+                    offset += CombatHUD.Rel(22f);
                 }
                 else
                 {
@@ -332,7 +331,7 @@ namespace CombatHUD
                 {
                     m_infoboxBurningSprite.gameObject.SetActive(true);
                     m_infoboxBurningSprite.rectTransform.position = new Vector3(pos.x + offset, pos.y - 2f, 0);
-                    offset += HUDManager.Rel(22f);
+                    offset += CombatHUD.Rel(22f);
                 }
                 else
                 {
@@ -365,7 +364,7 @@ namespace CombatHUD
             {
                 m_TargetHUDHolder.SetActive(true);
             }
-            if (!(bool)HUDManager.config.GetValue(Settings.EnemyInfobox))
+            if (!(bool)CombatHUD.config.GetValue(Settings.EnemyInfobox))
             {
                 if (m_infoboxHolder.activeSelf)
                 {

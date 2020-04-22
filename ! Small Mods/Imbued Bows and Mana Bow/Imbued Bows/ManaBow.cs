@@ -3,8 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using SinAPI;
 using UnityEngine;
+using HarmonyLib;
 
 namespace ImbuedBows
 {
@@ -17,20 +17,6 @@ namespace ImbuedBows
         internal void Awake()
         {
             SideLoader.SL.OnPacksLoaded += Setup;
-
-            // mana bow hooks
-            On.WeaponLoadout.CanBeLoaded += CanBeLoadedHook;
-            On.WeaponLoadout.ReduceShotAmount += ReduceShotHook;
-            On.CharacterEquipment.GetEquippedAmmunition += GetAmmoHook;
-
-            // ammo sound hook
-            On.CharacterInventory.PlayEquipSFX += EquipSoundHook;
-            On.CharacterInventory.PlayUnequipSFX += UnequipSoundHook;
-
-            // bow skills
-            On.UseLoadoutAmunition.TryTriggerConditions += TryUseAmmoHook;
-            On.UseLoadoutAmunition.ActivateLocally += ActivateAmmoHook;
-            On.AttackSkill.OwnerHasAllRequiredItems += OwnerHasItemsHook;
         }
 
         //setup after sideloader init is done
@@ -42,6 +28,7 @@ namespace ImbuedBows
 
             // setup bow
             var bow = ResourcesPrefabManager.Instance.GetItemPrefab(ManaBowID) as ProjectileWeapon;
+
             if (bow != null && bow.VisualPrefab is Transform bowVisuals)
             {
                 skinnedMesh = bowVisuals.GetComponentInChildren<SkinnedMeshRenderer>();
@@ -110,125 +97,183 @@ namespace ImbuedBows
             }
         }
 
-        // custom mana cost hook (try trigger)
-        private bool CanBeLoadedHook(On.WeaponLoadout.orig_CanBeLoaded orig, WeaponLoadout self)
+        [HarmonyPatch(typeof(WeaponLoadout), "CanBeLoaded")]
+        public class WeaponLoadout_CanBeLoaded
         {
-            var item = self.Item;
+            [HarmonyPrefix]
+            public static bool Prefix(WeaponLoadout __instance, ref bool __result)
+            {
+                var self = __instance;
+                var item = self.Item;
 
-            if (item.ItemID != ManaBowID)
-            {
-                return orig(self);
-            }
-            else
-            {
-                float currentMana = item.OwnerCharacter.Stats.CurrentMana;
-                float manaCost = item.OwnerCharacter.Stats.GetFinalManaConsumption(null, ManaBowCost);
-                if (currentMana - manaCost >= 0)
+                if (item.ItemID == ManaBowID)
                 {
-                    return true;
-                }
-                else
-                {
-                    item.OwnerCharacter.CharacterUI.ShowInfoNotificationLoc("Notification_Skill_NotEnoughtMana");
-                    return false;
-                }
-            }
-        }
-
-        private void ReduceShotHook(On.WeaponLoadout.orig_ReduceShotAmount orig, WeaponLoadout self, bool _destroyOnEmpty = false)
-        {
-            if (self.Item.ItemID == ManaBowID)
-            {
-                float manaCost = self.Item.OwnerCharacter.Stats.GetFinalManaConsumption(null, ManaBowCost);
-                self.Item.OwnerCharacter.Stats.UseMana(null, manaCost);
-                return;
-            }
-            orig(self, _destroyOnEmpty);
-        }
-
-        private Ammunition GetAmmoHook(On.CharacterEquipment.orig_GetEquippedAmmunition orig, CharacterEquipment self)
-        {
-            if (self.GetEquippedItem(EquipmentSlot.EquipmentSlotIDs.RightHand) is Weapon weapon && weapon.ItemID == ManaBowID)
-            {
-                var character = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
-
-                if (!character.Inventory.HasEquipped(ManaArrowID))
-                {
-                    if (!character.Inventory.OwnsItem(ManaArrowID))
+                    float currentMana = item.OwnerCharacter.Stats.CurrentMana;
+                    float manaCost = item.OwnerCharacter.Stats.GetFinalManaConsumption(null, ManaBowCost);
+                    if (currentMana - manaCost >= 0)
                     {
-                        var newAmmo = ItemManager.Instance.GenerateItemNetwork(ManaArrowID) as Ammunition;
-                        newAmmo.ChangeParent(self.GetMatchingEquipmentSlotTransform(EquipmentSlot.EquipmentSlotIDs.Quiver));
-                        return newAmmo;
+                        __result = true;
                     }
                     else
                     {
-                        var ammoFromID = character.Inventory.GetOwnedItems(ManaArrowID);
-                        ammoFromID[0].ChangeParent(self.GetMatchingEquipmentSlotTransform(EquipmentSlot.EquipmentSlotIDs.Quiver));
-                        return ammoFromID[0] as Ammunition;
+                        item.OwnerCharacter.CharacterUI.ShowInfoNotificationLoc("Notification_Skill_NotEnoughtMana");
+                        __result = false;
                     }
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(WeaponLoadout), "ReduceShotAmount")]
+        public class WeaponLoadout_ReduceShotAmount
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(WeaponLoadout __instance, bool _destroyOnEmpty = false)
+            {
+                var self = __instance;
+
+                if (self.Item.ItemID == ManaBowID)
+                {
+                    float manaCost = self.Item.OwnerCharacter.Stats.GetFinalManaConsumption(null, ManaBowCost);
+                    self.Item.OwnerCharacter.Stats.UseMana(null, manaCost);
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(CharacterEquipment), "GetEquippedAmmunition")]
+        public class CharacterEquipment_GetEquippedAmmunition
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(CharacterEquipment __instance, ref Ammunition __result)
+            {
+                var self = __instance;
+
+                if (self.GetEquippedItem(EquipmentSlot.EquipmentSlotIDs.RightHand) is Weapon weapon && weapon.ItemID == ManaBowID)
+                {
+                    var character = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
+
+                    if (!character.Inventory.HasEquipped(ManaArrowID))
+                    {
+                        if (!character.Inventory.OwnsItem(ManaArrowID))
+                        {
+                            var newAmmo = ItemManager.Instance.GenerateItemNetwork(ManaArrowID) as Ammunition;
+                            newAmmo.ChangeParent(self.GetMatchingEquipmentSlotTransform(EquipmentSlot.EquipmentSlotIDs.Quiver));
+                            __result = newAmmo;
+                            return false;
+                        }
+                        else
+                        {
+                            var ammoFromID = character.Inventory.GetOwnedItems(ManaArrowID);
+                            ammoFromID[0].ChangeParent(self.GetMatchingEquipmentSlotTransform(EquipmentSlot.EquipmentSlotIDs.Quiver));
+                            __result = ammoFromID[0] as Ammunition;
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        __result = self.GetEquippedItem(EquipmentSlot.EquipmentSlotIDs.Quiver) as Ammunition;
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(AttackSkill), "OwnerHasAllRequiredItems")]
+        public class AttackSkill_OwnerHasAllRequiredItems
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(AttackSkill __instance, bool _TryingToActivate, ref bool __result)
+            {
+                var self = __instance;
+
+                if (self.OwnerCharacter && self.OwnerCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+                {
+                    __result = true;
+                    return false;
                 }
                 else
                 {
-                    return self.GetEquippedItem(EquipmentSlot.EquipmentSlotIDs.Quiver) as Ammunition;
+                    return true;
                 }
             }
-
-            return orig(self);
         }
 
-        private bool OwnerHasItemsHook(On.AttackSkill.orig_OwnerHasAllRequiredItems orig, AttackSkill self, bool _tryingToActivate)
+        [HarmonyPatch(typeof(UseLoadoutAmunition), "TryTriggerConditions")]
+        public class UseLoadoutAmmunition_TryTriggerConditions
         {
-            if (self.OwnerCharacter && self.OwnerCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            [HarmonyPrefix]
+            public static bool Prefix(UseLoadoutAmunition __instance, ref bool __result)
             {
+                var self = __instance;
+
+                var affectedChar = At.GetValue(typeof(Effect), self as Effect, "m_affectedCharacter") as Character;
+
+                if (self.MainHand && affectedChar.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+                {
+                    __result = true;
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(UseLoadoutAmunition), "ActivateLocally")]
+        public class UseLoadoutAmmunition_ActivateLocally
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(UseLoadoutAmunition __instance, Character _affectedCharacter, object[] _infos)
+            {
+                var self = __instance;
+
+                if (self.MainHand && _affectedCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(CharacterInventory), "PlayEquipSFX")]
+        public class CharacterInventory_PlayEquipSFX
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(CharacterInventory __instance, Equipment _equipment)
+            {
+                if (_equipment.ItemID == ManaArrowID)
+                {
+                    return false;
+                }
+
                 return true;
             }
-            else
-            {
-                return orig(self, _tryingToActivate);
-            }
         }
 
-        private bool TryUseAmmoHook(On.UseLoadoutAmunition.orig_TryTriggerConditions orig, UseLoadoutAmunition self)
+        [HarmonyPatch(typeof(CharacterInventory), "PlayUnequipSFX")]
+        public class CharacterInventory_PlayUnequipSFX
         {
-            var affectedChar = At.GetValue(typeof(Effect), self as Effect, "m_affectedCharacter") as Character;
-
-            if (self.MainHand && affectedChar.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBowID)
+            [HarmonyPrefix]
+            public static bool Prefix(CharacterInventory __instance, Equipment _equipment)
             {
+                if (_equipment.ItemID == ManaArrowID)
+                {
+                    return false;
+                }
+
                 return true;
             }
-            else
-            {
-                return orig(self);
-            }
-        }
-
-        private void ActivateAmmoHook(On.UseLoadoutAmunition.orig_ActivateLocally orig, UseLoadoutAmunition self, Character _affectedCharacter, object[] _infos)
-        {
-            if (self.MainHand && _affectedCharacter.CurrentWeapon is ProjectileWeapon bow && bow.ItemID == ManaBow.ManaBowID)
-            {
-                // do nothing.
-            }
-            else
-            {
-                orig(self, _affectedCharacter, _infos);
-            }
-        }
-
-        private void EquipSoundHook(On.CharacterInventory.orig_PlayEquipSFX orig, CharacterInventory self, Equipment _equipment)
-        {
-            if (_equipment.ItemID == ManaArrowID)
-            {
-                return;
-            }
-            orig(self, _equipment);
-        }
-        private void UnequipSoundHook(On.CharacterInventory.orig_PlayUnequipSFX orig, CharacterInventory self, Equipment _equipment)
-        {
-            if (_equipment.ItemID == ManaArrowID)
-            {
-                return;
-            }
-            orig(self, _equipment);
         }
     }
 }

@@ -22,6 +22,8 @@ namespace MoreMapDetails
 		public new void SetActive(bool _active)
 		{
 			base.gameObject.SetActive(_active);
+
+			
 		}
 
 		public void UpdateDisplay(EnemyMarker _marker)

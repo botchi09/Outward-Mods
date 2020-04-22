@@ -21,7 +21,8 @@ namespace CombatAndDodgeOverhaul
 
         internal void Start()
         {
-            this.gameObject.AddComponent(new PhotonView() { viewID = 902 });
+            var photon = this.gameObject.AddComponent<PhotonView>();
+            photon.viewID = 902;
             Debug.Log("Registered C&D Overhaul with ViewID " + this.photonView.viewID);
         }
 
@@ -52,13 +53,13 @@ namespace CombatAndDodgeOverhaul
                 this.photonView.RPC("SendSettingsRPC", PhotonTargets.All, new object[]
                 {
                     true,
-                    (bool)OverhaulGlobal.config.GetValue(Settings.All_Enemies_Allied),
-                    (bool)OverhaulGlobal.config.GetValue(Settings.Enemy_Balancing),
-                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Health),
-                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Damages),
-                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_ImpactRes),
-                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_Resistances),
-                    (float)OverhaulGlobal.config.GetValue(Settings.Enemy_ImpactDmg)
+                    (bool)CombatOverhaul.config.GetValue(Settings.All_Enemies_Allied),
+                    (bool)CombatOverhaul.config.GetValue(Settings.Enemy_Balancing),
+                    (float)CombatOverhaul.config.GetValue(Settings.Enemy_Health),
+                    (float)CombatOverhaul.config.GetValue(Settings.Enemy_Damages),
+                    (float)CombatOverhaul.config.GetValue(Settings.Enemy_ImpactRes),
+                    (float)CombatOverhaul.config.GetValue(Settings.Enemy_Resistances),
+                    (float)CombatOverhaul.config.GetValue(Settings.Enemy_ImpactDmg)
                 });
             }
         }

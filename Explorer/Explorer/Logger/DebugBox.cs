@@ -221,6 +221,10 @@ namespace Explorer
 
         internal void Update()
         {
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                m_showGUI = !m_showGUI;
+            }
 
             //check if text needs to be updated and then update on a frame basis
             if (m_showGUI)
@@ -236,22 +240,22 @@ namespace Explorer
                     UpdateGUIText();
                 }
             }
-
         }
 
         //Draw GUI
         internal void OnGUI()
         {
-
-            //scale UI to current resolution
-            GUI.matrix = m_scaledMatrix;
-
             if (m_showGUI)
             {
-                //create debugWindow
-                m_windowRect = GUI.Window(m_GUIID, m_windowRect, WindowFunction, m_BoxName, UIStyles.WindowSkin.window);
-            }
+                //scale UI to current resolution
+                GUI.matrix = m_scaledMatrix;
 
+                if (m_showGUI)
+                {
+                    //create debugWindow
+                    m_windowRect = GUI.Window(m_GUIID, m_windowRect, WindowFunction, m_BoxName + " (F8 Toggle)", UIStyles.WindowSkin.window);
+                }
+            }   
         }
 
         private void WindowFunction(int windowID)

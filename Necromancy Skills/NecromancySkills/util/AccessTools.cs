@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public static class At // Access Tools
     {

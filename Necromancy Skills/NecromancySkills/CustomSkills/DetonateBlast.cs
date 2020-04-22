@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class DetonateBlast : ShootBlast
     {
@@ -59,9 +59,9 @@ namespace NecromancerSkills
                 //    new DamageType(DamageType.Types.Decay, 40),
                 //    new DamageType(DamageType.Types.Ethereal, 20) 
                 //};
-                pDamage.Damages = ModBase.settings.DeathRitual_WeakExplosionDamage;
+                pDamage.Damages = NecromancyBase.settings.DeathRitual_WeakExplosionDamage;
                 //pDamage.Knockback = 75;
-                pDamage.Knockback = ModBase.settings.DeathRitual_WeakKnockback;
+                pDamage.Knockback = NecromancyBase.settings.DeathRitual_WeakKnockback;
             }
 
             var explosionFX = blast.transform.Find("ExplosionFX").gameObject;
@@ -102,7 +102,8 @@ namespace NecromancerSkills
                 };
                 pDamage2.Knockback = 150;
 
-                pDamage2.gameObject.AddComponent(new AddStatusEffect { Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Slow Down") });
+                var comp = pDamage2.gameObject.AddComponent<AddStatusEffect>();
+                comp.Status = ResourcesPrefabManager.Instance.GetStatusEffectPrefab("Slow Down");
             }
 
             var explosionFX2 = blast2.transform.Find("ExplosionFX").gameObject;

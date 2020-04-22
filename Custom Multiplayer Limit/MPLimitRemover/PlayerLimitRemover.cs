@@ -71,15 +71,15 @@ namespace CustomMultiplayerLimit
             if (PhotonNetwork.inRoom && PhotonNetwork.isMasterClient)
             {
                 // if the room limit is not set to our custom value, do that.
-                if (PhotonNetwork.room.maxPlayers != limitInt)
+                if (PhotonNetwork.room.MaxPlayers != limitInt)
                 {
-                    PhotonNetwork.room.maxPlayers = limitInt;
+                    PhotonNetwork.room.MaxPlayers = limitInt;
                 }
 
                 // not sure if this is necessary
-                if (!PhotonNetwork.room.open && PhotonNetwork.room.playerCount < limitInt)
+                if (!PhotonNetwork.room.IsOpen && PhotonNetwork.room.PlayerCount < limitInt)
                 {
-                    PhotonNetwork.room.open = true;
+                    PhotonNetwork.room.IsOpen = true;
                 }
             }
         }

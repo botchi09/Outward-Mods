@@ -3,59 +3,30 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using SinAPI;
 using UnityEngine;
-using Partiality.Modloader;
 using SideLoader;
+using BepInEx;
+using HarmonyLib;
 
 namespace ImbuedBows
 {
-    #region Mod Loader
-    public class ModBase : PartialityMod
+    [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    public class ImbuedBows : BaseUnityPlugin
     {
-        public double version = 1.0;
+        public const string GUID = "com.sinai.imbuedbows";
+        public const string NAME = "Imbued Bows & Mana Bow";
+        public const string VERSION = "1.1";
 
-        public ModBase()
-        {
-            this.ModID = "ImbuedBows";
-            this.Version = version.ToString("0.00");
-            this.author = "Sinai";
-        }
-
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            var _obj = new GameObject(this.ModID);
-            GameObject.DontDestroyOnLoad(_obj);
-
-            _obj.AddComponent<ImbuedBows>();
-
-            // mana bow
-            _obj.AddComponent<ManaBow>();
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-        }
-    }
-    #endregion
-
-    #region Actual Mod
-    public class ImbuedBows : MonoBehaviour
-    {
         internal void Awake()
         {
             SL.OnPacksLoaded += Setup;
 
-            On.InfuseConsumable.Use += UseInfuseHook;
+            this.gameObject.AddComponent<ManaBow>();
 
-            On.ItemVisual.AddImbueFX += AddImbueFXHook;
-
-
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
         }
-
 
         private void Setup()
         {
@@ -75,77 +46,93 @@ namespace ImbuedBows
             }
         }
 
-        private bool UseInfuseHook(On.InfuseConsumable.orig_Use orig, InfuseConsumable self, Character _character)
+        [HarmonyPatch(typeof(InfuseConsumable), "Use")]
+        public class InfuseConsumable_Use
         {
-            if (_character != null)
+            [HarmonyPostfix]
+            public static void Prefix(InfuseConsumable __instance, Character _character, ref bool __result)
             {
-                if (_character.CurrentWeapon != null) // && _character.CurrentWeapon.Type != Weapon.WeaponType.Bow)
+                __result = false;
+
+                var self = __instance;
+
+                if (_character != null)
                 {
-                    if (self.m_UseSound)
+                    if (_character.CurrentWeapon != null) // && _character.CurrentWeapon.Type != Weapon.WeaponType.Bow)
                     {
-                        self.m_UseSound.Play(false);
+                        if (self.m_UseSound)
+                        {
+                            self.m_UseSound.Play(false);
+                        }
+
+                        //self.m_characterUsing = _character;
+                        At.SetValue(_character, typeof(Item), self as Item, "m_characterUsing");
+
+                        if (self.ActivateEffectAnimType == Character.SpellCastType.NONE)
+                        {
+                            _character.Inventory.OnUseItem(self.UID);
+                        }
+                        else
+                        {
+                            //self.StartEffectsCast(_character);
+                            At.Call(self as Item, "StartEffectsCast", new object[] { _character });
+                        }
+                        __result = true;
                     }
-                    //self.m_characterUsing = _character;
-                    At.SetValue(_character, typeof(Item), self as Item, "m_characterUsing");
-                    if (self.ActivateEffectAnimType == Character.SpellCastType.NONE)
+                    if (_character.CharacterUI)
                     {
-                        _character.Inventory.OnUseItem(self.UID);
+                        _character.CharacterUI.ShowInfoNotificationLoc("Notification_Item_InfuseNotCompatible");
                     }
-                    else
-                    {
-                        //self.StartEffectsCast(_character);
-                        At.Call(self as Item, "StartEffectsCast", new object[] { _character });
-                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(ItemVisual), "AddImbueFX")]
+        public class ItemVisual_AddImbueFX
+        {
+            [HarmonyPrefix]
+            public static bool Prefix(ItemVisual __instance, ImbueStack newStack, Weapon _linkedWeapon)
+            {
+                var self = __instance;
+
+                // if its not a bow, just do orig(self) and return
+                if (_linkedWeapon.Type != Weapon.WeaponType.Bow)
+                {
                     return true;
                 }
-                if (_character.CharacterUI)
+
+                newStack.ImbueFX = ItemManager.Instance.GetImbuedFX(newStack.ImbuedEffectPrefab);
+                if (!newStack.ImbueFX.gameObject.activeSelf)
                 {
-                    _character.CharacterUI.ShowInfoNotificationLoc("Notification_Item_InfuseNotCompatible");
+                    newStack.ImbueFX.gameObject.SetActive(true);
                 }
-            }
+                newStack.ParticleSystems = newStack.ImbueFX.GetComponentsInChildren<ParticleSystem>();
 
-            return false;
-        }
-
-        // fix for bows imbue FX (they use Skinned Mesh)
-        private void AddImbueFXHook(On.ItemVisual.orig_AddImbueFX orig, ItemVisual self, ImbueStack newStack, Weapon _linkedWeapon)
-        {
-            // if its not a bow, just do orig(self) and return
-            if (_linkedWeapon.Type != Weapon.WeaponType.Bow)
-            {
-                orig(self, newStack, _linkedWeapon);
-                return;
-            }
-
-            newStack.ImbueFX = ItemManager.Instance.GetImbuedFX(newStack.ImbuedEffectPrefab);
-            if (!newStack.ImbueFX.gameObject.activeSelf)
-            {
-                newStack.ImbueFX.gameObject.SetActive(true);
-            }
-            newStack.ParticleSystems = newStack.ImbueFX.GetComponentsInChildren<ParticleSystem>();
-
-            if (self.GetComponentInChildren<SkinnedMeshRenderer>() is SkinnedMeshRenderer skinnedMesh)
-            {
-                for (int j = 0; j < newStack.ParticleSystems.Length; j++)
+                if (self.GetComponentInChildren<SkinnedMeshRenderer>() is SkinnedMeshRenderer skinnedMesh)
                 {
-                    if (newStack.ParticleSystems[j].shape.shapeType == ParticleSystemShapeType.MeshRenderer)
+                    for (int j = 0; j < newStack.ParticleSystems.Length; j++)
                     {
-                        var shape = newStack.ParticleSystems[j].shape;
-                        shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
-                        shape.skinnedMeshRenderer = skinnedMesh;
+                        if (newStack.ParticleSystems[j].shape.shapeType == ParticleSystemShapeType.MeshRenderer)
+                        {
+                            var shape = newStack.ParticleSystems[j].shape;
+                            shape.shapeType = ParticleSystemShapeType.SkinnedMeshRenderer;
+                            shape.skinnedMeshRenderer = skinnedMesh;
+                        }
+                        newStack.ParticleSystems[j].Play();
                     }
-                    newStack.ParticleSystems[j].Play();
                 }
-            }
 
-            newStack.ImbueFX.SetParent(self.transform);
-            newStack.ImbueFX.ResetLocal(true);
-            if (At.GetValue(typeof(ItemVisual), self, "m_linkedImbueFX") is List<ImbueStack> m_linkedImbues)
-            {
-                m_linkedImbues.Add(newStack);
-                At.SetValue(m_linkedImbues, typeof(ItemVisual), self, "m_linkedImbueFX");
+                newStack.ImbueFX.SetParent(self.transform);
+                newStack.ImbueFX.ResetLocal(true);
+                if (At.GetValue(typeof(ItemVisual), self, "m_linkedImbueFX") is List<ImbueStack> m_linkedImbues)
+                {
+                    m_linkedImbues.Add(newStack);
+                    At.SetValue(m_linkedImbues, typeof(ItemVisual), self, "m_linkedImbueFX");
+                }
+
+                return false;
             }
         }
-        #endregion
+
     }
 }

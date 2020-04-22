@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 //using OModAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class PlagueAuraProximityCondition : ProximityCondition
     {

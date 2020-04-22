@@ -6,7 +6,7 @@ using UnityEngine;
 using System.Reflection;
 using System.IO;
 using UnityEngine.Events;
-using SharedModConfig;
+using HarmonyLib;
 
 namespace OutSoulsMod
 {
@@ -35,7 +35,7 @@ namespace OutSoulsMod
         {
             Instance = this;
 
-            On.AISCombat.EquipRequiredWeapons += AIEquipHook;
+            
 
             if (BonfireEvent == null)
             {
@@ -406,17 +406,15 @@ namespace OutSoulsMod
             BlackFade.Instance.StartFade(false);
         }
 
+        // hook for enemies owning required weapon after resurrection
 
-
-        // fix enemy not owning required weapons after resurrect
-        private void AIEquipHook(On.AISCombat.orig_EquipRequiredWeapons orig, AISCombat self)
+        [HarmonyPatch(typeof(AISCombat), "EquipRequiredWeapons")]
+        public class AISCombat_EquipRequiredWeapons
         {
-            try
+            public static bool Prefix(AISCombat __instance)
             {
-                orig(self);
-            }
-            catch
-            {
+                var self = __instance;
+
                 Character c = At.GetValue(typeof(AIState), self as AIState, "m_character") as Character;
 
                 foreach (Weapon w in self.RequiredWeapon)
@@ -425,9 +423,10 @@ namespace OutSoulsMod
                     {
                         Item i = ItemManager.Instance.GenerateItemNetwork(w.ItemID);
                         c.Inventory.TakeItem(i, false);
-                        At.Call(c.Inventory.Equipment, "EquipWithoutAssociating", new object[] { i, false });
                     }
                 }
+
+                return true;
             }
         }
 

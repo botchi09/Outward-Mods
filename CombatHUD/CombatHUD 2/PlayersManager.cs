@@ -42,7 +42,7 @@ namespace CombatHUD
 
                 UpdateVitalText(SplitScreenManager.Instance.LocalPlayers[i].AssignedCharacter);
 
-                if ((bool)HUDManager.config.GetValue(Settings.PlayerStatusTimers))
+                if ((bool)CombatHUD.config.GetValue(Settings.PlayerStatusTimers))
                 {
                     try
                     {
@@ -58,7 +58,7 @@ namespace CombatHUD
             // update text holders
             for (int i = 0; i < m_labelHolders.Count; i++)
             {
-                if (i >= statusInfos.Count || !(bool)HUDManager.config.GetValue(Settings.PlayerStatusTimers))
+                if (i >= statusInfos.Count || !(bool)CombatHUD.config.GetValue(Settings.PlayerStatusTimers))
                 {
                     if (m_labelHolders[i].activeSelf)
                     {
@@ -70,7 +70,7 @@ namespace CombatHUD
                     var text = m_labelHolders[i].GetComponent<Text>();
 
                     var iconRect = statusInfos[i].LinkedIcon.RectTransform;
-                    var posOffset = new Vector3(0, HUDManager.Rel(25f, true), 0);
+                    var posOffset = new Vector3(0, CombatHUD.Rel(25f, true), 0);
                     text.GetComponent<RectTransform>().position = iconRect.position + posOffset;
 
                     TimeSpan t = TimeSpan.FromSeconds(statusInfos[i].TimeRemaining);
@@ -109,9 +109,9 @@ namespace CombatHUD
                 manaText.fontSize = 14;
                 stamText.fontSize = 14;
 
-                healthBar.TextValueDisplayed = (bool)HUDManager.config.GetValue(Settings.PlayerVitals);
-                manaBar.TextValueDisplayed = (bool)HUDManager.config.GetValue(Settings.PlayerVitals);
-                stamBar.TextValueDisplayed = (bool)HUDManager.config.GetValue(Settings.PlayerVitals);
+                healthBar.TextValueDisplayed = (bool)CombatHUD.config.GetValue(Settings.PlayerVitals);
+                manaBar.TextValueDisplayed = (bool)CombatHUD.config.GetValue(Settings.PlayerVitals);
+                stamBar.TextValueDisplayed = (bool)CombatHUD.config.GetValue(Settings.PlayerVitals);
             }
         }
 

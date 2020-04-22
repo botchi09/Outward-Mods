@@ -6,11 +6,11 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-//using SinAPI;
 using SideLoader;
 using SideLoader.CustomSkills;
+using HarmonyLib;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class SkillManager : MonoBehaviour
     {
@@ -24,9 +24,6 @@ namespace NecromancerSkills
             Instance = this;
 
             SL.OnPacksLoaded += Setup;
-
-            // temporary hook
-            On.Skill.HasBaseRequirements += ActivationConditionHook;
         }
 
         private void Setup()
@@ -38,11 +35,14 @@ namespace NecromancerSkills
             SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)
         }
 
-        // hooks. temporary fixes for custom activation conditions, a better implementation would be creating a custom SummonSkill : Skill class.
-        private bool ActivationConditionHook(On.Skill.orig_HasBaseRequirements orig, Skill self, bool _tryingToActivate)
+        // patch for skill activation (pretty lazy method, but works)
+        [HarmonyPatch(typeof(Skill), "HasBaseRequirements")]
+        public class Skill_HasBaseRequirements
         {
-            if (_tryingToActivate) // only do this when trying to activate, otherwise it runs to summon manager check every frame which is a bit overkill.
+            public static bool Prefix(Skill __instance, bool _tryingToActivate)
             {
+                var self = __instance;
+
                 // custom check for Life Ritual and Death Ritual (requires a summoned skeleton)
                 if (self.ItemID == 8890105 || self.ItemID == 8890106)
                 {
@@ -52,9 +52,9 @@ namespace NecromancerSkills
                         return false;
                     }
                 }
-            }
 
-            return orig(self, _tryingToActivate);
+                return true;
+            }
         }
 
         private void SetupSkills()
@@ -83,12 +83,13 @@ namespace NecromancerSkills
             DestroyImmediate(passiveTransform.GetComponent<AffectStat>());
 
             // add elemental bonuses using custom ManaPointAffectStat class
+            // elemental bonus stats are id 98 to 102
 
-            passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "98" });
-            passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "99" });
-            passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "100" });
-            passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "101" });
-            passiveTransform.gameObject.AddComponent(new ManaPointAffectStat() { SelectedUID = "102" });
+            for (int i = 98; i < 102; i++)
+            {
+                var comp = passiveTransform.gameObject.AddComponent<ManaPointAffectStat>();
+                comp.SelectedUID = i.ToString();
+            }
         }
 
 

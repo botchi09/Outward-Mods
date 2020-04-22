@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
-//using SinAPI;
+using HarmonyLib;
 using static CustomKeybindings;
 
 namespace MixedGrip
@@ -18,18 +18,20 @@ namespace MixedGrip
 
     public class GripManager : Photon.MonoBehaviour
     {
-        public List<CharacterInfo> CurrentPlayers = new List<CharacterInfo>();
+        public static GripManager Instance;
 
+        public List<CharacterInfo> CurrentPlayers = new List<CharacterInfo>();
+        
         internal void Awake()
         {
-            // equip item hook for MixedGrip logic
-            On.CharacterEquipment.EquipItem_1 += EquipItemHook;
-        }
-        
-        internal void Start()
-        {
-            this.gameObject.AddComponent(new PhotonView() { viewID = 901 });
+            Instance = this;
+
+            var view = this.gameObject.AddComponent<PhotonView>();
+            view.viewID = 901;
             Debug.Log("Registered MixedGrip with ViewID " + this.photonView.viewID);
+
+            var harmony = new Harmony("com.sinai.mixedgrip");
+            harmony.PatchAll();
         }
 
         internal void Update()
@@ -81,7 +83,7 @@ namespace MixedGrip
         private void UpdatePlayerInput(CharacterInfo charInfo, Character c)
         {
             // grip hotkey
-            if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(MixedGrip.Instance.ToggleKey))
+            if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(MixedGrip.ToggleKey))
             {
                 ToggleGripHotkey(charInfo, c);
             }
@@ -138,25 +140,24 @@ namespace MixedGrip
         }
 
         // Local SwapGrip call. Just determines what the swap should do, then calls it via RPC.
-        private void SwapGrip(Character c, Weapon weapon)
+        public void SwapGrip(Character c, Weapon weapon)
         {
             bool setTwoHanded = weapon.TwoHand == Equipment.TwoHandedType.None;
             int newWeaponType = (bool)MixedGrip.config.GetValue(Settings.Swap_Animations) ? (int)GetSwappedType(weapon.Type) : (int)weapon.Type;
 
             // == send RPC swap grip ==
-            photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] { weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, (bool)MixedGrip.config.GetValue(Settings.Balance_Weapons) });
-            //if (!PhotonNetwork.offlineMode)
-            //{
-            //    photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] { weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, global.settings.Balance_Weapons });
-            //}
-            //else
-            //{
-            //    SwapGripRPC(weapon.UID, c.UID.ToString(), setTwoHanded, newWeaponType, global.settings.Balance_Weapons);
-            //}
+            photonView.RPC("SwapGripRPC", PhotonTargets.All, new object[] 
+            { 
+                weapon.UID, 
+                c.UID.ToString(), 
+                setTwoHanded, 
+                newWeaponType, 
+                (bool)MixedGrip.config.GetValue(Settings.Balance_Weapons) 
+            });
         }
 
         [PunRPC]
-        private void SwapGripRPC(string weaponUID, string charUID, bool setTwoHanded, int newWeaponType, bool shouldFixStats)
+        public void SwapGripRPC(string weaponUID, string charUID, bool setTwoHanded, int newWeaponType, bool shouldFixStats)
         {
             if (CharacterManager.Instance.GetCharacter(charUID) is Character c && ItemManager.Instance.GetItem(weaponUID) is Weapon weapon)
             {
@@ -222,48 +223,7 @@ namespace MixedGrip
             }
         }
 
-        // hook for swapping 2H weapons to 1H on equip item, if the logic calls for it.
-        private void EquipItemHook(On.CharacterEquipment.orig_EquipItem_1 orig, CharacterEquipment self, Equipment _itemToEquip, bool _playAnim = false)
-        {
-            Character c = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
-
-            if (!(bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip)
-                || (_itemToEquip is Weapon weapon && (weapon.Type == Weapon.WeaponType.Bow || weapon.IsSummonedEquipment))
-                || (c.CurrentWeapon != null && (c.CurrentWeapon.Type == Weapon.WeaponType.Bow || c.CurrentWeapon.IsSummonedEquipment)))
-            { 
-                orig(self, _itemToEquip, _playAnim); 
-                return; 
-            }
-
-            bool anySwap = false;
-            if (!c.IsAI && ((int)_itemToEquip.EquipSlot == 5 || (int)_itemToEquip.EquipSlot == 6))
-            {
-                if (_itemToEquip.TwoHanded && c.LeftHandEquipment != null)
-                {
-                    // we are equipping a 2H weapon but we currently have an off-hand item, swap the grip of the weapon first.
-                    anySwap = true;
-
-                    SwapGrip(c, _itemToEquip as Weapon);
-                    At.Call(c.Inventory.Equipment, "EquipWithoutAssociating", new object[] { _itemToEquip, false });
-                }
-                else if (_itemToEquip.EquipSlot == EquipmentSlot.EquipmentSlotIDs.LeftHand && c.CurrentWeapon != null && c.CurrentWeapon.TwoHanded)
-                {
-                    // we are equipping an off-hand item but our current weapon is 2H. swap our weapon to 1H first.
-                    anySwap = true;
-
-                    SwapGrip(c, c.CurrentWeapon);
-
-                    // set the offhand to our C.LeftHandEquipment now to avoid problems with autoswapping
-                    At.SetValue(_itemToEquip as Equipment, typeof(Character), c, "m_leftHandEquipment");
-                    At.Call(c.Inventory.Equipment, "EquipWithoutAssociating", new object[] { _itemToEquip, false });
-                }
-            }
-
-            if (!anySwap)
-            {
-                orig(self, _itemToEquip, _playAnim);
-            }
-        }
+        
 
         // =================== STAT HELPERS, ETC ====================== //
 
@@ -303,6 +263,8 @@ namespace MixedGrip
             if (origWeapon.TwoHand == newWeapon.TwoHand)
             {
                 JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(origWeapon.Stats), newWeapon.Stats);
+                At.SetValue(newWeapon.Stats.BaseDamage, typeof(Weapon), newWeapon, "m_baseDamage");
+                At.Call(newWeapon, "RefreshEnchantmentModifiers", new object[0]);
             }
             else
             {
@@ -345,6 +307,8 @@ namespace MixedGrip
                 }
 
                 JsonUtility.FromJsonOverwrite(JsonUtility.ToJson(newStats), newWeapon.Stats);
+                At.SetValue(newStats.BaseDamage, typeof(Weapon), newWeapon, "m_baseDamage");
+                At.Call(newWeapon, "RefreshEnchantmentModifiers", new object[0]);
             }
         }
 
@@ -370,4 +334,55 @@ namespace MixedGrip
             { Weapon.WeaponType.Halberd_2H, 1.612f}
         };
     }
+
+    [HarmonyPatch(typeof(CharacterEquipment), "EquipItem", new Type[] { typeof(Equipment), typeof(bool) })]
+    public class CharacterEquipment_EquipItem
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(CharacterEquipment __instance, Equipment _itemToEquip, bool _playAnim = false)
+        {
+            var self = __instance;
+
+            Character c = At.GetValue(typeof(CharacterEquipment), self, "m_character") as Character;
+
+            if (!(bool)MixedGrip.config.GetValue(Settings.Swap_On_Equip_And_Unequip)
+                || (_itemToEquip is Weapon weapon && (weapon.Type == Weapon.WeaponType.Bow || weapon.IsSummonedEquipment))
+                || (c.CurrentWeapon != null && (c.CurrentWeapon.Type == Weapon.WeaponType.Bow || c.CurrentWeapon.IsSummonedEquipment)))
+            {
+                return true;
+            }
+
+            bool anySwap = false;
+            if (!c.IsAI && ((int)_itemToEquip.EquipSlot == 5 || (int)_itemToEquip.EquipSlot == 6))
+            {
+                if (_itemToEquip.TwoHanded && c.LeftHandEquipment != null)
+                {
+                    // we are equipping a 2H weapon but we currently have an off-hand item, swap the grip of the weapon first.
+                    anySwap = true;
+
+                    GripManager.Instance.SwapGrip(c, _itemToEquip as Weapon);
+                    At.Call(c.Inventory.Equipment, "EquipWithoutAssociating", new object[] { _itemToEquip, false });
+                }
+                else if (_itemToEquip.EquipSlot == EquipmentSlot.EquipmentSlotIDs.LeftHand && c.CurrentWeapon != null && c.CurrentWeapon.TwoHanded)
+                {
+                    // we are equipping an off-hand item but our current weapon is 2H. swap our weapon to 1H first.
+                    anySwap = true;
+
+                    GripManager.Instance.SwapGrip(c, c.CurrentWeapon);
+
+                    // set the offhand to our C.LeftHandEquipment now to avoid problems with autoswapping
+                    At.SetValue(_itemToEquip as Equipment, typeof(Character), c, "m_leftHandEquipment");
+                    At.Call(c.Inventory.Equipment, "EquipWithoutAssociating", new object[] { _itemToEquip, false });
+                }
+            }
+
+            if (!anySwap)
+            {
+                return true;
+            }
+
+            return false;
+        }
+    }
+
 }

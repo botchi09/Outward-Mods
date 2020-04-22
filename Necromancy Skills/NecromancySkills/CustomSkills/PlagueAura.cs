@@ -7,7 +7,7 @@ using UnityEngine;
 //using SinAPI;
 //using OModAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class PlagueAura : Summon
     {
@@ -41,7 +41,7 @@ namespace NecromancerSkills
             var plagueStone = plagueAuraComp.SummonedPrefab;
 
             var ephemeral = plagueStone.GetComponent<Ephemeral>();
-            ephemeral.LifeSpan = ModBase.settings.PlagueAura_SigilLifespan;
+            ephemeral.LifeSpan = NecromancyBase.settings.PlagueAura_SigilLifespan;
 
             //// setup custom visuals
             //var origVisuals = plagueStone.GetComponent<Item>().VisualPrefab;

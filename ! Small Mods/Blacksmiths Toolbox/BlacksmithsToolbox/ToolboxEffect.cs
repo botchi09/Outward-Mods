@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-//using SinAPI;
 
 namespace BlacksmithsToolbox
 {
@@ -18,9 +17,9 @@ namespace BlacksmithsToolbox
 
             if (!c.IsLocalPlayer) { return; }
 
-            if (ToolboxGlobal.settings.Iron_Scrap_Cost > 0 && !c.Inventory.OwnsItem(6400140, ToolboxGlobal.settings.Iron_Scrap_Cost))
+            if (BlacksmithsToolbox.settings.Iron_Scrap_Cost > 0 && !c.Inventory.OwnsItem(6400140, BlacksmithsToolbox.settings.Iron_Scrap_Cost))
             {
-                SendUIMessage(c, string.Format("You need {0} Iron Scrap to do that!", ToolboxGlobal.settings.Iron_Scrap_Cost));
+                SendUIMessage(c, string.Format("You need {0} Iron Scrap to do that!", BlacksmithsToolbox.settings.Iron_Scrap_Cost));
             }
             else
             {
@@ -29,7 +28,7 @@ namespace BlacksmithsToolbox
                 Item lowestDurBox = null;
                 float currentDur = float.MaxValue;
 
-                foreach (Item item in c.Inventory.GetOwnedItems(ToolboxGlobal.Toolbox_ID))
+                foreach (Item item in c.Inventory.GetOwnedItems(BlacksmithsToolbox.TOOLBOX_ID))
                 {
                     if (item.CurrentDurability > 0 && item.CurrentDurability < currentDur)
                     {
@@ -49,13 +48,13 @@ namespace BlacksmithsToolbox
                 }
 
                 // remove scrap(s)                
-                c.Inventory.RemoveItem(6400140, ToolboxGlobal.settings.Iron_Scrap_Cost);
+                c.Inventory.RemoveItem(6400140, BlacksmithsToolbox.settings.Iron_Scrap_Cost);
 
                 // repair everything. this will also repair our toolbox.
                 c.Inventory.RepairEverything();
 
                 // fix the toolbox durability. effectively this forces there to only ever be 1 toolbox that is used at a time, until it reaches 0 durability.
-                At.SetValue(currentDur - ToolboxGlobal.settings.Durability_Cost_Per_Use, typeof(Item), lowestDurBox, "m_currentDurability");
+                At.SetValue(currentDur - BlacksmithsToolbox.settings.Durability_Cost_Per_Use, typeof(Item), lowestDurBox, "m_currentDurability");
 
                 if (lowestDurBox.CurrentDurability <= 0)
                 {

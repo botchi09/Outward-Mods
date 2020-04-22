@@ -43,16 +43,16 @@ namespace MoreMapDetails
 
 		internal void OnEnable()
 		{
-			MapManager.Instance.EnemyMarkers.Add(this);
+			MoreMapDetails.Instance.EnemyMarkers.Add(this);
 
 			LinkedCharacter = this.GetComponentInParent<Character>();
 		}
 
 		internal void OnDisable()
 		{
-			if (MapManager.Instance.EnemyMarkers.Contains(this))
+			if (MoreMapDetails.Instance.EnemyMarkers.Contains(this))
 			{
-				MapManager.Instance.EnemyMarkers.Remove(this);
+				MoreMapDetails.Instance.EnemyMarkers.Remove(this);
 			}
 		}
 

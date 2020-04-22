@@ -12,7 +12,7 @@ using NodeCanvas.Framework;
 using NodeCanvas.Tasks.Actions;
 using SideLoader;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     public class TrainerManager : MonoBehaviour
     {
@@ -96,11 +96,9 @@ namespace NecromancerSkills
             {
                 Destroy(view);
             }
-            trainer.AddComponent(new PhotonView
-            {
-                viewID = trainerViewID,
-                onSerializeTransformOption = OnSerializeTransform.All
-            });
+            var pView = trainer.AddComponent<PhotonView>();
+            pView.viewID = trainerViewID;
+            pView.onSerializeTransformOption = OnSerializeTransform.All;
 
             // remove unwanted components
             DestroyImmediate(trainer.GetComponent<PlayerCharacterStats>());
@@ -162,6 +160,10 @@ namespace NecromancerSkills
             nodes.Clear();
             // add the nodes we want to use
             nodes.Add(rootStatement);
+            nodes.Add(multiChoice1);
+            nodes.Add(openTrainer);
+            nodes.Add(answer1);
+            nodes.Add(answer2);
             graph.primeNode = rootStatement;
             graph.ConnectNodes(rootStatement, multiChoice1);    // prime node triggers the multiple choice
             graph.ConnectNodes(multiChoice1, openTrainer, 0);   // choice1: open trainer

@@ -20,7 +20,8 @@ namespace OutSoulsMod
 
         internal void Start()
         {
-            this.gameObject.AddComponent(new PhotonView() { viewID = 903 });
+            var view = this.gameObject.AddComponent<PhotonView>();
+            view.viewID = 903;
             Debug.Log("Registered OutSouls with ViewID " + this.photonView.viewID);
         }
 

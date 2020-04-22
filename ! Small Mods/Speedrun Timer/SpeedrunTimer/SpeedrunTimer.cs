@@ -1,48 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Partiality.Modloader;
 using UnityEngine;
 using System.IO;
 using System.Linq;
 using UnityEngine.SceneManagement;
+using BepInEx;
+using HarmonyLib;
 
 namespace SpeedrunTimer
 {
-    public class ModBase : PartialityMod
+
+    [BepInPlugin(GUID, NAME, VERSION)]
+    public class SpeedrunTimer : BaseUnityPlugin
     {
-        public ModBase()
-        {
-            this.ModID = "Speedrun Timer";
-            this.Version = "1.3";
-            this.author = "Sinai";
-        }
+        const string GUID = "com.sinai.speedruntimer";
+        const string VERSION = "2.0";
+        const string NAME = "Speedrun Timer";
 
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            var _obj = new GameObject("Speedrun_Timer");
-            GameObject.DontDestroyOnLoad(_obj);
-
-            _obj.AddComponent<SpeedrunTimer>();
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-        }
-    }
-
-    public class Settings
-    {
-        public string StartKey = "F8";
-        public string StopKey = "F9";
-        public string ConditionKey = "F10";
-    }
-
-    public class SpeedrunTimer : MonoBehaviour
-    {
         public static SpeedrunTimer Instance;
 
         public Settings settings = new Settings();
@@ -68,6 +43,8 @@ namespace SpeedrunTimer
 
         internal void Awake()
         {
+            Instance = this;
+
             bool flag = true;
             if (File.Exists(configPath))
             {
@@ -75,9 +52,9 @@ namespace SpeedrunTimer
                 var tempSettings = JsonUtility.FromJson<Settings>(json);
                 if (tempSettings != null)
                 {
-                    if (Enum.IsDefined(typeof(KeyCode), tempSettings.StartKey) 
+                    if (Enum.IsDefined(typeof(KeyCode), tempSettings.StartKey)
                         && Enum.IsDefined(typeof(KeyCode), tempSettings.StopKey)
-                        && Enum.IsDefined(typeof(KeyCode), tempSettings.ConditionKey)) 
+                        && Enum.IsDefined(typeof(KeyCode), tempSettings.ConditionKey))
                     {
                         settings = tempSettings;
                         flag = false;
@@ -221,5 +198,12 @@ namespace SpeedrunTimer
             GUI.skin.label.fontSize = origFontsize;
             GUI.color = Color.white;
         }
+    }
+
+    public class Settings
+    {
+        public string StartKey = "F8";
+        public string StopKey = "F9";
+        public string ConditionKey = "F10";
     }
 }

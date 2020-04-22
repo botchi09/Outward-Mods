@@ -5,7 +5,7 @@ using System.Text;
 using UnityEngine;
 //using SinAPI;
 
-namespace NecromancerSkills
+namespace NecromancySkills
 {
     // simple script, just add this as a component to an NPC character to have them automatically look at the closest player. 
     // this is not as smooth as the SNPC class, but its ok for now.
