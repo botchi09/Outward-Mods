@@ -377,7 +377,7 @@ namespace MoreMapDetails
             //newMarker.transform.parent = m_enemyMarkerHolder;
             newMarker.transform.SetParent(m_enemyMarkerHolder, false);
             newMarker.transform.localScale = Vector3.one;
-            DestroyImmediate(newMarker.Circle);
+            newMarker.Circle.enabled = false;
 
             m_enemyTexts.Add(newMarker);
         }

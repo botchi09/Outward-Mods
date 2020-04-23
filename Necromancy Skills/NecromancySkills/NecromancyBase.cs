@@ -32,6 +32,9 @@ namespace NecromancySkills
             go.AddComponent<SkillManager>();
             go.AddComponent<SummonManager>();
             go.AddComponent<RPCManager>();
+
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
         }
 
         private void LoadSettings()

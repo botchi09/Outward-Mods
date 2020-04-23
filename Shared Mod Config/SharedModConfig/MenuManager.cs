@@ -59,13 +59,17 @@ namespace SharedModConfig
                 }
             }
 
+            //if (Input.GetKeyDown(KeyCode.Escape) && m_ConfigPanel.activeSelf)
+            //{
+            //    ToggleMenu();
+            //}
+
             // keybind check
             foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
             {
                 if (CustomKeybindings.m_playerInputManager[player.RewiredID].GetButtonDown(MenuKey))
                 {
-                    bool active = m_ConfigPanel.activeSelf;
-                    m_ConfigPanel.SetActive(!active);
+                    ToggleMenu();
                 }
             }
 
@@ -83,6 +87,12 @@ namespace SharedModConfig
                     setting.UpdateValue(true); // true = no save
                 }
             }
+        }
+
+        public void ToggleMenu()
+        {
+            bool active = m_ConfigPanel.activeSelf;
+            m_ConfigPanel.SetActive(!active);
         }
 
         #region Internal Setup

@@ -181,6 +181,7 @@ namespace Explorer
             "only 0 controls when doing Repaint",
             "it is not close enough to the NavMesh",
             "Start Node:",
+            "TLA_DEBUG_STACK_LEAK",
         };
 
         // Log Debug messages to OLogger window

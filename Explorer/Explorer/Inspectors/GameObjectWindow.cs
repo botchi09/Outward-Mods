@@ -158,10 +158,20 @@ namespace Explorer
             {
                 foreach (var obj in m_children.Where(x => x.childCount > 0))
                 {
+                    if (obj == null)
+                    {
+                        GUILayout.Label("null");
+                        continue;
+                    }
                     UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
                 foreach (var obj in m_children.Where(x => x.childCount == 0))
                 {
+                    if (obj == null)
+                    {
+                        GUILayout.Label("null");
+                        continue;
+                    }
                     UIStyles.GameobjButton(obj.gameObject, InspectGameObject, false, this.m_rect.width / 2 - 60);
                 }
             }

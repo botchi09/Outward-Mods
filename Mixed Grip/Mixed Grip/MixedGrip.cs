@@ -15,6 +15,7 @@ using static CustomKeybindings;
 namespace MixedGrip
 { 
     [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
     public class MixedGrip : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.mixedgrip";
