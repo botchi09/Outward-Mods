@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Partiality.Modloader;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
@@ -13,7 +12,7 @@ namespace DialogueMiner
 {
     // This class is used to parse the original Localizations to custom XML holders, and these are used for saving the user's custom locs too.
 
-    public class LocalizationMiner : MonoBehaviour
+    public class LocalizationHolder
     {
         public static Type[] CUSTOM_TYPES = new Type[]
         {
@@ -21,6 +20,14 @@ namespace DialogueMiner
             typeof(DialogueLocalizationHolder),
             typeof(LocalizationEntryHolder)
         };
+
+        public string Name;
+        public string DefaultName;
+
+        public List<ItemLocalizationHolder> ItemLocalizations = new List<ItemLocalizationHolder>();
+        public List<DialogueLocalizationHolder> DialogueLocalizations = new List<DialogueLocalizationHolder>();
+        public List<LocalizationEntryHolder> MenuLocalizations = new List<LocalizationEntryHolder>();
+        public List<LocalizationEntryHolder> LoadingTipsLocalization = new List<LocalizationEntryHolder>();
 
         // save orig XML
         public static void SaveLocalization(LocalizationReference.Localization loc, string path)
@@ -234,17 +241,6 @@ namespace DialogueMiner
 
             return dict.Values.ToList();
         }
-    }
-
-    public class LocalizationHolder
-    {
-        public string Name;
-        public string DefaultName;
-
-        public List<ItemLocalizationHolder> ItemLocalizations = new List<ItemLocalizationHolder>();
-        public List<DialogueLocalizationHolder> DialogueLocalizations = new List<DialogueLocalizationHolder>();
-        public List<LocalizationEntryHolder> MenuLocalizations = new List<LocalizationEntryHolder>();
-        public List<LocalizationEntryHolder> LoadingTipsLocalization = new List<LocalizationEntryHolder>();
     }
 
     public class ItemLocalizationHolder

@@ -86,10 +86,10 @@ namespace CustomWeight
                 UpdateBag(player.Inventory.EquippedBag);
             }
 
-            foreach (var container in player.GetComponentsInChildren<ItemContainer>())
-            {
-                container.UpdateVersion();
-            }
+            //foreach (var container in player.GetComponentsInChildren<ItemContainer>())
+            //{
+            //    container.UpdateVersion();
+            //}
         }
 
         private void UpdateBag(Bag bag)
@@ -250,7 +250,7 @@ namespace CustomWeight
                     }
                 }
 
-                Instance.UpdatePlayer(m_character);
+                //Instance.UpdatePlayer(m_character);
 
                 return false;
             }
