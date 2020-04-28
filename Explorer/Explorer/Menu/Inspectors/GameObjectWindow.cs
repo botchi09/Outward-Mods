@@ -209,11 +209,15 @@ namespace Explorer
                 }
 
                 GUILayout.BeginHorizontal();
+                if (component is Behaviour)
+                {
+                    BehaviourEnabledBtn(component as Behaviour);
+                }
                 if (GUILayout.Button("<color=cyan>" + component.GetType().ToString() + "</color>", GUILayout.Width(m_rect.width / 2 - 90)))
                 {
                     ReflectObject(component);
                 }
-                if (GUILayout.Button("<color=red>Remove</color>", GUILayout.Width(60)))
+                if (GUILayout.Button("<color=red>-</color>", GUILayout.Width(20)))
                 {
                     m_cachedDestroyList.Add(component);
                 }
@@ -253,6 +257,29 @@ namespace Explorer
             GUILayout.EndHorizontal();
 
             GUILayout.EndVertical();
+        }
+
+        private void BehaviourEnabledBtn(Behaviour obj)
+        {
+            var _col = GUI.color;
+            bool _enabled = obj.enabled;
+            if (_enabled)
+            {
+                GUI.color = Color.green;
+            }
+            else
+            {
+                GUI.color = Global.LIGHT_RED;
+            }
+
+            // ------ toggle active button ------
+
+            _enabled = GUILayout.Toggle(_enabled, "", GUILayout.Width(18));
+            if (obj.enabled != _enabled)
+            {
+                obj.enabled = _enabled;
+            }
+            GUI.color = _col;
         }
 
         private void GameObjectControls()
@@ -332,28 +359,20 @@ namespace Explorer
                 case TranslateType.Rotation: vector = transform.rotation.eulerAngles; break;
                 case TranslateType.Scale:    vector = transform.localScale; break;
             }
-            GUILayout.Label(vector.ToString());
+            GUILayout.Label(vector.ToString(), GUILayout.Width(250));
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Force:", GUILayout.Width(50));
-            var input = amount.ToString();
-            input = GUILayout.TextField(input, GUILayout.Width(50));
-            if (float.TryParse(input, out float f))
-            {
-                amount = f;
-            }
-
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
 
-            GUILayout.Label("X:");
+            GUILayout.Label("<color=cyan>X:</color>", GUILayout.Width(20));
             PlusMinusFloat(ref vector.x, amount, multByTime);
 
-            GUILayout.Label("Y:");
+            GUILayout.Label("<color=cyan>Y:</color>", GUILayout.Width(20));
             PlusMinusFloat(ref vector.y, amount, multByTime);
 
-            GUILayout.Label("Z:");
-            PlusMinusFloat(ref vector.y, amount, multByTime);
+            GUILayout.Label("<color=cyan>Z:</color>", GUILayout.Width(20));
+            PlusMinusFloat(ref vector.z, amount, multByTime);
 
             switch (mode)
             {
@@ -362,17 +381,31 @@ namespace Explorer
                 case TranslateType.Scale:    transform.localScale = vector; break;
             }
 
+            GUILayout.Label("+/-:", GUILayout.Width(30));
+            var input = amount.ToString();
+            input = GUILayout.TextField(input, GUILayout.Width(40));
+            if (float.TryParse(input, out float f))
+            {
+                amount = f;
+            }
+
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
             GUILayout.EndHorizontal();
         }
 
         private void PlusMinusFloat(ref float f, float amount, bool multByTime)
         {
-            if (GUILayout.RepeatButton("-", GUILayout.Width(30)))
+            string s = f.ToString();
+            s = GUILayout.TextField(s, GUILayout.Width(60));
+            if (float.TryParse(s, out float f2))
+            {
+                f = f2;
+            }
+            if (GUILayout.RepeatButton("-", GUILayout.Width(20)))
             {
                 f -= multByTime ? amount * Time.deltaTime : amount;
             }
-            if (GUILayout.RepeatButton("+", GUILayout.Width(30)))
+            if (GUILayout.RepeatButton("+", GUILayout.Width(20)))
             {
                 f += multByTime ? amount * Time.deltaTime : amount;
             }
