@@ -10,7 +10,6 @@ using HarmonyLib;
 
 namespace SpeedrunTimer
 {
-
     [BepInPlugin(GUID, NAME, VERSION)]
     public class SpeedrunTimer : BaseUnityPlugin
     {

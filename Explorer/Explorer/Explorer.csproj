@@ -109,15 +109,15 @@
     <Compile Include="Logger\DebugType.cs" />
     <Compile Include="Logger\OLogger.cs" />
     <Compile Include="Logger\UnityDebugIgnore.cs" />
-    <Compile Include="MainMenu.cs" />
-    <Compile Include="MainMenu\ConsolePage.cs" />
-    <Compile Include="Inspectors\GameObjectWindow.cs" />
-    <Compile Include="Inspectors\ReflectionWindow.cs" />
-    <Compile Include="MainMenu\Console\REPL.cs" />
-    <Compile Include="MainMenu\Console\REPLHelper.cs" />
-    <Compile Include="MainMenu\ScenePage.cs" />
-    <Compile Include="MainMenu\SearchPage.cs" />
-    <Compile Include="UIStyles.cs" />
+    <Compile Include="Menu\MainMenu.cs" />
+    <Compile Include="Menu\MainMenu\ConsolePage.cs" />
+    <Compile Include="Menu\Inspectors\GameObjectWindow.cs" />
+    <Compile Include="Menu\Inspectors\ReflectionWindow.cs" />
+    <Compile Include="Menu\Console\REPL.cs" />
+    <Compile Include="Menu\Console\REPLHelper.cs" />
+    <Compile Include="Menu\MainMenu\ScenePage.cs" />
+    <Compile Include="Menu\MainMenu\SearchPage.cs" />
+    <Compile Include="Menu\UIStyles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="utils\AccessTools.cs" />
   </ItemGroup>

@@ -42,7 +42,7 @@ namespace CombatHUD
                     {
                         DamageList damages = __instance.GetDamage(attackID).Clone();
 
-                        owner.Stats.GetMitigatedDamage(null, ref damages);
+                        target.Stats.GetMitigatedDamage(null, ref damages);
 
                         DamageLabels.AddDamageLabel(damages, _hit.point, target);
                     }

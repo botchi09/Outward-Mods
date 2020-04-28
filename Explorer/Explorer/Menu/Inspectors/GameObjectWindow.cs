@@ -26,6 +26,11 @@ namespace Explorer
         private float m_rotateAmount = 50f;
         private float m_scaleAmount = 0.1f;
 
+        List<Component> m_cachedDestroyList = new List<Component>();
+        private string m_addComponentInput = "";
+
+        private string m_setParentInput = "";
+
         public override void Init()
         {
             if (!(m_object = Target as GameObject))
@@ -184,6 +189,7 @@ namespace Explorer
             GUILayout.EndVertical();
         }
 
+
         private void ComponentList()
         {
             GUILayout.BeginVertical(GUI.skin.box, new GUILayoutOption[] { GUILayout.MaxHeight(450), GUILayout.MinHeight(100), GUILayout.ExpandHeight(true) });
@@ -191,6 +197,10 @@ namespace Explorer
             GUILayout.Label("<b><size=15>Components</size></b>");
 
             GUI.skin.button.alignment = TextAnchor.MiddleLeft;
+            if (m_cachedDestroyList.Count > 0)
+            {
+                m_cachedDestroyList.Clear();
+            }
             foreach (var component in m_components)
             {
                 if (component.GetType() == typeof(Transform))
@@ -199,15 +209,49 @@ namespace Explorer
                 }
 
                 GUILayout.BeginHorizontal();
-                if (GUILayout.Button("<color=cyan>" + component.GetType().ToString() + "</color>"))
+                if (GUILayout.Button("<color=cyan>" + component.GetType().ToString() + "</color>", GUILayout.Width(m_rect.width / 2 - 90)))
                 {
                     ReflectObject(component);
+                }
+                if (GUILayout.Button("<color=red>Remove</color>", GUILayout.Width(60)))
+                {
+                    m_cachedDestroyList.Add(component);
                 }
                 GUILayout.EndHorizontal();
             }
             GUI.skin.button.alignment = TextAnchor.MiddleCenter;
+            if (m_cachedDestroyList.Count > 0)
+            {
+                var list = m_components.ToList();
+                for (int i = m_cachedDestroyList.Count - 1; i >= 0; i--)
+                {
+                    var comp = m_cachedDestroyList[i];
+                    list.Remove(comp);
+                    Destroy(comp);
+                }
+                m_components = list.ToArray();
+            }
 
             GUILayout.EndScrollView();
+
+            GUILayout.BeginHorizontal();
+            m_addComponentInput = GUILayout.TextField(m_addComponentInput, GUILayout.Width(m_rect.width / 2 - 150));
+            if (GUILayout.Button("Add Component", GUILayout.Width(120)))
+            {
+                if (Explorer.GetType(m_addComponentInput) is Type type && typeof(Component).IsAssignableFrom(type))
+                {
+                    var comp = m_object.AddComponent(type);
+                    var list = m_components.ToList();
+                    list.Add(comp);
+                    m_components = list.ToArray();
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not get type '{m_addComponentInput}'. If it's not a typo, try the fully qualified name.");
+                }
+            }
+            GUILayout.EndHorizontal();
+
             GUILayout.EndVertical();
         }
 
@@ -228,6 +272,26 @@ namespace Explorer
                 CharacterCheats(c);
             }
 
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button("Remove from parent", GUILayout.Width(160)))
+            {
+                m_object.transform.parent = null;
+            }
+            m_setParentInput = GUILayout.TextField(m_setParentInput, GUILayout.Width(m_rect.width - 280));
+            if (GUILayout.Button("Set Parent", GUILayout.Width(80)))
+            {
+                if (GameObject.Find(m_setParentInput) is GameObject newparent)
+                {
+                    m_object.transform.parent = newparent.transform;
+                }
+                else
+                {
+                    Debug.LogWarning($"Could not find gameobject '{m_setParentInput}'");
+                }
+            }
             GUILayout.EndHorizontal();
 
             GUILayout.BeginVertical(GUI.skin.box);

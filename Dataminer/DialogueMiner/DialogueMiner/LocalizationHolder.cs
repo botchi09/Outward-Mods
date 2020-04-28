@@ -14,6 +14,7 @@ namespace DialogueMiner
 
     public class LocalizationHolder
     {
+        [XmlIgnore]
         public static Type[] CUSTOM_TYPES = new Type[]
         {
             typeof(ItemLocalizationHolder),

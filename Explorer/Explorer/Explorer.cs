@@ -79,7 +79,7 @@ namespace Explorer
                 ShowMenu = !ShowMenu;
             }
 
-            if (ShowMenu && Input.GetKeyDown(KeyCode.F8))
+            if (ShowMenu && Input.GetKeyDown(KeyCode.F5))
             {
                 ShowMouse = !ShowMouse;
             }
@@ -137,16 +137,25 @@ namespace Explorer
 
         public static Type GetType(string _type)
         {
-            Type type = null;
             if (TryGetType(_type, "Assembly-CSharp") is Type gameType)
             {
-                type = gameType;
+                return gameType;
             }
             else if (TryGetType(_type, "UnityEngine") is Type unityType)
             {
-                type = unityType;
+                return unityType;
             }
-            return type;
+            else
+            {
+                try
+                {
+                    return Type.GetType(_type);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
         }
 
         private static Type TryGetType(string _type, string _assembly)

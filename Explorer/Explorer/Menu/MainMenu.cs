@@ -90,7 +90,7 @@ namespace Explorer
             GUILayout.BeginHorizontal();
             GUILayout.Label("<b>Options:</b>", GUILayout.Width(70));
             Explorer.QuestDebugging = GUILayout.Toggle(Explorer.QuestDebugging, "Debug Quest Events", GUILayout.Width(160));
-            Explorer.ShowMouse = GUILayout.Toggle(Explorer.ShowMouse, "Show Mouse (F8)", GUILayout.Width(140));
+            Explorer.ShowMouse = GUILayout.Toggle(Explorer.ShowMouse, "Show Mouse (F5)", GUILayout.Width(140));
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
             GUILayout.Label("Array Limit:", GUILayout.Width(70));
             GUI.skin.label.alignment = TextAnchor.UpperLeft;
