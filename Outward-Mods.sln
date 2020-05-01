@@ -51,6 +51,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCoopRewards", "! Smal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mods\Speedrun Timer\SpeedrunTimer\SpeedrunTimer.csproj", "{0078FDE4-B0C0-4DCA-B576-78D741436EFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomStatsTest", "RandomStatsTest\RandomStatsTest.csproj", "{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -149,6 +151,10 @@ Global
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0078FDE4-B0C0-4DCA-B576-78D741436EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

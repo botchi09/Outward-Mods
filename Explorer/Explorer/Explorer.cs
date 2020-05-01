@@ -35,7 +35,7 @@ namespace Explorer
         {
             Instance = this;
 
-            LoadMCS();
+            //LoadMCS();
 
             this.gameObject.AddComponent<WindowManager>();
             this.gameObject.AddComponent<MainMenu>();
@@ -49,16 +49,16 @@ namespace Explorer
 
         private void LoadMCS()
         {
-            //var mcsPath = Path.GetDirectoryName(Info.Location) + @"\mcs.dll";
-            //if (File.Exists(mcsPath))
-            //{
-            //    Assembly.Load(File.ReadAllBytes(mcsPath));
-            //    Logger.LogMessage("Loaded mcs.dll");
-            //}
-            //else
-            //{
-            //    Logger.LogError("Could not find mcs.dll!");
-            //}
+            var mcsPath = Path.GetDirectoryName(Info.Location) + @"\mcs.dll";
+            if (File.Exists(mcsPath))
+            {
+                Assembly.Load(File.ReadAllBytes(mcsPath));
+                Logger.LogMessage("Loaded mcs.dll");
+            }
+            else
+            {
+                Logger.LogError("Could not find mcs.dll!");
+            }
         }
 
         internal void Start()
@@ -162,7 +162,7 @@ namespace Explorer
         {
             try
             {
-                var type = Type.GetType(_type + ", " + _assembly + ", Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
+                var type = Type.GetType($"{_type}, {_assembly}, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");
                 if (type == null)
                 {
                     throw new Exception();
