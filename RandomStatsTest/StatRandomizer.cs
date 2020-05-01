@@ -80,7 +80,7 @@ namespace RandomStatsTest
         // Apply changes onto an Item
         public override void InitCachedInfo(Item _item)
         {
-            if (!StatsGenerated || m_stats == null)
+            if (m_stats == null)
             {
                 RandomizeStats();
             }
