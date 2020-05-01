@@ -154,6 +154,8 @@ namespace RandomStatsTest
                         break;
                 }
             }
+            
+            StatsGenerated = true;
 
             m_receivedInfo = _networkInfo;
         }
