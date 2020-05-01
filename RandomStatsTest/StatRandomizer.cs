@@ -98,7 +98,7 @@ namespace RandomStatsTest
         {
             var _toSave = "";
 
-            if (!StatsGenerated || this.m_stats == null)
+            if (this.m_stats == null)
             {
                 Debug.LogWarning("Trying to do ToNetworkInfo on RandomStats, but we have no stats to serialize!");
                 return "";
