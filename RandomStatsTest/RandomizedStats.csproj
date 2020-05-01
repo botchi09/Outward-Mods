@@ -89,6 +89,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="RandomStat.cs" />
+    <Compile Include="RandomizedStats.cs" />
     <Compile Include="StatRandomizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

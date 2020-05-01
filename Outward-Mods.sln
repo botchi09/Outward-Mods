@@ -51,7 +51,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedCoopRewards", "! Smal
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpeedrunTimer", "! Small Mods\Speedrun Timer\SpeedrunTimer\SpeedrunTimer.csproj", "{0078FDE4-B0C0-4DCA-B576-78D741436EFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomStatsTest", "RandomStatsTest\RandomStatsTest.csproj", "{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RandomizedStats", "RandomStatsTest\RandomizedStats.csproj", "{B38F7E1D-D6C2-4180-8A8A-868482CCFC17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
