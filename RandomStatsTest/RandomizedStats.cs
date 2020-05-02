@@ -6,22 +6,20 @@ using UnityEngine;
 
 namespace StatRandomizer
 {
-    public class RandomStats : ItemExtension
+    public class RandomizedStats : ItemExtension
     {
-        public bool StatsGenerated { get; private set; }
-
         private Dictionary<SyncOrder, RandomStat> m_stats;
 
         // add the base component to an Item
-        public static RandomStats AddToItem(Item item)
+        public static RandomizedStats AddToItem(Item item)
         {
-            if (item.GetExtension("RandomStats") is RandomStats existing)
+            if (item.GetExtension("RandomStats") is RandomizedStats existing)
             {
                 Debug.Log($"{item.Name} already has a RandomStats component!");
                 return existing;
             }
 
-            var comp = item.gameObject.AddComponent<RandomStats>();
+            var comp = item.gameObject.AddComponent<RandomizedStats>();
             comp.Savable = true;
             comp.m_item = item;
 
@@ -42,8 +40,6 @@ namespace StatRandomizer
             {
                 stat.Randomize();
             }
-
-            StatsGenerated = true;
         }
 
         public void RemoveStats()
@@ -70,7 +66,6 @@ namespace StatRandomizer
                 stat.Deserialize(_networkInfo[i]);
             }
 
-            StatsGenerated = true;
             m_receivedInfo = _networkInfo;
 
             ApplyValues();

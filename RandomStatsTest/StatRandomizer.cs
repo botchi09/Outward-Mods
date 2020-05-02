@@ -32,7 +32,7 @@ namespace StatRandomizer
                     continue;
                 }
 
-                var comp = RandomStats.AddToItem(item);
+                var comp = RandomizedStats.AddToItem(item);
                 DontDestroyOnLoad(comp);
             }
         }
