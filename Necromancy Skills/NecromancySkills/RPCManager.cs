@@ -16,6 +16,7 @@ namespace NecromancySkills
         // This will allow you to do a photonView.RPC("MethodName", PhotonTargets.All, new object[] { parameters for method go here });
         // Note: your parameter arguments MUST be primitive types! (string, int, float, bool, etc).
 
+        public static GameObject obj;
         public static RPCManager Instance;
 
         internal void Start()

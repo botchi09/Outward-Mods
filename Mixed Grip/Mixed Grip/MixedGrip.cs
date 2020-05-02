@@ -27,6 +27,8 @@ namespace MixedGrip
 
         public const string ToggleKey = "Toggle Weapon Grip";
 
+        private static GameObject rpcObj;
+
         internal void Awake()
         {
             Instance = this;
@@ -37,7 +39,9 @@ namespace MixedGrip
             config = SetupConfig();
             config.Register();
 
-            this.gameObject.AddComponent<GripManager>();
+            rpcObj = new GameObject("MixedGripRPC");
+            DontDestroyOnLoad(rpcObj);
+            rpcObj.AddComponent<GripManager>();
         }
 
         private ModConfig SetupConfig()

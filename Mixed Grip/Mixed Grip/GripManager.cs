@@ -20,15 +20,17 @@ namespace MixedGrip
     {
         public static GripManager Instance;
 
+        public static GameObject obj;
+
         public List<CharacterInfo> CurrentPlayers = new List<CharacterInfo>();
         
         internal void Awake()
         {
             Instance = this;
-
+            
             var view = this.gameObject.AddComponent<PhotonView>();
             view.viewID = 901;
-            Debug.Log("Registered MixedGrip with ViewID " + this.photonView.viewID);
+            Debug.Log("Registered MixedGrip with ViewID " + view.viewID);
 
             var harmony = new Harmony("com.sinai.mixedgrip");
             harmony.PatchAll();

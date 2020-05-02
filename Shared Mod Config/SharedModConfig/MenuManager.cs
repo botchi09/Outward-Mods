@@ -95,7 +95,6 @@ namespace SharedModConfig
             m_ConfigPanel.SetActive(!active);
         }
 
-        #region Internal Setup
         internal void Awake()
         {
             Instance = this;
@@ -162,10 +161,9 @@ namespace SharedModConfig
                 m_ConfigPanel.SetActive(false);
             }
         }
-        #endregion
 
+        // config menu button callbacks
 
-        #region UI Button Listener Functions
         private void CloseButton()
         {
             m_ConfigPanel.SetActive(false);
@@ -201,9 +199,9 @@ namespace SharedModConfig
                 Debug.LogError("[SharedModConfig] Error! Could not find transform " + buttontext);
             }
         }
-        #endregion
 
-        #region Adding a Config to the UI Menu
+        // Adding a new mod config to the menu
+
         public void AddConfig(ModConfig config)
         {
             // add button to mod list
@@ -353,10 +351,9 @@ namespace SharedModConfig
             var inputField = newPrefab.GetComponentInChildren<InputField>();
             inputField.text = setting.m_value;
         }
-        #endregion
 
+        // mouse control fix
 
-        #region Menu Mouse Fix
         private void MenuMouseFix()
         {
             if (m_lastCanvasState != m_ConfigPanel.activeSelf)
@@ -384,6 +381,5 @@ namespace SharedModConfig
                 }
             }
         }
-        #endregion
     }
 }
