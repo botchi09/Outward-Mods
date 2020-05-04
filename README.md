@@ -1,8 +1,12 @@
 # Outward-Mods
  
-Highly recommended to use with [BepInEx-Partiality-Wrapper](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper).
+Sinai's mods for Outward.
 
- * Some mods may require [SideLoader](https://github.com/sinaioutlander/Outward-Sideloader/blob/master/README.md)
+[![Version](https://img.shields.io/badge/BepInEx-5.0.1-green.svg)](https://github.com/BepInEx/BepInEx)
+
+* Requires [BepInEx](https://github.com/BepInEx/BepInEx).
+* Some mods may require [SideLoader](https://github.com/sinaioutlander/Outward-Sideloader/blob/master/README.md)
+* A few mods are Partiality, they will require [BepInEx-Partiality-Wrapper](https://github.com/sinaioutlander/BepInEx-Partiality-Wrapper).
  
  To download an individual mod:
  - In the mod folder, go into the 'Release' folder
