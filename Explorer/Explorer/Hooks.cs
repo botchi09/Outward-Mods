@@ -6,47 +6,38 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
-
+using HarmonyLib;
 
 namespace Explorer
 {
     public class Hooks
     {
-        public static void InitHooks()
-        {
-            // debug quest events
-            On.SendQuestEventInteraction.OnActivate += Hooks.SendQuestInteractionHook;
-            On.NodeCanvas.Tasks.Actions.SendQuestEvent.OnExecute += Hooks.SendQuestEventHook;
-
-            // fix area names on teleport menu
-            On.DT_CharacterCheats.InitAreaSwitches += Hooks.DT_CharacterCheats_InitAreaSwitches;
-
-            // Skip Logos hook
-            On.StartupVideo.Start += Hooks.StartupVideo_Start;
-        }
-
         // *************** FIX DEBUG AREA SWITCH NAMES *********** //
 
-        public static void DT_CharacterCheats_InitAreaSwitches(On.DT_CharacterCheats.orig_InitAreaSwitches orig, DT_CharacterCheats self)
+        [HarmonyPatch(typeof(DT_CharacterCheats), "InitAreaSwitches")]
+        public class DT_CharacterCheats_InitAreaSwitches
         {
-            orig(self);
-
-            var families = At.GetValue(typeof(DT_CharacterCheats), self, "m_ddFamilies") as Dropdown[];
-
-            foreach (var dd in families)
+            [HarmonyPostfix]
+            public static void Postfix(DT_CharacterCheats __instance)
             {
-                if (dd == null) { continue; }
+                var self = __instance;
+                var families = At.GetValue(typeof(DT_CharacterCheats), self, "m_ddFamilies") as Dropdown[];
 
-                var trigger = dd.GetComponent<EventTrigger>();
-                if (trigger == null) { continue; }
-
-                var _event = new EventTrigger.Entry()
+                foreach (var dd in families)
                 {
-                    eventID = EventTriggerType.PointerUp
-                };
-                _event.callback.AddListener(delegate (BaseEventData data) { OnAreaSelected(dd); });
+                    if (dd == null) { continue; }
 
-                trigger.triggers.Add(_event);
+                    var trigger = dd.GetComponent<EventTrigger>();
+                    if (trigger == null) { continue; }
+
+                    var _event = new EventTrigger.Entry()
+                    {
+                        eventID = EventTriggerType.PointerUp
+                    };
+                    _event.callback.AddListener(delegate (BaseEventData data) { OnAreaSelected(dd); });
+
+                    trigger.triggers.Add(_event);
+                }
             }
         }
 
@@ -116,41 +107,51 @@ namespace Explorer
 
         // ****************** SKIP LOGOS HOOK ********************** //
 
-        // Skip Logos hook
-        public static void StartupVideo_Start(On.StartupVideo.orig_Start orig, StartupVideo self)
+        [HarmonyPatch(typeof(StartupVideo), "Start")]
+        public class StartupVideo_Start
         {
-            //StoreManager.Experimental = false;
-            StartupVideo.HasPlayedOnce = true;
-            orig(self);
+            [HarmonyPrefix]
+            public static void Prefix()
+            {
+                StartupVideo.HasPlayedOnce = true;
+            }
         }
 
         // ********************* QUEST HOOKS ********************* //
 
-        public static void SendQuestInteractionHook(On.SendQuestEventInteraction.orig_OnActivate orig, SendQuestEventInteraction self)
+        [HarmonyPatch(typeof(SendQuestEventInteraction), "OnActivate")]
+        public class SendQuestEventInteraction_OnActivate
         {
-            var _ref = At.GetValue(typeof(SendQuestEventInteraction), self, "m_questReference") as QuestEventReference;
-            var _event = _ref.Event;
-            var s = _ref.EventUID;
-
-            if (_event != null && s != null)
+            public static void Prefix(SendQuestEventInteraction __instance)
             {
-                LogQuestEvent(_event, -1);
-            }
+                var self = __instance;
 
-            orig(self);
+                var _ref = At.GetValue(typeof(SendQuestEventInteraction), self, "m_questReference") as QuestEventReference;
+                var _event = _ref.Event;
+                var s = _ref.EventUID;
+
+                if (_event != null && s != null)
+                {
+                    LogQuestEvent(_event, -1);
+                }
+            }
         }
 
-        public static void SendQuestEventHook(On.NodeCanvas.Tasks.Actions.SendQuestEvent.orig_OnExecute orig, NodeCanvas.Tasks.Actions.SendQuestEvent self)
+        [HarmonyPatch(typeof(NodeCanvas.Tasks.Actions.SendQuestEvent), "OnExecute")]
+        public class SendQuestEvent_OnExecute
         {
-            var _event = self.QuestEventRef.Event;
-            //var s = self.QuestEventRef.EventUID;
-
-            if (_event != null)
+            [HarmonyPrefix]
+            public static void Prefix(NodeCanvas.Tasks.Actions.SendQuestEvent __instance) 
             {
-                LogQuestEvent(_event, self.StackAmount);
-            }
+                var self = __instance;
+                var _event = self.QuestEventRef.Event;
+                //var s = self.QuestEventRef.EventUID;
 
-            orig(self);
+                if (_event != null)
+                {
+                    LogQuestEvent(_event, self.StackAmount);
+                }
+            }
         }
 
         public static void LogQuestEvent(QuestEventSignature _event, int stack = -1)

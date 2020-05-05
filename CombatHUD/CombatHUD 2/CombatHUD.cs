@@ -14,11 +14,12 @@ using BepInEx.Logging;
 namespace CombatHUD
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SideLoader", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SharedModConfig", BepInDependency.DependencyFlags.HardDependency)]
     public class CombatHUD : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.combathud";
-        public const string VERSION = "4.2";
+        public const string VERSION = "4.21";
         public const string NAME = "Combat HUD";
 
         public static CombatHUD Instance;

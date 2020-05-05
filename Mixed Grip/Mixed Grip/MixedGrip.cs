@@ -15,12 +15,12 @@ using static CustomKeybindings;
 namespace MixedGrip
 { 
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SharedModConfig", BepInDependency.DependencyFlags.HardDependency)]
     public class MixedGrip : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.mixedgrip";
         public const string NAME = "Mixed Grip";
-        public const string VERSION = "3.0";
+        public const string VERSION = "3.1";
 
         public static MixedGrip Instance;
         public static ModConfig config;

@@ -9,6 +9,7 @@ using UnityEngine.EventSystems;
 using BepInEx;
 using System.IO;
 using System.Reflection;
+using HarmonyLib;
 
 namespace Explorer
 {
@@ -44,7 +45,8 @@ namespace Explorer
             Application.logMessageReceived += Application_logMessageReceived;
 
             // init debugging hooks
-            Hooks.InitHooks();
+            var harmony = new Harmony(ID);
+            harmony.PatchAll();
         }
 
         private void LoadMCS()
@@ -79,9 +81,14 @@ namespace Explorer
                 ShowMenu = !ShowMenu;
             }
 
-            if (ShowMenu && Input.GetKeyDown(KeyCode.F5))
+            if (ShowMenu && Input.GetKeyDown(KeyCode.LeftAlt))
             {
                 ShowMouse = !ShowMouse;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape) && ShowMouse)
+            {
+                ShowMouse = false;
             }
 
             MouseFix();

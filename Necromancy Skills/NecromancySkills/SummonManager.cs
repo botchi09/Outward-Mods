@@ -111,7 +111,7 @@ namespace NecromancySkills
 			Vector3 castPos = caster.transform.position + (Vector3.forward * 0.5f);
 
 			// use SideLoader's CustomCharacters to create a basic player prefab
-			var playerPrefab = SideLoader.CustomCharacters.InstantiatePlayerPrefab(castPos, summonUID);
+			var playerPrefab = SideLoader.CustomCharacters.CreateCharacter(castPos, summonUID, "NecroSummon");
 
 			Character _char = playerPrefab.GetComponent<Character>();
 			_char.SetUID(summonUID);
@@ -187,17 +187,17 @@ namespace NecromancySkills
 
 			}
 
-			// setup photonview
-			if (summonChar.GetComponent<PhotonView>() is PhotonView view)
-			{
-				Debug.Log("Removing PhotonView");
-				DestroyImmediate(view);
-			}
-			var pView = summonChar.gameObject.AddComponent<PhotonView>();
-			pView.viewID = sceneViewID;
-			pView.onSerializeTransformOption = OnSerializeTransform.PositionAndRotation;
-			pView.onSerializeRigidBodyOption = OnSerializeRigidBody.All;
-			pView.synchronization = ViewSynchronization.Unreliable;
+			//// setup photonview
+			//if (summonChar.GetComponent<PhotonView>() is PhotonView view)
+			//{
+			//	Debug.Log("Removing PhotonView");
+			//	DestroyImmediate(view);
+			//}
+			//var pView = summonChar.gameObject.AddComponent<PhotonView>();
+			//pView.viewID = sceneViewID;
+			//pView.onSerializeTransformOption = OnSerializeTransform.PositionAndRotation;
+			//pView.onSerializeRigidBodyOption = OnSerializeRigidBody.All;
+			//pView.synchronization = ViewSynchronization.Unreliable;
 
 			// add observed components after setting active?
 			if (summonChar.photonView.ObservedComponents == null)
@@ -234,7 +234,7 @@ namespace NecromancySkills
 		{
 			yield return new WaitForSeconds(2f);
 
-			Debug.Log("Fixing observed components");
+			//Debug.Log("Fixing observed components");
 
 			// add observed components after setting active?
 			if (summonChar.photonView.ObservedComponents == null)

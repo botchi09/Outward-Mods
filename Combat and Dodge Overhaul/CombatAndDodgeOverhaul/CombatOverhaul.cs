@@ -11,12 +11,12 @@ using HarmonyLib;
 namespace CombatAndDodgeOverhaul
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SharedModConfig", BepInDependency.DependencyFlags.HardDependency)]
     public class CombatOverhaul : BaseUnityPlugin
     {
         const string GUID = "com.sinai.combatoverhaul";
         const string NAME = "Combat Overhaul";
-        const string VERSION = "2.0";
+        const string VERSION = "2.1";
 
         public static CombatOverhaul Instance;
 

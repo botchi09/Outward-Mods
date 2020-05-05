@@ -11,12 +11,12 @@ using HarmonyLib;
 namespace CustomWeight
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SharedModConfig", BepInDependency.DependencyFlags.HardDependency)]
     public class CustomWeight : BaseUnityPlugin
     {
         const string GUID = "com.sinai.customweight";
         const string NAME = "Custom Weight";
-        const string VERSION = "2.0";
+        const string VERSION = "2.1";
 
         public static CustomWeight Instance;
         public ModConfig config;

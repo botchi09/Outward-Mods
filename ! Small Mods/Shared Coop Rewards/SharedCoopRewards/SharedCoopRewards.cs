@@ -18,12 +18,12 @@ namespace SharedCoopRewards
     }
 
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SharedModConfig", BepInDependency.DependencyFlags.HardDependency)]
     public class SharedCoopRewards : BaseUnityPlugin
     {
         const string GUID = "com.sinai.sharedcooprewards";
         const string NAME = "Shared Coop Rewards";
-        const string VERSION = "2.0";
+        const string VERSION = "2.1";
 
         public static ModConfig config;
 

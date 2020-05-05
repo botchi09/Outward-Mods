@@ -11,12 +11,12 @@ using HarmonyLib;
 namespace BlacksmithsToolbox
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SideLoader", BepInDependency.DependencyFlags.HardDependency)]
     public class BlacksmithsToolbox : BaseUnityPlugin
     {
         const string GUID = "com.sinai.blacksmithstoolbox";
         const string NAME = "Blacksmith's Toolbox";
-        const string VERSION = "2.0";
+        const string VERSION = "2.1";
 
         public static Settings settings = new Settings();
         private static readonly string savePath = @"Mods\BlacksmithsToolbox.json";

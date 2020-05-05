@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.IO;
-using SharedModConfig;
 
 namespace OutSoulsMod
 {

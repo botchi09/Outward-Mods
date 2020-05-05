@@ -11,12 +11,12 @@ using HarmonyLib;
 namespace ImbuedBows
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("com.sinai.SideLoader", BepInDependency.DependencyFlags.HardDependency)]
     public class ImbuedBows : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.imbuedbows";
         public const string NAME = "Imbued Bows & Mana Bow";
-        public const string VERSION = "1.1";
+        public const string VERSION = "1.2";
 
         internal void Awake()
         {

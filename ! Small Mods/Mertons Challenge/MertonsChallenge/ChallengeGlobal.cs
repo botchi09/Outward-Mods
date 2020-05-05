@@ -116,7 +116,9 @@ namespace MertonsChallenge
             // setup healing rift
             var rift = new GameObject("HealingRift");
             rift.transform.position = CurrentTemplate.InteractorPos;
-            rift.AddComponent(new SigilHeal() { global = this });
+            //rift.AddComponent(new SigilHeal() { global = this });
+            var sigil = rift.AddComponent<SigilHeal>();
+            sigil.global = this;
 
             StartTime = Time.time;
             while (IsGameplayStarted)
@@ -351,7 +353,9 @@ namespace MertonsChallenge
             // setup components
             InteractionTriggerBase triggerBase = InteractorObj.AddComponent<InteractionTriggerBase>();
             InteractionActivator activator = InteractorObj.AddComponent<InteractionActivator>();
-            InteractionBase interactBase = InteractorObj.AddComponent(new InteractionBase { OnActivationEvent = new UnityAction(InteractorBeginEvent) });
+            //InteractionBase interactBase = InteractorObj.AddComponent(new InteractionBase { OnActivationEvent = new UnityAction(InteractorBeginEvent) });
+            InteractionBase interactBase = InteractorObj.AddComponent<InteractionBase>();
+            interactBase.OnActivationEvent = new UnityAction(InteractorBeginEvent);
             triggerBase.SetActivator(activator);
             At.SetValue("Begin <color=#FF0000>Merton's Challenge</color>", typeof(InteractionActivator), activator, "m_overrideBasicText");
             At.SetValue(interactBase, typeof(InteractionActivator), activator, "m_sceneBasicInteraction");

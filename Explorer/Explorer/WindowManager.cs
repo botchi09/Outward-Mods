@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using HarmonyLib;
 
 namespace Explorer
 {
@@ -19,21 +20,18 @@ namespace Explorer
         internal void Awake()
         {
             Instance = this;
-
-            // prevent Rewired GUI click-through
-            On.UICursor.StateForCursorButton += UICursor_StateForCursorButton;
         }
 
-        // prevent Rewired GUI click-through
-        private PointerEventData.FramePressState UICursor_StateForCursorButton(On.UICursor.orig_StateForCursorButton orig, UICursor self, int _buttonID)
+        [HarmonyPatch(typeof(UICursor), "StateForCursorButton")]
+        public class UICursor_StateForCursorButton
         {
-            if (IsMouseInWindow)
+            [HarmonyPostfix]
+            public static void Postfix(ref PointerEventData.FramePressState __result)
             {
-                return PointerEventData.FramePressState.NotChanged;
-            }
-            else
-            {
-                return orig(self, _buttonID);
+                if (IsMouseInWindow)
+                {
+                    __result = PointerEventData.FramePressState.NotChanged;
+                }
             }
         }
 
