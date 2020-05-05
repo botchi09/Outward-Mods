@@ -95,7 +95,7 @@ namespace Combat_Dummy
             {
                 if (state is AISCombat aiscombat)
                 {
-                    aiscombat.ChanceToDefend = enabled ? Config.ChanceToDefend : 0;
+                    aiscombat.CanDodge = enabled ? Config.CanDodge : false;
                 }
 
                 state.enabled = enabled;
@@ -131,14 +131,13 @@ namespace Combat_Dummy
         public int Weapon = 2000010;
 
         // ai
-        public float ChanceToDefend = 0;
+        public bool CanDodge = false;
 
         // stats
         public float Health = 500;
         public float ImpactResist = 0;
         public float Protection = 0;
         public float[] Damage_Resists = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };
-
         public float[] Damage_Bonus = new float[6] { 0f, 0f, 0f, 0f, 0f, 0f };
     
         public void ApplyToCharacter(Character character)
@@ -169,7 +168,7 @@ namespace Combat_Dummy
             {
                 if (state is AISCombat aisCombat)
                 {
-                    aisCombat.ChanceToDefend = ChanceToDefend;
+                    aisCombat.CanDodge = CanDodge;
                 }
             }
 

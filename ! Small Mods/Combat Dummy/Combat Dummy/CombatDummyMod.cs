@@ -16,6 +16,8 @@ namespace Combat_Dummy
 
         public static List<DummyCharacter> ActiveDummies = new List<DummyCharacter>();
 
+        public const string MenuKey = "Combat Dummy Menu";
+
         internal void Awake()
         {
             Instance = this;
@@ -23,6 +25,19 @@ namespace Combat_Dummy
             var obj = new GameObject("CombatDummyGUI");
             DontDestroyOnLoad(obj);
             obj.AddComponent<ModGUI>();
+
+            var harmony = new Harmony("com.sinai.combatdummy");
+            harmony.PatchAll();
+
+            CustomKeybindings.AddAction(MenuKey, CustomKeybindings.KeybindingsCategory.Menus, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
+        }
+
+        internal void Update()
+        {
+            if (CustomKeybindings.m_playerInputManager[0].GetButtonDown(MenuKey))
+            {
+                ModGUI.ShowMenu = !ModGUI.ShowMenu;
+            }
         }
 
         public static DummyCharacter AddDummy(string name)
