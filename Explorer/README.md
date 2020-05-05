@@ -2,7 +2,7 @@
 
 This is a debugging tool for inspecting the Outward game in a similar way to the Unity editor.
 
-This mod <b>requires</b> BepInEx, it's not a Partiality mod.
+This mod <b>requires</b> BepInEx.
 
 ## Install
 
