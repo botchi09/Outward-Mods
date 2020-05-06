@@ -18,6 +18,8 @@ namespace Combat_Dummy
 
         public const string MenuKey = "Combat Dummy Menu";
 
+        private static bool m_mouseShowing = false;
+
         internal void Awake()
         {
             Instance = this;
@@ -38,6 +40,8 @@ namespace Combat_Dummy
             {
                 ModGUI.ShowMenu = !ModGUI.ShowMenu;
             }
+
+            MouseFix();
         }
 
         public static DummyCharacter AddDummy(string name)
@@ -64,6 +68,51 @@ namespace Combat_Dummy
             if (dummy.CharacterExists)
             {
                 dummy.DestroyCharacter();
+            }
+        }
+
+        public static void MouseFix()
+        {
+            var cha = CharacterManager.Instance.GetFirstLocalCharacter();
+
+            if (!cha)
+            {
+                return;
+            }
+
+            if (ModGUI.ShowMenu)
+            {
+                if (!m_mouseShowing)
+                {
+                    m_mouseShowing = true;
+                    ToggleDummyPanel(cha, true);
+                }
+            }
+            else if (m_mouseShowing)
+            {
+                m_mouseShowing = false;
+                ToggleDummyPanel(cha, false);
+            }
+        }
+
+        private static void ToggleDummyPanel(Character cha, bool show)
+        {
+            if (cha.CharacterUI.PendingDemoCharSelectionScreen is Panel panel)
+            {
+                if (show)
+                    panel.Show();
+                else
+                    panel.Hide();
+            }
+            else if (show)
+            {
+                GameObject obj = new GameObject();
+                obj.transform.parent = cha.transform;
+                obj.SetActive(true);
+
+                Panel newPanel = obj.AddComponent<Panel>();
+                At.SetValue(newPanel, typeof(CharacterUI), cha.CharacterUI, "PendingDemoCharSelectionScreen");
+                newPanel.Show();
             }
         }
     }
