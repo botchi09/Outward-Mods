@@ -143,13 +143,6 @@ namespace Combat_Dummy
                 typeof(InputManager_Base).GetMethod("Initialize", BindingFlags.Instance | BindingFlags.NonPublic),
                 typeof(CustomKeybindings).GetMethod("InputManager_Base_Initialize", BindingFlags.Static | BindingFlags.NonPublic)
                 )).GenerateTrampoline<d_Initialize>();
-
-            // Use a normal HookGen hook of the bindings panel to add action-to-element maps for our custom actions
-            // ActionElementMaps bind a keyboard key or controller or mouse input to an action
-            //On.ControlMappingPanel.InitSections += new On.ControlMappingPanel.hook_InitSections(ControlMappingPanel_InitSections);
-
-            // Use a normal HookGen hook of the localization manager to give our keybinding a nice name in the bindings menu
-            //On.LocalizationManager.StartLoading += new On.LocalizationManager.hook_StartLoading(LocalizationManager_StartLoading);
         }
 
         // These are some things we need to store for our manual hook of the Initialize method on Rewired.InputManager_Base
