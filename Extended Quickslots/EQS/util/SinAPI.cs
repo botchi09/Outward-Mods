@@ -7,7 +7,7 @@ using System.Reflection;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace ExtendedQuickslotsPartiality
+namespace ExtendedQuickslots2
 {
     public static class At // Access Tools
     {

@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using System.IO;
 using System.Xml.Serialization;
+using HarmonyLib;
 
 namespace Dataminer
 {
@@ -20,8 +21,8 @@ namespace Dataminer
         {
             Instance = this;
 
-            On.AICEnemyDetection.Update += new On.AICEnemyDetection.hook_Update(AIEnemyDetectionHook);
-            On.AIESwitchState.SwitchState += new On.AIESwitchState.hook_SwitchState(AISwitchStateHook);
+            var harmony = new Harmony("com.sinai.dataminer");
+            harmony.PatchAll();
 
             SceneHelper.SetupSceneSummaries();
         }
@@ -408,16 +409,34 @@ namespace Dataminer
 
         #region HOOKS
 
-        // disable AI aggression
-        private void AIEnemyDetectionHook(On.AICEnemyDetection.orig_Update orig, AICEnemyDetection self)
+        [HarmonyPatch(typeof(AICEnemyDetection), "Update")]
+        public class AICEnemyDetection_Update
         {
-            //if (!m_parsing)
-            //    orig(self);
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                if (SceneManager.Instance.m_parsing)
+                {
+                    return false;
+                }
+
+                return true;
+            }
         }
-        private void AISwitchStateHook(On.AIESwitchState.orig_SwitchState orig, AIESwitchState self)
+
+        [HarmonyPatch(typeof(AIESwitchState), "SwitchState")]
+        public class AIESwitchState_Update
         {
-            //if (!m_parsing)
-            //    orig(self);
+            [HarmonyPrefix]
+            public static bool Prefix()
+            {
+                if (SceneManager.Instance.m_parsing)
+                {
+                    return false;
+                }
+
+                return true;
+            }
         }
         #endregion
     }

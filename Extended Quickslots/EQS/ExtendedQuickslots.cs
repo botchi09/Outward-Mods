@@ -2,86 +2,53 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Partiality.Modloader;
 using UnityEngine;
 using System.IO;
-using static CustomKeybindings;
+using BepInEx;
+using HarmonyLib;
 
 // ORIGINAL MOD BY ASHNAL AND STIMMEDCOW
 // CUSTOM KEYBINDINGS BY STIAN
 
-// FIXED BY SINAI FOR PARTIALITY AND CUSTOMKEYBINDINGS COMPATIBILITY
+// Fixed by Sinai
 
-namespace ExtendedQuickslotsPartiality
+namespace ExtendedQuickslots2
 {
-    // partiality modloader
-    public class Loader : PartialityMod
-    {
-        public double version = 1.2;
-
-        public Loader()
-        {
-            this.author = "Ashnal, Stimmedcow, Sinai";
-            this.ModID = "EQS";
-            this.Version = version.ToString("1.00");
-        }
-
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            GameObject obj = new GameObject("EQSPartiality");
-            GameObject.DontDestroyOnLoad(obj);
-
-            EQSPartiality script = obj.AddComponent<EQSPartiality>();
-            script._base = this;
-            script.Init();
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-        }
-    }
-
     public class Settings
     {
         public int NumberOfQuickSlotsToAdd;
         public bool CenterQuickSlots;
     }
 
-    // actual mod
-    public class EQSPartiality : MonoBehaviour
+    [BepInPlugin(GUID, NAME, VERSION)]
+    public class ExtendedQuickslots : BaseUnityPlugin
     {
-        public Loader _base;
+        public const string GUID = "com.sinai.ExtendedQuickslots2";
+        public const string NAME = "Extended Quickslots 2";
+        public const string VERSION = "2.5";
 
-        public Settings settings = new Settings() { NumberOfQuickSlotsToAdd = 8, CenterQuickSlots = true, };
+        public static Settings settings = new Settings() 
+        { 
+            NumberOfQuickSlotsToAdd = 8, 
+            CenterQuickSlots = true, 
+        };
 
-        public string SitEmote = "Sit Emote";
-        public string IdleEmote = "Alternate Idle Pose";
+        private static bool fixedDictionary = false;
 
-        private bool fixedDictionary = false;
+        private static readonly bool[] fixedPositions = new bool[2] { false, false };
 
-        private bool[] fixedPositions = new bool[2] { false, false };
-
-        public void Init()
+        internal void Awake()
         {
             LoadSettings();
 
-            // Hooks
-            On.KeyboardQuickSlotPanel.InitializeQuickSlotDisplays += KeyboardQuickSlotPanel_InitializeQuickSlotDisplays;
-            On.CharacterQuickSlotManager.Awake += CharacterQuickSlotManager_Awake;
-            On.QuickSlotPanel.Update += QuickSlotPanel_Update;
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
 
             // Quickslot Keybindings
             for (int x = 0; x < settings.NumberOfQuickSlotsToAdd; x++)
             {
-                AddAction("QS_Instant" + (x + 12), KeybindingsCategory.QuickSlot, ControlType.Both, 5, InputActionType.Button);
+                CustomKeybindings.AddAction("QS_Instant" + (x + 12), CustomKeybindings.KeybindingsCategory.QuickSlot, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
             }
-
-            // Other keybindings
-            AddAction(SitEmote, KeybindingsCategory.Actions, ControlType.Both, 5, InputActionType.Button);  // Sit Emote key
-            AddAction(IdleEmote, KeybindingsCategory.Actions, ControlType.Both, 5, InputActionType.Button); // Idle Pose key
         }
 
         // ============== GLOBAL UPDATE ==============
@@ -94,18 +61,9 @@ namespace ExtendedQuickslotsPartiality
                 Character c = ps.ControlledCharacter;
                 int playerID = c.OwnerPlayerSys.PlayerID;
 
-                if (m_playerInputManager[playerID].GetButtonDown(SitEmote))
-                {
-                    c.CastSpell(Character.SpellCastType.Sit, c.gameObject, Character.SpellCastModifier.Immobilized, 1, -1f);
-                }
-                else if (m_playerInputManager[playerID].GetButtonDown(IdleEmote))
-                {
-                    c.CastSpell(Character.SpellCastType.IdleAlternate, c.gameObject, Character.SpellCastModifier.Immobilized, 1, -1f);
-                }
-
                 for (int x = 0; x < settings.NumberOfQuickSlotsToAdd; x++)
                 {
-                    if (m_playerInputManager[playerID].GetButtonDown("QS_Instant" + (x + 12)))
+                    if (CustomKeybindings.m_playerInputManager[playerID].GetButtonDown("QS_Instant" + (x + 12)))
                     {
                         c.QuickSlotMngr.QuickSlotInput(x + 11);
                         break;
@@ -137,63 +95,72 @@ namespace ExtendedQuickslotsPartiality
 
         // Quickslot update hook, just for custom initialization
 
-        public void QuickSlotPanel_Update(On.QuickSlotPanel.orig_Update orig, QuickSlotPanel self)
+        [HarmonyPatch(typeof(QuickSlotPanel), "Update")]
+        public class QuickSlotPanel_Update
         {
-            UIElement _base = self as UIElement;
-
-            // UIElement.Update() fix:
-            if ((bool)At.GetValue(typeof(UIElement), _base, "m_hideWanted") && _base.IsDisplayed)
+            [HarmonyPrefix]
+            public static bool Prefix(QuickSlotPanel __instance)
             {
-                At.Call(_base, "OnHide", null);
-            }
+                var self = __instance;
 
-            // get private fields
-            var m_active = (bool)At.GetValue(typeof(QuickSlotPanel), self, "m_active");
-            var m_initialized = (bool)At.GetValue(typeof(QuickSlotPanel), self, "m_initialized");
-            var m_quickSlotDisplays = At.GetValue(typeof(QuickSlotPanel), self, "m_quickSlotDisplays") as QuickSlotDisplay[];
-            var m_lastCharacter = At.GetValue(typeof(QuickSlotPanel), self, "m_lastCharacter") as Character;
+                UIElement _base = self as UIElement;
 
-            // check init
-            if ((_base.LocalCharacter == null || m_lastCharacter != _base.LocalCharacter) && m_initialized)
-            {
-                m_initialized = false;
-                At.SetValue(m_initialized, typeof(QuickSlotPanel), self, "m_initialized");
-            }
-
-            // normal update when initialized
-            if (m_initialized)
-            {
-                if (self.UpdateInputVisibility)
+                // UIElement.Update() fix:
+                if ((bool)At.GetValue(typeof(UIElement), _base, "m_hideWanted") && _base.IsDisplayed)
                 {
-                    for (int i = 0; i < m_quickSlotDisplays.Count(); i++)
+                    At.Call(_base, "OnHide", null);
+                }
+
+                // get private fields
+                var m_active = (bool)At.GetValue(typeof(QuickSlotPanel), self, "m_active");
+                var m_initialized = (bool)At.GetValue(typeof(QuickSlotPanel), self, "m_initialized");
+                var m_quickSlotDisplays = At.GetValue(typeof(QuickSlotPanel), self, "m_quickSlotDisplays") as QuickSlotDisplay[];
+                var m_lastCharacter = At.GetValue(typeof(QuickSlotPanel), self, "m_lastCharacter") as Character;
+
+                // check init
+                if ((_base.LocalCharacter == null || m_lastCharacter != _base.LocalCharacter) && m_initialized)
+                {
+                    m_initialized = false;
+                    At.SetValue(m_initialized, typeof(QuickSlotPanel), self, "m_initialized");
+                }
+
+                // normal update when initialized
+                if (m_initialized)
+                {
+                    if (self.UpdateInputVisibility)
                     {
-                        m_quickSlotDisplays[i].SetInputTargetAlpha((!m_active) ? 0f : 1f);
+                        for (int i = 0; i < m_quickSlotDisplays.Count(); i++)
+                        {
+                            m_quickSlotDisplays[i].SetInputTargetAlpha((!m_active) ? 0f : 1f);
+                        }
                     }
                 }
-            }
-            // custom initialize setup
-            else if (_base.LocalCharacter != null) 
-            {
-                At.SetValue(_base.LocalCharacter, typeof(QuickSlotPanel), self, "m_lastCharacter");
-                At.SetValue(true, typeof(QuickSlotPanel), self, "m_initialized");
-
-                // set quickslot display refs (orig function)
-                for (int j = 0; j < m_quickSlotDisplays.Length; j++)
+                // custom initialize setup
+                else if (_base.LocalCharacter != null)
                 {
-                    int refSlotID = m_quickSlotDisplays[j].RefSlotID;
-                    m_quickSlotDisplays[j].SetQuickSlot(_base.LocalCharacter.QuickSlotMngr.GetQuickSlot(refSlotID));
+                    At.SetValue(_base.LocalCharacter, typeof(QuickSlotPanel), self, "m_lastCharacter");
+                    At.SetValue(true, typeof(QuickSlotPanel), self, "m_initialized");
+
+                    // set quickslot display refs (orig function)
+                    for (int j = 0; j < m_quickSlotDisplays.Length; j++)
+                    {
+                        int refSlotID = m_quickSlotDisplays[j].RefSlotID;
+                        m_quickSlotDisplays[j].SetQuickSlot(_base.LocalCharacter.QuickSlotMngr.GetQuickSlot(refSlotID));
+                    }
+
+                    // if its a keyboard quickslot, set up the custom display stuff
+                    if (_base.name == "Keyboard" && _base.transform.parent.name == "QuickSlot")
+                    {
+                        ExtendedQuickslots.SetupKeyboardQuickslotDisplay(_base, m_quickSlotDisplays);
+                    }
+
                 }
 
-                // if its a keyboard quickslot, set up the custom display stuff
-                if (_base.name == "Keyboard" && _base.transform.parent.name == "QuickSlot")
-                {
-                    SetupKeyboardQuickslotDisplay(_base, m_quickSlotDisplays);
-                }
-              
+                return false;
             }
         }
 
-        private void SetupKeyboardQuickslotDisplay(UIElement _base, QuickSlotDisplay[] m_quickSlotDisplays)
+        private static void SetupKeyboardQuickslotDisplay(UIElement _base, QuickSlotDisplay[] m_quickSlotDisplays)
         {
             if ((_base.PlayerID == 0 && fixedPositions[0] == false) || (_base.PlayerID == 1 && fixedPositions[1] == false))
             {
@@ -251,33 +218,41 @@ namespace ExtendedQuickslotsPartiality
 
         // Keyboard quickslot initialize hook. Add our custom slots first.
 
-        public void KeyboardQuickSlotPanel_InitializeQuickSlotDisplays(On.KeyboardQuickSlotPanel.orig_InitializeQuickSlotDisplays orig, KeyboardQuickSlotPanel self)
+        [HarmonyPatch(typeof(KeyboardQuickSlotPanel), "InitializeQuickSlotDisplays")]
+        public class KeyboardQSPanel_Init
         {
-            Array.Resize(ref self.DisplayOrder, self.DisplayOrder.Length + settings.NumberOfQuickSlotsToAdd);
-            int s = 12;
-            for (int x = settings.NumberOfQuickSlotsToAdd; x >= 1; x--)
+            [HarmonyPrefix]
+            public static void Prefix(KeyboardQuickSlotPanel __instance)
             {
-                self.DisplayOrder[self.DisplayOrder.Length - x] = (QuickSlot.QuickSlotIDs)(s++);
-            }
+                var self = __instance;
 
-            orig(self);
+                Array.Resize(ref self.DisplayOrder, self.DisplayOrder.Length + settings.NumberOfQuickSlotsToAdd);
+                int s = 12;
+                for (int x = settings.NumberOfQuickSlotsToAdd; x >= 1; x--)
+                {
+                    self.DisplayOrder[self.DisplayOrder.Length - x] = (QuickSlot.QuickSlotIDs)(s++);
+                }
+            }
         }
 
         // character quickslot manager awake hook. Add our custom slots first.
-
-        public void CharacterQuickSlotManager_Awake(On.CharacterQuickSlotManager.orig_Awake orig, CharacterQuickSlotManager self)
+        [HarmonyPatch(typeof(CharacterQuickSlotManager), "Awake")]
+        public class CharacterQSMgr_Awake
         {
-            Transform m_quickslotTrans = self.transform.Find("QuickSlots");
-            At.SetValue(m_quickslotTrans, typeof(CharacterQuickSlotManager), self, "m_quickslotTrans");
-            for (int x = 0; x < settings.NumberOfQuickSlotsToAdd; x++)
+            public static void Prefix(CharacterQuickSlotManager __instance)
             {
-                GameObject gameObject = new GameObject(string.Format("EXQS_{0}", x));
-                QuickSlot qs = gameObject.AddComponent<QuickSlot>();
-                qs.name = "" + (x + 12);
-                gameObject.transform.SetParent(m_quickslotTrans);
-            }
+                var self = __instance;
 
-            orig(self);
+                Transform m_quickslotTrans = self.transform.Find("QuickSlots");
+                At.SetValue(m_quickslotTrans, typeof(CharacterQuickSlotManager), self, "m_quickslotTrans");
+                for (int x = 0; x < settings.NumberOfQuickSlotsToAdd; x++)
+                {
+                    GameObject gameObject = new GameObject(string.Format("EXQS_{0}", x));
+                    QuickSlot qs = gameObject.AddComponent<QuickSlot>();
+                    qs.name = "" + (x + 12);
+                    gameObject.transform.SetParent(m_quickslotTrans);
+                }
+            }
         }
 
         // ============== SETTINGS ==============

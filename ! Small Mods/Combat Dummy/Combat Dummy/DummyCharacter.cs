@@ -23,16 +23,12 @@ namespace Combat_Dummy
             CustomCharacters.DestroyCharacterRPC(m_character);
         }
 
-        public void SpawnOrReset(DummyConfig _config = null)
+        public void SpawnOrReset()
         {
-            if (_config == null && Config == null)
+            if (Config == null)
             {
                 Debug.LogError("null config!");
                 return;
-            }
-            else if (_config != null)
-            {
-                Config = _config;
             }
 
             var pos = CharacterManager.Instance.GetFirstLocalCharacter().transform.position;
@@ -49,18 +45,21 @@ namespace Combat_Dummy
                 newspawn = true;
             }
 
-            // init
             m_character.gameObject.SetActive(true);
 
-            CombatDummyMod.Instance.StartCoroutine(DelayedSetup(Config, pos, newspawn));
+            Reset(pos, newspawn);
         }
 
-        private IEnumerator DelayedSetup(DummyConfig _config, Vector3 pos, bool newSpawn)
+        public void Reset(Vector3 pos, bool newspawn)
+        {
+            CombatDummyMod.Instance.StartCoroutine(ResetCoroutine(pos, newspawn));
+        }
+
+        private IEnumerator ResetCoroutine(Vector3 pos, bool newSpawn)
         {
             yield return new WaitForSeconds(0.5f);
 
             // set and apply stats
-            Config = _config;
             Config.ApplyToCharacter(m_character);
 
             if (newSpawn)
@@ -78,11 +77,6 @@ namespace Combat_Dummy
             try { m_character.Teleport(pos, Quaternion.identity); } catch { }
         }
 
-        public void SetCharacterEnabled(bool enabled)
-        {
-            m_character.gameObject.SetActive(enabled);
-        }
-
         public void SetAIEnabled(bool enabled)
         {
             if (m_character == null)
@@ -93,12 +87,12 @@ namespace Combat_Dummy
             var ai = m_character.GetComponent<CharacterAI>();
             foreach (var state in ai.AiStates)
             {
+                state.enabled = enabled;
+
                 if (state is AISCombat aiscombat)
                 {
                     aiscombat.CanDodge = enabled ? Config.CanDodge : false;
                 }
-
-                state.enabled = enabled;
             }
         }
 

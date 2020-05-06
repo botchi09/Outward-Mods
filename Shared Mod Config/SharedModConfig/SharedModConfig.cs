@@ -6,6 +6,7 @@ using UnityEngine;
 using System.IO;
 using BepInEx;
 using SideLoader;
+using HarmonyLib;
 
 namespace SharedModConfig
 {
@@ -15,7 +16,7 @@ namespace SharedModConfig
     {
         public const string GUID = "com.sinai.SharedModConfig";
         public const string ModName = "SharedModConfig";
-        public const string ModVersion = "1.5";
+        public const string ModVersion = "1.6";
 
         internal void Awake()
         {
@@ -24,6 +25,9 @@ namespace SharedModConfig
 
             obj.AddComponent<ConfigManager>(); // not sure if this is any faster than Awake(), just trying it
             obj.AddComponent<MenuManager>();
+
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
         }
     }
 }

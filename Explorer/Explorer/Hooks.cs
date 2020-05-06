@@ -166,23 +166,5 @@ namespace Explorer
                 "\r\n---------------------------");
             }
         }
-
-
-
-        //private void QuestLoad(On.QuestEventDictionary.orig_Load orig)
-        //{
-        //    orig();
-
-        //    Type t = typeof(QuestEventDictionary);
-        //    FieldInfo fi = t.GetField("m_questEvents", BindingFlags.Static | BindingFlags.NonPublic);
-        //    if (fi.GetValue(null) is Dictionary<string, QuestEventSignature> m_questEvents)
-        //    {
-        //        foreach (QuestEventSignature sig in m_questEvents.Values)
-        //        {
-        //            if (QuestEvents.ContainsKey(sig.EventName)) { continue; }
-        //            QuestEvents.Add(sig.EventName, sig);
-        //        }
-        //    }
-        //}
     }
 }

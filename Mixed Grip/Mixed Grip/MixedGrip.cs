@@ -10,7 +10,6 @@ using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using SharedModConfig;
-using static CustomKeybindings;
 
 namespace MixedGrip
 { 
@@ -20,7 +19,7 @@ namespace MixedGrip
     {
         public const string GUID = "com.sinai.mixedgrip";
         public const string NAME = "Mixed Grip";
-        public const string VERSION = "3.1";
+        public const string VERSION = "3.2";
 
         public static MixedGrip Instance;
         public static ModConfig config;
@@ -33,8 +32,11 @@ namespace MixedGrip
         {
             Instance = this;
 
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
+
             // custom keybindings
-            AddAction(ToggleKey, KeybindingsCategory.Actions, ControlType.Both, 5);
+            CustomKeybindings.AddAction(ToggleKey, CustomKeybindings.KeybindingsCategory.Actions, CustomKeybindings.ControlType.Both, 5);
 
             config = SetupConfig();
             config.Register();

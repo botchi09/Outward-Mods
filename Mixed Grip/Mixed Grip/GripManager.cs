@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using HarmonyLib;
-using static CustomKeybindings;
 
 namespace MixedGrip
 {
@@ -31,9 +30,6 @@ namespace MixedGrip
             var view = this.gameObject.AddComponent<PhotonView>();
             view.viewID = 901;
             Debug.Log("Registered MixedGrip with ViewID " + view.viewID);
-
-            var harmony = new Harmony("com.sinai.mixedgrip");
-            harmony.PatchAll();
         }
 
         internal void Update()
@@ -85,7 +81,7 @@ namespace MixedGrip
         private void UpdatePlayerInput(CharacterInfo charInfo, Character c)
         {
             // grip hotkey
-            if (m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(MixedGrip.ToggleKey))
+            if (CustomKeybindings.m_playerInputManager[c.OwnerPlayerSys.PlayerID].GetButtonDown(MixedGrip.ToggleKey))
             {
                 ToggleGripHotkey(charInfo, c);
             }

@@ -74,39 +74,7 @@ namespace SpeedrunTimer
             StartKey = (KeyCode)Enum.Parse(typeof(KeyCode), settings.StartKey);
             StopKey = (KeyCode)Enum.Parse(typeof(KeyCode), settings.StopKey);
             ConditionKey = (KeyCode)Enum.Parse(typeof(KeyCode), settings.ConditionKey);
-
-            // --------------- temp debug ---------------
-            On.MerchantPouch.RefreshInventory += RefreshHook;
-            SceneManager.sceneLoaded += OnSceneLoaded;
         }
-
-        bool added = false;
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            added = false;
-        }
-
-        private void RefreshHook(On.MerchantPouch.orig_RefreshInventory orig, MerchantPouch self, Dropable dropable)
-        {
-            orig(self, dropable);
-
-            if (!added && self.Merchant.ShopName.ToLower().Contains("helmi"))
-            {
-                added = true;
-                Temp(self);
-            }
-        }
-
-        private void Temp(MerchantPouch pouch)
-        {
-            if (!pouch.ContainsOfSameID(4300180))
-            {
-                var i = ItemManager.Instance.GenerateItemNetwork(4300180);
-                i.ChangeParent(pouch.transform);
-            }
-        }
-
-        // --------------- end debug ---------------
 
         internal void Update()
         {

@@ -164,9 +164,10 @@ namespace Combat_Dummy
                     EditInspectingDummy();
                 }
 
-                if (GUILayout.Button("Reset and Apply"))
+                GUI.color = Color.green;
+                if (GUILayout.Button("Spawn / Apply"))
                 {
-                    m_dummyCharacter.SpawnOrReset(m_dummyCharacter.Config);
+                    m_dummyCharacter.SpawnOrReset();
                 }
 
                 GUILayout.Space(10);
@@ -199,9 +200,9 @@ namespace Combat_Dummy
             FloatEdit("Health", ref cfg.Health);
             FloatEdit("Impact Res", ref cfg.ImpactResist);
             BoldTitle("Resistances");
-            DamageTypesEdit("Resistances", ref cfg.Damage_Resists);
+            DamageTypesEdit(ref cfg.Damage_Resists);
             BoldTitle("Damage Bonus");
-            DamageTypesEdit("Damage Bonuses", ref cfg.Damage_Bonus);
+            DamageTypesEdit(ref cfg.Damage_Bonus);
         }
 
         private void AIButtons()
@@ -259,9 +260,8 @@ namespace Combat_Dummy
             GUILayout.EndHorizontal();
         }
 
-        public void DamageTypesEdit(string label, ref float[] stats)
+        public void DamageTypesEdit(ref float[] stats)
         {
-            
             GUILayout.BeginHorizontal();
             GUI.skin.label.alignment = TextAnchor.MiddleRight;
             for (int i = 0; i < 6; i++)
