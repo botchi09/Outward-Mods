@@ -13,7 +13,7 @@ using SharedModConfig;
 namespace OutSoulsMod
 {
     [BepInPlugin(GUID, NAME, VERSION)]
-    [BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]    
+    [BepInDependency(SharedModConfig.SharedModConfig.GUID, BepInDependency.DependencyFlags.HardDependency)]    
     public class OutSouls : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.outsouls";

@@ -108,14 +108,24 @@ namespace CombatHUD
                 UpdateOnTargetChange();
             }
 
-            UpdateTargetHUD(target);
+            var m_hideUI = (bool)At.GetValue(typeof(Global), Global.Instance, "m_hideUI");
+            var m_playerShowHUD = (bool[])At.GetValue(typeof(OptionManager), null, "m_playerShowHUD");
 
-            if ((bool)CombatHUD.config.GetValue(Settings.EnemyInfobox))
+            if (m_hideUI || !m_playerShowHUD[this.Split_ID])
             {
-                UpdateInfobox(target);
+                DisableHolders();
             }
+            else
+            {
+                UpdateTargetHUD(target);
 
-            EnableHolders();
+                if ((bool)CombatHUD.config.GetValue(Settings.EnemyInfobox))
+                {
+                    UpdateInfobox(target);
+                }
+
+                EnableHolders();
+            }
         }
 
         private void UpdateInfobox(Character target)
@@ -359,11 +369,21 @@ namespace CombatHUD
 
         private void EnableHolders()
         {
-            // todo needs Settings
-            if (!m_TargetHUDHolder.activeSelf)
+            if (MenuManager.Instance.IsMapDisplayed || m_LinkedCharacter.CharacterUI.GetCurrentMenu() is MenuPanel panel && panel.IsDisplayed)
             {
-                m_TargetHUDHolder.SetActive(true);
+                if (m_TargetHUDHolder.activeSelf)
+                {
+                    m_TargetHUDHolder.SetActive(false);
+                }
             }
+            else
+            {
+                if (!m_TargetHUDHolder.activeSelf)
+                {
+                    m_TargetHUDHolder.SetActive(true);
+                }
+            }
+
             if (!(bool)CombatHUD.config.GetValue(Settings.EnemyInfobox))
             {
                 if (m_infoboxHolder.activeSelf)

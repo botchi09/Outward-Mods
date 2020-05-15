@@ -33,6 +33,9 @@ namespace Dataminer
                     case "Enmerkar Forest":
                         list = SceneHelper.EnmerkarDungeons.Keys.ToList();
                         break;
+                    case "Antique Fields":
+                        list = SceneHelper.AntiqueDungeons.Keys.ToList();
+                        break;
                     default:
                         break;
                 }
@@ -97,6 +100,7 @@ namespace Dataminer
             { "EmercarDungeonsSmall", "Enmerkar Misc. Dungeons" },
             { "EmercarDungeonsBosses", "Unknown Arena" },
             { "DreamWorld", "In Between" },
+            // TODO ANTIQUE FIELDS SCENES
         };
 
         public static Dictionary<string, List<string>> ScenesByRegion = new Dictionary<string, List<string>>
@@ -166,6 +170,13 @@ namespace Dataminer
                 }
             },
             {
+                "Antique Fields",
+                new List<string>
+                {
+                    // TODO ANTIQUE FIELDS NAMES
+                }
+            },
+            {
                 "Other",
                 new List<string>
                 {
@@ -223,6 +234,11 @@ namespace Dataminer
             { "Immaculate's Camp", new Vector3(1800, 0, 0)},
             { "Tree Husk", new Vector3(2100, 0, 0)},
             { "Vigil Pylon", new Vector3(2400, 0, 0)},
+        };
+
+        public static Dictionary<string, Vector3> AntiqueDungeons = new Dictionary<string, Vector3>
+        {
+            { "Unknown", new Vector3(0, 0, 0) },
         };
     }
 }

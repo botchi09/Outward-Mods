@@ -7,16 +7,34 @@ using UnityEngine;
 using System.Xml.Serialization;
 using System.IO;
 using System.Reflection;
+using BepInEx;
+using HarmonyLib;
 
 namespace Dataminer
 {
-    public class Dataminer : MonoBehaviour
+    [BepInPlugin(GUID, NAME, VERSION)]
+    public class Dataminer : BaseUnityPlugin
     {
+        public const string GUID = "com.sinai.dataminer";
+        public const string NAME = "Dataminer";
+        public const string VERSION = "2.1";
+
+        // Folders
+        public const string SaveFolder = @"Dumps";
+        public const string Prefabs = SaveFolder + "/Prefabs";
+        public const string Lists = SaveFolder + "/Lists";
+        public const string Scenes = SaveFolder + "/Scenes";
+        public const string Enemies = SaveFolder + "/Enemies";
+        public const string Merchants = SaveFolder + "/Merchants";
+
         public static Dataminer Instance;
 
         internal void Awake()
         {
             Instance = this;
+
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
         }
 
         internal void Start()
@@ -171,12 +189,5 @@ namespace Dataminer
             }
             return madeFolder;
         }
-
-        public static readonly string SaveFolder = @"Dumps_2";
-        public static readonly string Prefabs = SaveFolder + "/Prefabs";
-        public static readonly string Lists = SaveFolder + "/Lists";
-        public static readonly string Scenes = SaveFolder + "/Scenes";
-        public static readonly string Enemies = SaveFolder + "/Enemies";
-        public static readonly string Merchants = SaveFolder + "/Merchants";
     }
 }

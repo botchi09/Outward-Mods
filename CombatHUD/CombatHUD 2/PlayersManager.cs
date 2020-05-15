@@ -33,14 +33,19 @@ namespace CombatHUD
 
             List<StatusEffectInfo> statusInfos = new List<StatusEffectInfo>();
 
+            var m_hideUI = (bool)At.GetValue(typeof(Global), Global.Instance, "m_hideUI");
+            var m_playerShowHUD = (bool[])At.GetValue(typeof(OptionManager), null, "m_playerShowHUD");
+
             for (int i = 0; i < SplitScreenManager.Instance.LocalPlayers.Count; i++)
             {
-                if (SplitScreenManager.Instance.LocalPlayers[i].AssignedCharacter == null)
+                var player = SplitScreenManager.Instance.LocalPlayers[i].AssignedCharacter;
+
+                if (player == null || !m_playerShowHUD[i] || m_hideUI)
                 {
                     continue;
                 }
 
-                UpdateVitalText(SplitScreenManager.Instance.LocalPlayers[i].AssignedCharacter);
+                UpdateVitalText(player);
 
                 if ((bool)CombatHUD.config.GetValue(Settings.PlayerStatusTimers))
                 {

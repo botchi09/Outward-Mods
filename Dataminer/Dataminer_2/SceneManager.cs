@@ -21,9 +21,6 @@ namespace Dataminer
         {
             Instance = this;
 
-            var harmony = new Harmony("com.sinai.dataminer");
-            harmony.PatchAll();
-
             SceneHelper.SetupSceneSummaries();
         }
 

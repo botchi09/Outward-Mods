@@ -326,6 +326,7 @@ namespace MoreMapDetails
             newMarker.Circle = Instantiate(origCircle.gameObject).GetComponent<Image>();
             newMarker.Circle.transform.SetParent(origCircle.transform.parent, false);
             newMarker.Circle.transform.localScale = Vector3.one;
+            newMarker.Circle.gameObject.SetActive(true);
             // add to list
             var list = markerTexts.ToList();
             list.Add(newMarker);

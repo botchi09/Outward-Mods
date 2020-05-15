@@ -57,21 +57,31 @@ namespace CombatHUD
             if (maxsize < minsize)
                 maxsize = minsize;
 
+            var m_hideUI = (bool)At.GetValue(typeof(Global), Global.Instance, "m_hideUI");
+            var m_playerShowHUD = (bool[])At.GetValue(typeof(OptionManager), null, "m_playerShowHUD");
+
             for (int i = 0; i < SplitScreenManager.Instance.LocalPlayerCount; i++)
             {
-                var splitplayer = SplitScreenManager.Instance.LocalPlayers[i];
+                var player = SplitScreenManager.Instance.LocalPlayers[i];
 
-                if (splitplayer.AssignedCharacter == null)
+                if (player.AssignedCharacter == null)
                 {
                     continue;
                 }
 
-                var camera = splitplayer.CameraScript;
+                // dont show damage labels if player is in menu
+                bool disable = false;
+                if (m_hideUI || !m_playerShowHUD[i] || MenuManager.Instance.IsMapDisplayed || player.AssignedCharacter.CharacterUI.GetCurrentMenu() is MenuPanel panel && panel.IsDisplayed)
+                {
+                    disable = true;
+                }
+
+                var camera = player.CameraScript;
                 int offset = i * 30;
 
                 for (int j = 0 + offset; j < LabelHolders.Count; j++)
                 {
-                    if (j - offset >= ActiveLabels.Count)
+                    if (disable || j - offset >= ActiveLabels.Count)
                     {
                         if (LabelHolders[j].activeSelf)
                         {
@@ -90,7 +100,7 @@ namespace CombatHUD
                         var timeOffset = Mathf.Lerp(0.3f, 0.07f, damageStrength) * time;
 
                         var screenPos = camera.WorldToViewportPoint(pos + new Vector3(0, timeOffset));
-                        float distance = Vector3.Distance(splitplayer.AssignedCharacter.transform.position, pos);
+                        float distance = Vector3.Distance(player.AssignedCharacter.transform.position, pos);
 
                         if (IsScreenPosVisible(ref screenPos, i) && distance < (float)CombatHUD.config.GetValue(Settings.MaxDistance))
                         {

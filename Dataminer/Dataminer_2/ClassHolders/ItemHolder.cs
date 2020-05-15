@@ -17,9 +17,7 @@ namespace Dataminer
         public string Description;
         public int LegacyItemID;
 
-        //public List<string> VisualPrefabTextures = new List<string>();
-        //public List<string> SpecialVisualPrefabTextures = new List<string>();
-        //public List<string> SpecialFemaleVisualPrefabTextures = new List<string>();
+        public string PerishTime = "-1";
 
         public ItemStatsHolder StatsHolder;
 
@@ -40,37 +38,17 @@ namespace Dataminer
                 LegacyItemID = item.LegacyItemID,
             };
 
-            // ====== parse visual prefab textures =====
+            if (item.GetComponent<Perishable>() is Perishable perish)
+            {
+                float perishRate = perish.DepletionRate * 0.03333333f;
+                float perishModifier = 1 / perishRate;
 
-            //if (item.VisualPrefab != null)
-            //{
-            //    if (item.VisualPrefab.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer skinnedMesh)
-            //    {
-            //        ParsePrefabTextures(skinnedMesh.material, itemHolder.VisualPrefabTextures);
-            //    }
-            //    else
-            //    {
-            //        foreach (Transform child in item.VisualPrefab)
-            //        {
-            //            if (child.GetComponent<BoxCollider>() && child.GetComponent<MeshRenderer>() is MeshRenderer mesh)
-            //            {
-            //                ParsePrefabTextures(mesh.material, itemHolder.VisualPrefabTextures);
+                var remainingTicks = item.MaxDurability * perishModifier; // est game time in seconds
+                var minutes = remainingTicks * 2;
+                TimeSpan t = TimeSpan.FromMinutes(minutes);
 
-            //                break;
-            //            }
-            //        }
-            //    }
-            //}
-
-            //if (item.SpecialVisualPrefabDefault != null && item.SpecialVisualPrefabDefault.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer specialMesh)
-            //{
-            //    ParsePrefabTextures(specialMesh.material, itemHolder.SpecialVisualPrefabTextures);
-            //}
-
-            //if (item.SpecialVisualPrefabFemale != null && item.SpecialVisualPrefabFemale.GetComponent<SkinnedMeshRenderer>() is SkinnedMeshRenderer femaleMesh)
-            //{
-            //    ParsePrefabTextures(femaleMesh.material, itemHolder.SpecialFemaleVisualPrefabTextures);
-            //}
+                itemHolder.PerishTime = $"{t.Days} Days, {t.Hours} Hours, {t.Minutes} Minutes, {t.Seconds} Seconds";
+            }
 
             // == parse item type ==
 

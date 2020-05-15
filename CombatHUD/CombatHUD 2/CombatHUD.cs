@@ -19,12 +19,10 @@ namespace CombatHUD
     public class CombatHUD : BaseUnityPlugin
     {
         public const string GUID = "com.sinai.combathud";
-        public const string VERSION = "4.21";
+        public const string VERSION = "4.3";
         public const string NAME = "Combat HUD";
 
         public static CombatHUD Instance;
-
-        public static Harmony HarmonyInstance;
 
         public static ModConfig config;
         public GameObject HUDCanvas;
@@ -33,8 +31,8 @@ namespace CombatHUD
         {
             Instance = this;
 
-            HarmonyInstance = new Harmony(GUID);
-            HarmonyInstance.PatchAll();
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
 
             config = SetupConfig();
             config.Register();
@@ -53,38 +51,18 @@ namespace CombatHUD
     
         internal void Update()
         {
-            if (HUDCanvas == null || Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)
+            if (HUDCanvas == null || Global.Lobby.PlayersInLobbyCount < 1)
             {
                 return;
             }
 
-            bool disable = false;
-            if (MenuManager.Instance.IsMapDisplayed)
+            // main canvas disable
+            if (!NetworkLevelLoader.Instance.IsOverallLoadingDone || !NetworkLevelLoader.Instance.AllPlayerReadyToContinue)
             {
-                disable = true;
+                if (HUDCanvas.activeSelf)
+                    HUDCanvas.SetActive(false);
             }
-            else
-            {
-                foreach (SplitPlayer player in SplitScreenManager.Instance.LocalPlayers)
-                {
-                    if (player.AssignedCharacter == null)
-                    {
-                        continue;
-                    }
-
-                    if (player.AssignedCharacter.CharacterUI.GetCurrentMenu() is MenuPanel panel && panel.IsDisplayed)
-                    {
-                        disable = true;
-                        break;
-                    }
-                }
-            }
-
-            if (disable && HUDCanvas.activeSelf)
-            {
-                HUDCanvas.SetActive(false);
-            }
-            else if (!disable && !HUDCanvas.activeSelf)
+            else if (!HUDCanvas.activeSelf)
             {
                 HUDCanvas.SetActive(true);
             }
