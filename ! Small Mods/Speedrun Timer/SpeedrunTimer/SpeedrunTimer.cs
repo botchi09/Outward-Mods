@@ -33,8 +33,22 @@ namespace SpeedrunTimer
 
         public Dictionary<string, List<int>> StopConditions = new Dictionary<string, List<int>>
         {
-            { "Well-Earned Rest", new List<int> { 7011104, 7011204, 7011304 } }, // checks for all 3 "Peacemaker" quests
-            { "Blood Price", new List<int> { 7011001 } }, // checks for Call to Adventure (does not check success)
+            {  // "Peacemaker" quests (main quest)
+                "Well-Earned Rest", 
+                new List<int> 
+                { 
+                    7011104, 
+                    7011204, 
+                    7011304 
+                } 
+            },
+            {   // Call to Adventure
+                "Blood Price", 
+                new List<int> 
+                { 
+                    7011001 
+                } 
+            }, 
         };
         private int m_currentStopCondition = 0;
 
@@ -44,30 +58,10 @@ namespace SpeedrunTimer
         {
             Instance = this;
 
-            bool flag = true;
-            if (File.Exists(configPath))
-            {
-                string json = File.ReadAllText(configPath);
-                var tempSettings = JsonUtility.FromJson<Settings>(json);
-                if (tempSettings != null)
-                {
-                    if (Enum.IsDefined(typeof(KeyCode), tempSettings.StartKey)
-                        && Enum.IsDefined(typeof(KeyCode), tempSettings.StopKey)
-                        && Enum.IsDefined(typeof(KeyCode), tempSettings.ConditionKey))
-                    {
-                        settings = tempSettings;
-                        flag = false;
-                    }
-                    else
-                    {
-                        Debug.LogError("[SpeedrunTimer] Could not parse KeyCodes! Please make sure they are valid KeyCodes");
-                    }
-                }
-            }
-            if (flag)
-            {
-                File.WriteAllText(configPath, JsonUtility.ToJson(settings, true));
-            }
+            var harmony = new Harmony(GUID);
+            harmony.PatchAll();
+
+            LoadSettings();
 
             m_currentStopCondition = 0;
 
@@ -129,6 +123,36 @@ namespace SpeedrunTimer
         {
             return Global.Lobby.PlayersInLobbyCount > 0 && !NetworkLevelLoader.Instance.IsGameplayPaused;
         }
+
+        private void LoadSettings()
+        {
+            bool flag = true;
+            if (File.Exists(configPath))
+            {
+                string json = File.ReadAllText(configPath);
+                var tempSettings = JsonUtility.FromJson<Settings>(json);
+                if (tempSettings != null)
+                {
+                    if (Enum.IsDefined(typeof(KeyCode), tempSettings.StartKey)
+                        && Enum.IsDefined(typeof(KeyCode), tempSettings.StopKey)
+                        && Enum.IsDefined(typeof(KeyCode), tempSettings.ConditionKey))
+                    {
+                        settings = tempSettings;
+                        flag = false;
+                    }
+                    else
+                    {
+                        Debug.LogError("[SpeedrunTimer] Could not parse KeyCodes! Please make sure they are valid KeyCodes");
+                    }
+                }
+            }
+            if (flag)
+            {
+                File.WriteAllText(configPath, JsonUtility.ToJson(settings, true));
+            }
+        }
+
+        // ============= GUI ==============
 
         internal void OnGUI()
         {

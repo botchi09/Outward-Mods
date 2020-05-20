@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using System.Collections;
 
 namespace Dismantler
 {
@@ -20,8 +21,20 @@ namespace Dismantler
 			{
 				Debug.Log("Destroying " + script.Item.Name);
 
-				ItemManager.Instance.DestroyItem(script.Item.UID);
+				if (this.LastCharacter is Character character)
+				{
+					character.SpellCastAnim(Character.SpellCastType.PackupGround, Character.SpellCastModifier.Immobilized, 1);
+				}
+
+				StartCoroutine(DelayedDestroy(script));
 			}
+		}
+
+		private IEnumerator DelayedDestroy(Deployable _deployable)
+		{
+			yield return new WaitForSeconds(1.0f);
+
+			ItemManager.Instance.DestroyItem(_deployable.Item.UID);
 		}
 	}
 }

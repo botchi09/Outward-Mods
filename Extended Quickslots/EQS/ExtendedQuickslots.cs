@@ -47,7 +47,12 @@ namespace ExtendedQuickslots2
             // Quickslot Keybindings
             for (int x = 0; x < settings.NumberOfQuickSlotsToAdd; x++)
             {
-                CustomKeybindings.AddAction("QS_Instant" + (x + 12), CustomKeybindings.KeybindingsCategory.QuickSlot, CustomKeybindings.ControlType.Both, 5, CustomKeybindings.InputActionType.Button);
+                CustomKeybindings.AddAction(
+                    "QS_Instant" + (x + 12), 
+                    CustomKeybindings.KeybindingsCategory.QuickSlot, 
+                    CustomKeybindings.ControlType.Both, 
+                    5, 
+                    CustomKeybindings.InputActionType.Button);
             }
         }
 
@@ -162,7 +167,7 @@ namespace ExtendedQuickslots2
 
         private static void SetupKeyboardQuickslotDisplay(UIElement _base, QuickSlotDisplay[] m_quickSlotDisplays)
         {
-            if ((_base.PlayerID == 0 && fixedPositions[0] == false) || (_base.PlayerID == 1 && fixedPositions[1] == false))
+            if (fixedPositions[_base.PlayerID] == false)
             {
                 //Debug.Log("Fixing position for " + _base.LocalCharacter.Name + " (Player " + _base.PlayerID + ")");
 

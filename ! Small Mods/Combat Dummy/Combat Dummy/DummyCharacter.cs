@@ -85,6 +85,8 @@ namespace Combat_Dummy
             }
 
             var ai = m_character.GetComponent<CharacterAI>();
+            ai.enabled = enabled;
+
             foreach (var state in ai.AiStates)
             {
                 state.enabled = enabled;
@@ -123,9 +125,11 @@ namespace Combat_Dummy
 
         // gear
         public int Weapon = 2000010;
+        public int Shield = 2300000;
 
         // ai
         public bool CanDodge = false;
+        public bool CanBlock = false;
 
         // stats
         public float Health = 500;
@@ -139,22 +143,9 @@ namespace Combat_Dummy
             // set faction
             character.ChangeFaction(Faction);
 
-            // gear (just weapon atm)
-            if (ResourcesPrefabManager.Instance.GetItemPrefab(Weapon) is Weapon wepPrefab)
-            {
-                var currentWep = character.CurrentWeapon;
-
-                if (currentWep != null && wepPrefab.ItemID != currentWep.ItemID)
-                {
-                    character.Inventory.UnequipItem(currentWep);
-                }
-
-                if (currentWep == null || wepPrefab.ItemID != currentWep.ItemID)
-                {
-                    var weapon = ItemManager.Instance.GenerateItemNetwork(Weapon) as Weapon;
-                    weapon.ChangeParent(character.Inventory.Equipment.GetMatchingEquipmentSlotTransform(weapon.EquipSlot));
-                }
-            }
+            // gear
+            TryEquip(character, Weapon);
+            TryEquip(character, Shield);
 
             // AI
             var ai = character.GetComponent<CharacterAI>();
@@ -163,6 +154,7 @@ namespace Combat_Dummy
                 if (state is AISCombat aisCombat)
                 {
                     aisCombat.CanDodge = CanDodge;
+                    aisCombat.CanBlock = CanBlock;
                 }
             }
 
@@ -188,6 +180,32 @@ namespace Combat_Dummy
             for (int i = 0; i < 6; i++)
             {
                 m_damageTypesModifier[i].AddStack(new StatStack(StatSourceID, Damage_Bonus[i]), false);
+            }
+        }
+
+        private void TryEquip(Character character, int id)
+        {
+            if (ResourcesPrefabManager.Instance.GetItemPrefab(id) is Equipment item)
+            {
+                bool makeNew = true;
+
+                if (character.Inventory.Equipment.GetEquippedItem(item.EquipSlot) is Equipment existing)
+                {
+                    if (existing.ItemID == id)
+                    {
+                        makeNew = false;
+                    }
+                    else
+                    {
+                        GameObject.DestroyImmediate(existing.gameObject);
+                    }
+                }
+
+                if (makeNew)
+                {
+                    var newItem = ItemManager.Instance.GenerateItemNetwork(id);
+                    newItem.ChangeParent(character.Inventory.Equipment.GetMatchingEquipmentSlotTransform(item.EquipSlot));
+                }
             }
         }
     }

@@ -15,7 +15,7 @@ A box containing a whetstone and other useful tools for mending one's equipment.
   <HasPhysicsWhenWorld>false</HasPhysicsWhenWorld>
   <RepairedInRest>false</RepairedInRest>
   <BehaviorOnNoDurability>Destroy</BehaviorOnNoDurability>
-  <CastType>NONE</CastType>
+  <CastType>UseUp</CastType>
   <CastModifier>Immobilized</CastModifier>
   <CastLocomotionEnabled>false</CastLocomotionEnabled>
   <MobileCastMovementMult>-1</MobileCastMovementMult>

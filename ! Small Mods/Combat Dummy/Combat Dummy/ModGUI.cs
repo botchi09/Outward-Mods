@@ -11,7 +11,7 @@ namespace Combat_Dummy
     {
         public static bool ShowMenu { get; set; } = false;
 
-        private Rect m_rect = new Rect(5, 5, 360, 460);
+        private Rect m_rect = new Rect(5, 5, 380, 470);
 
         private Vector2 m_scroll = Vector2.zero;
 
@@ -190,10 +190,12 @@ namespace Combat_Dummy
             BoldTitle("Setup Dummy: " + m_dummyCharacter.Name);
 
             IntEdit("Weapon ID", ref cfg.Weapon);
+            IntEdit("Shield ID", ref cfg.Shield);
 
             FactionEdit(cfg);
 
             cfg.CanDodge = GUILayout.Toggle(cfg.CanDodge, "Can Dodge");
+            cfg.CanBlock = GUILayout.Toggle(cfg.CanBlock, "Can Block");
 
             BoldTitle("Stats");
 

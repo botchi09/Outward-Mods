@@ -148,9 +148,9 @@ namespace NecromancySkills
 			At.Call(_char.Inventory.Equipment, "EquipWithoutAssociating", new object[] { blade as Equipment, false });
 			_char.SheatheInput(); //unsheathe
 
-			//Debug.Log("(Host) Summoned Skeleton with UID: " + _char.UID + ", photon view ID: " + _char.GetComponent<PhotonView>().viewID);
-
 			playerPrefab.SetActive(true);
+
+			//Debug.Log("(Host) Summoned Skeleton with UID: " + _char.UID + ", photon view ID: " + _char.GetComponent<PhotonView>().viewID);
 
 			return playerPrefab;
 		}
@@ -187,18 +187,6 @@ namespace NecromancySkills
 
 			}
 
-			//// setup photonview
-			//if (summonChar.GetComponent<PhotonView>() is PhotonView view)
-			//{
-			//	Debug.Log("Removing PhotonView");
-			//	DestroyImmediate(view);
-			//}
-			//var pView = summonChar.gameObject.AddComponent<PhotonView>();
-			//pView.viewID = sceneViewID;
-			//pView.onSerializeTransformOption = OnSerializeTransform.PositionAndRotation;
-			//pView.onSerializeRigidBodyOption = OnSerializeRigidBody.All;
-			//pView.synchronization = ViewSynchronization.Unreliable;
-
 			// add observed components after setting active?
 			if (summonChar.photonView.ObservedComponents == null)
 			{
@@ -207,10 +195,6 @@ namespace NecromancySkills
 					summonChar
 				};
 			}
-
-			// restore stats locally
-			summonChar.Stats.FullHealth();
-			summonChar.Stats.FullStamina();
 
 			// set skeleton active
 			rootObject.SetActive(true);
@@ -225,14 +209,18 @@ namespace NecromancySkills
 				SummonedCharacters.Add(ownerUID, new List<string> { summonUID });
 			}
 
-			StartCoroutine(FixPhotonCoroutine(summonChar));
+			StartCoroutine(DelayedFixCoroutine(summonChar));
 
 			//Debug.Log("added local summon: " + summonUID);
 		}
 
-		private IEnumerator FixPhotonCoroutine(Character summonChar)
+		private IEnumerator DelayedFixCoroutine(Character summonChar)
 		{
 			yield return new WaitForSeconds(2f);
+
+			// restore stats 
+			summonChar.Stats.FullHealth();
+			summonChar.Stats.FullStamina();
 
 			//Debug.Log("Fixing observed components");
 

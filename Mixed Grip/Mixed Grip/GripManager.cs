@@ -35,7 +35,14 @@ namespace MixedGrip
         internal void Update()
         {
             // make sure game is running
-            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) { return; }
+            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused) 
+            { 
+                if (CurrentPlayers.Count > 0)
+                {
+                    CurrentPlayers.Clear();
+                }
+                return; 
+            }
 
             MixedGripUpdate();            
         }
@@ -67,7 +74,7 @@ namespace MixedGrip
 
             foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.ControlledCharacter.Initialized))
             {
-                //Debug.Log("[MG]" + Time.time + " | InternalUpdate :: Added " + ps.ControlledCharacter.Name + " to CurrentPlayers");
+                Debug.Log("[MG]" + Time.time + " | InternalUpdate :: Added " + ps.ControlledCharacter.Name + " to CurrentPlayers");
 
                 CharacterInfo charInfo = new CharacterInfo() { CharacterUID = ps.ControlledCharacter.UID };
                 if (ps.ControlledCharacter.LeftHandEquipment)
