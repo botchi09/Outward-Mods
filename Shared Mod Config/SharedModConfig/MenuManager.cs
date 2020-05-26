@@ -191,7 +191,9 @@ namespace SharedModConfig
 
                 if (ConfigManager.RegisteredConfigs.ContainsKey(buttontext))
                 {
-                    m_currentModConfig = ConfigManager.RegisteredConfigs[buttontext];
+                    var cfg = ConfigManager.RegisteredConfigs[buttontext];
+                    m_currentModConfig = cfg;
+                    cfg.INTERNAL_OnSettingsOpened();
                 }
             }
             else

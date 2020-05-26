@@ -272,7 +272,13 @@ namespace Dataminer
                 {
                     if (item.IsPickable)
                     {
-                        AddGuaranteedDrop(enemyHolder, item.ItemID, item.Name, 1, -1, true);
+                        int qty = 1;
+                        if (item.IsStackable)
+                        {
+                            qty = item.GetComponent<MultipleUsage>().RemainingAmount;
+                        }
+
+                        AddGuaranteedDrop(enemyHolder, item.ItemID, item.Name, qty, (qty == 1 ? -1 : qty), true);
                     }
                 }
             }

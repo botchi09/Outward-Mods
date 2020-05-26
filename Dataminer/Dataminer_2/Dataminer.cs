@@ -19,14 +19,6 @@ namespace Dataminer
         public const string NAME = "Dataminer";
         public const string VERSION = "2.1";
 
-        // Folders
-        public const string SaveFolder = @"Dumps";
-        public const string Prefabs = SaveFolder + "/Prefabs";
-        public const string Lists = SaveFolder + "/Lists";
-        public const string Scenes = SaveFolder + "/Scenes";
-        public const string Enemies = SaveFolder + "/Enemies";
-        public const string Merchants = SaveFolder + "/Merchants";
-
         public static Dataminer Instance;
 
         internal void Awake()
@@ -175,6 +167,13 @@ namespace Dataminer
 
     public class Folders
     {
+        public const string SaveFolder = @"Dumps";
+        public const string Prefabs = SaveFolder + "/Prefabs";
+        public const string Lists = SaveFolder + "/Lists";
+        public const string Scenes = SaveFolder + "/Scenes";
+        public const string Enemies = SaveFolder + "/Enemies";
+        public const string Merchants = SaveFolder + "/Merchants";
+
         public static bool MakeFolders()
         {
             bool madeFolder = false;
