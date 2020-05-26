@@ -39,14 +39,23 @@ namespace Explorer
 
         public override void Init()
         {
-            ResetConsole();
+            try
+            {
+                //                MethodInput = @"// This is a basic REPL console used to execute a method.
+                //// Some common directives are added by default, you can add more below.
+                //// If you want to return some output, Debug.Log() it.
 
-            MethodInput = @"// This is a basic REPL console used to execute a method.
-// Some common directives are added by default, you can add more below.
-// If you want to return some output, Debug.Log() it.
+                //var ironSword = ResourcesPrefabManager.Instance.GetItemPrefab(2000010);
+                //Debug.Log(ironSword.Name);";
 
-var ironSword = ResourcesPrefabManager.Instance.GetItemPrefab(2000010);
-Debug.Log(ironSword.Name);";
+                MethodInput = "This console is currently not working, due to lack of System.Reflection.Emit.";
+
+                ResetConsole();
+            }
+            catch (Exception e)
+            {
+                Debug.Log($"Error setting up console!\r\nMessage: {e.Message}\r\nStack: {e.StackTrace}");
+            }
         }
 
         public void ResetConsole()

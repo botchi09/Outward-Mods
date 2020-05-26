@@ -91,8 +91,17 @@ namespace SharedModConfig
 
         public void ToggleMenu()
         {
-            bool active = m_ConfigPanel.activeSelf;
-            m_ConfigPanel.SetActive(!active);
+            bool active = !m_ConfigPanel.activeSelf;
+            m_ConfigPanel.SetActive(active);
+
+            if (active)
+            {
+                // Invoke the OnSettingsOpened callback for the current config
+                if (m_currentModConfig != null)
+                {
+                    m_currentModConfig.INTERNAL_OnSettingsOpened();
+                }
+            }
         }
 
         internal void Awake()

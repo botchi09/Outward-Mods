@@ -183,19 +183,27 @@ namespace Explorer
             GUILayout.EndHorizontal();
         }
 
-        public static void DrawValue(ref object value, Rect rect, string valueType = null, string memberName = null, object setTarget = null, Action<object> setAction = null)
+        public static void DrawMember(ref object value, string valueType, string memberName, Rect rect, object setTarget = null, Action<object> setAction = null, float labelWidth = 180)
+        {
+            GUILayout.Label("<color=cyan>" + memberName + ":</color>", GUILayout.Width(labelWidth));
+
+            DrawValue(ref value, rect, valueType, memberName, setTarget, setAction);
+        }
+
+        public static void DrawValue(ref object value, Rect rect, string nullValueType = null, string memberName = null, object setTarget = null, Action<object> setAction = null)
         {
             if (value == null)
             {
-                GUILayout.Label("<i>null (" + valueType + ")</i>");
+                GUILayout.Label("<i>null (" + nullValueType + ")</i>");
             }
             else
             {
-                if (value.GetType().IsPrimitive || value.GetType() == typeof(string))
+                var valueType = value.GetType();
+                if (valueType.IsPrimitive || value.GetType() == typeof(string))
                 {
                     DrawPrimitive(ref value, rect, setTarget, setAction);
                 }
-                else if (value.GetType() == typeof(GameObject) || value.GetType() == typeof(Transform))
+                else if (valueType == typeof(GameObject) || valueType == typeof(Transform))
                 {
                     GameObject go;
                     if (value.GetType() == typeof(Transform))
@@ -209,7 +217,7 @@ namespace Explorer
 
                     UIStyles.GameobjButton(go, null, false, rect.width - 250);
                 }
-                else if (value.GetType().IsEnum)
+                else if (valueType.IsEnum)
                 {
                     if (setAction != null)
                     {
@@ -228,17 +236,16 @@ namespace Explorer
                     GUILayout.Label(value.ToString());
 
                 }
-                else if (value.GetType().IsArray || ReflectionWindow.IsList(value.GetType()))
+                else if (valueType.IsArray || ReflectionWindow.IsList(valueType))
                 {
-                    Array m_array = null;
-
-                    if (value is Array)
+                    object[] m_array;
+                    if (valueType.IsArray)
                     {
-                        m_array = value as Array;
+                        m_array = (value as Array).Cast<object>().ToArray();
                     }
-                    else if (value is IList list)
+                    else
                     {
-                        m_array = list.Cast<object>().ToArray();
+                        m_array = (value as IEnumerable).Cast<object>().ToArray();
                     }
 
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
@@ -248,61 +255,49 @@ namespace Explorer
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
 
-                    int drawn = 0;
-                    foreach (var entry in m_array)
+                    for (int i = 0; i < m_array.Length; i++)
                     {
+                        var obj = m_array[i];
+
                         // collapsing the BeginHorizontal called from ReflectionWindow.WindowFunction or previous array entry
                         GUILayout.EndHorizontal();
                         GUILayout.BeginHorizontal();
                         GUILayout.Space(190);
 
-                        if (drawn > Explorer.ArrayLimit)
+                        if (i > Explorer.ArrayLimit)
                         {
                             GUILayout.Label($"<i><color=red>{m_array.Length - Explorer.ArrayLimit} results omitted, array is too long!</color></i>");
                             break;
                         }
-                        drawn++;
 
-                        if (entry == null)
+                        if (obj == null)
                         {
                             GUILayout.Label("<i><color=grey>null</color></i>");
                         }
                         else
                         {
-                            var type = entry.GetType();
-                            if (type.IsPrimitive || type == typeof(string))
-                            {
-                                GUILayout.Label(entry.ToString());
-                            }
-                            else
-                            {
-                                GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                                if (GUILayout.Button("<color=yellow>" + entry.ToString() + "</color>", GUILayout.MaxWidth(rect.width - 230)))
-                                {
-                                    WindowManager.InspectObject(entry, out bool _);
-                                }
-                                GUI.skin.button.alignment = TextAnchor.MiddleCenter;
-                            }
+                            var type = obj.GetType();
+                            DrawMember(ref obj, type.ToString(), i.ToString(), rect, setTarget, setAction, 25);
                         }
                     }
                 }
                 else
                 {
+                    var label = value.ToString();
+                    if (valueType == typeof(AnimatorControllerParameter))
+                    {
+                        var param = value as AnimatorControllerParameter;
+
+                        label = param.name + " (" + param.type + ")";
+                    }
                     GUI.skin.button.alignment = TextAnchor.MiddleLeft;
-                    if (GUILayout.Button("<color=yellow>" + value.ToString() + "</color>", GUILayout.MaxWidth(rect.width - 230)))
+                    if (GUILayout.Button("<color=yellow>" + label + "</color>", GUILayout.MaxWidth(rect.width - 230)))
                     {
                         WindowManager.InspectObject(value, out bool _);
                     }
                     GUI.skin.button.alignment = TextAnchor.MiddleCenter;
                 }
             }
-        }
-
-        public static void DrawMember(ref object value, string valueType, string memberName, Rect rect, object setTarget = null, Action<object> setAction = null)
-        {
-            GUILayout.Label("<color=cyan>" + memberName + ":</color>", GUILayout.Width(180));
-
-            DrawValue(ref value, rect, valueType, memberName, setTarget, setAction);
         }
 
         // Helper for drawing primitive values (with Apply button)

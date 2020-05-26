@@ -36,7 +36,7 @@ namespace Explorer
         {
             Instance = this;
 
-            //LoadMCS();
+            LoadMCS();
 
             this.gameObject.AddComponent<WindowManager>();
             this.gameObject.AddComponent<MainMenu>();
