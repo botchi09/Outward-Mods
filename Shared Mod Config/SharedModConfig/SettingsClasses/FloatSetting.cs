@@ -42,9 +42,15 @@ namespace SharedModConfig
         public override void SetValue(object value)
         {
             m_value = Mathf.Clamp((float)value, MinValue, MaxValue);
+
             if (RoundTo >= 0)
             {
                 m_value = (float)Math.Round(m_value, RoundTo);
+            }
+
+            if (Increment > 0)
+            {
+                m_value = Increment * Mathf.Floor(m_value / Increment);
             }
 
             if (m_text != null && m_slider != null)
@@ -65,13 +71,13 @@ namespace SharedModConfig
                     m_slider = LinkedGameObject.GetComponentInChildren<Slider>();
                 }
 
-                float formattedValue = RoundTo >= 0 ? (float)Math.Round(m_slider.value, RoundTo) : m_slider.value;
-
                 if (Increment > 0)
                 {
-                    formattedValue *= Increment;
+                    m_slider.value = Increment * Mathf.Floor(m_slider.value / Increment);
                 }
 
+                float formattedValue = RoundTo >= 0 ? (float)Math.Round(m_slider.value, RoundTo) : m_slider.value;
+                
                 string s = formattedValue + (ShowPercent ? "%" : "");
                 m_text.text = s;
 

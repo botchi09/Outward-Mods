@@ -51,12 +51,12 @@ namespace SharedModConfig
         {
             foreach (var setting in Settings)
             {
-                setting.UpdateValue();
+                setting.UpdateValue(false);
             }
 
             if (OnSettingsSaved != null)
             {
-                Debug.Log("OnSettingsSaved Callback for " + this.ModName);
+                //Debug.Log("OnSettingsSaved Callback for " + this.ModName);
                 OnSettingsSaved.Invoke();
             }
         }

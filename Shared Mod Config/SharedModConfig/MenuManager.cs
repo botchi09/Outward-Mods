@@ -339,25 +339,25 @@ namespace SharedModConfig
             label.text = string.IsNullOrEmpty(setting.Description) ? setting.Name : setting.Description;
 
             var slider = newPrefab.GetComponentInChildren<Slider>();
+
+            slider.value = setting.m_value;
+            if (setting.Increment > 0)
+            {
+                slider.value = setting.Increment * Mathf.Floor(slider.value / setting.Increment);
+                // formattedValue = Increment * Mathf.Floor(formattedValue / Increment);
+            }
+
             slider.minValue = setting.MinValue;
             slider.maxValue = setting.MaxValue;
-            slider.value = setting.m_value;
+
             if (setting.RoundTo >= 0)
             {
                 slider.value = (float)Math.Round(setting.m_value, setting.RoundTo);
             }
 
             var textvalue = slider.transform.parent.Find("SliderValue").GetComponent<Text>();
-
-            if (setting.Increment > 0)
-            {
-                slider.wholeNumbers = true;
-            }
-
-            float displayedvalue = (setting.Increment > 0 ? setting.m_value * setting.Increment : setting.m_value);
-            string suffix = (setting.ShowPercent ? "%" : "");
-
-            textvalue.text = displayedvalue + suffix;
+            string s = setting.m_value + (setting.ShowPercent ? "%" : "");
+            textvalue.text = s;
         }
 
         private void SetupStringSetting(Transform contentHolder, GameObject prefab, StringSetting setting, GameObject titlePrefab)
