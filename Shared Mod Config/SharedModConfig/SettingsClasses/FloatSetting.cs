@@ -24,6 +24,8 @@ namespace SharedModConfig
         public float MinValue = 0;
         [XmlIgnore]
         public float MaxValue = 100;
+        [XmlIgnore]
+        public float Increment = -1;
 
         public float m_value;
 
@@ -64,6 +66,11 @@ namespace SharedModConfig
                 }
 
                 float formattedValue = RoundTo >= 0 ? (float)Math.Round(m_slider.value, RoundTo) : m_slider.value;
+
+                if (Increment > 0)
+                {
+                    formattedValue *= Increment;
+                }
 
                 string s = formattedValue + (ShowPercent ? "%" : "");
                 m_text.text = s;

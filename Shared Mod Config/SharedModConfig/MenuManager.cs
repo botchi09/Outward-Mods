@@ -348,8 +348,16 @@ namespace SharedModConfig
             }
 
             var textvalue = slider.transform.parent.Find("SliderValue").GetComponent<Text>();
-            string s = setting.m_value + (setting.ShowPercent ? "%" : "");
-            textvalue.text = s;
+
+            if (setting.Increment > 0)
+            {
+                slider.wholeNumbers = true;
+            }
+
+            float displayedvalue = (setting.Increment > 0 ? setting.m_value * setting.Increment : setting.m_value);
+            string suffix = (setting.ShowPercent ? "%" : "");
+
+            textvalue.text = displayedvalue + suffix;
         }
 
         private void SetupStringSetting(Transform contentHolder, GameObject prefab, StringSetting setting, GameObject titlePrefab)
