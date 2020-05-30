@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B21DBDE3-5D6F-4726-93AB-CC3CC68BAE7D}</ProjectGuid>
+    <ProjectGuid>{8654B1DB-7A3B-411B-9891-C0078B5DDA2F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Explorer</RootNamespace>
-    <AssemblyName>Explorer</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <RootNamespace>PvP</RootNamespace>
+    <AssemblyName>PvP</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -18,13 +18,11 @@
     <DebugSymbols>false</DebugSymbols>
     <DebugType>none</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\Release\BepInEx\plugins\Explorer\</OutputPath>
+    <OutputPath>..\Release\BepInEx\plugins\</OutputPath>
     <DefineConstants>
     </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x64</PlatformTarget>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,7 +31,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -56,8 +53,8 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\BepInEx.Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="mcs">
-      <HintPath>..\Release\BepInEx\plugins\Explorer\mcs.dll</HintPath>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
@@ -70,6 +67,10 @@
     </Reference>
     <Reference Include="Rewired_Core">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Rewired_Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharedModConfig">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SideLoader">
@@ -90,8 +91,8 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.BaselibModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.BaselibModule.dll</HintPath>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.AudioModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
@@ -102,8 +103,12 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.StyleSheetsModule">
-      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.StyleSheetsModule.dll</HintPath>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.JSONSerializeModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
@@ -114,26 +119,27 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Explorer.cs" />
-    <Compile Include="Hooks.cs" />
-    <Compile Include="WindowManager.cs" />
-    <Compile Include="Logger\DebugBox.cs" />
-    <Compile Include="Logger\DebugType.cs" />
-    <Compile Include="Logger\OLogger.cs" />
-    <Compile Include="Logger\UnityDebugIgnore.cs" />
-    <Compile Include="Menu\MainMenu.cs" />
-    <Compile Include="Menu\MainMenu\ConsolePage.cs" />
-    <Compile Include="Menu\Inspectors\GameObjectWindow.cs" />
-    <Compile Include="Menu\Inspectors\ReflectionWindow.cs" />
-    <Compile Include="Menu\Console\REPL.cs" />
-    <Compile Include="Menu\Console\REPLHelper.cs" />
-    <Compile Include="Menu\MainMenu\ScenePage.cs" />
-    <Compile Include="Menu\MainMenu\SearchPage.cs" />
-    <Compile Include="Menu\UIStyles.cs" />
+    <Compile Include="BattleRoyale.cs" />
+    <Compile Include="BattleRoyale_Hooks.cs" />
+    <Compile Include="DeathMatch.cs" />
+    <Compile Include="PlayerManager.cs" />
+    <Compile Include="PvP.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="utils\AccessTools.cs" />
+    <Compile Include="PvPGUI.cs" />
+    <Compile Include="RPCManager.cs" />
+    <Compile Include="Templates.cs" />
+    <Compile Include="util\CustomKeybindings.cs" />
+    <Compile Include="util\AccessTools.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

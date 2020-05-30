@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 using System.Reflection;
 using Mono.CSharp;
 using System.IO;
+using HarmonyLib;
 
 /*
  * Credits to ManlyMarco (BepInEx team) for the REPL in RuntimeUnityEditor.

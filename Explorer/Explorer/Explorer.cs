@@ -10,11 +10,12 @@ using BepInEx;
 using System.IO;
 using System.Reflection;
 using HarmonyLib;
+using Object = UnityEngine.Object;
+using SideLoader;
 
 namespace Explorer
 {
     [BepInPlugin(ID, NAME, VERSION)]
-    //[BepInDependency("com.sinai.PartialityWrapper", BepInDependency.DependencyFlags.HardDependency)]
     public class Explorer : BaseUnityPlugin
     {
         const string ID = "com.sinai.explorer";
