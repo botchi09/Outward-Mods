@@ -33,6 +33,23 @@ namespace Explorer
 
         public static int ArrayLimit { get; set; } = 100;
 
+        public bool MouseInspect { get; set; } = false;
+
+        private string m_objUnderMouseName = "";
+
+        public Camera MainCamera
+        {
+            get
+            {
+                if (m_main == null)
+                {
+                    m_main = Camera.main;
+                }
+                return m_main;
+            }
+        }
+        private Camera m_main;
+
         internal void Awake()
         {
             Instance = this;
@@ -82,17 +99,87 @@ namespace Explorer
                 ShowMenu = !ShowMenu;
             }
 
-            if (ShowMenu && Input.GetKeyDown(KeyCode.LeftAlt))
+            if (ShowMenu)
             {
-                ShowMouse = !ShowMouse;
-            }
+                if (Input.GetKeyDown(KeyCode.LeftAlt))
+                    ShowMouse = !ShowMouse;
 
-            if (Input.GetKeyDown(KeyCode.Escape) && ShowMouse)
+                if (Input.GetKeyDown(KeyCode.Escape))
+                    ShowMouse = false;
+
+                if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(1))
+                {
+                    MouseInspect = !MouseInspect;
+                    
+                    if (MouseInspect)
+                    {
+                        ShowMouse = true;
+                    }
+                }
+
+                if (MouseInspect)
+                {
+                    InspectUnderMouse();
+                }
+            }
+            else if (MouseInspect)
             {
-                ShowMouse = false;
+                MouseInspect = false;
             }
 
             MouseFix();
+        }
+
+        private void InspectUnderMouse()
+        {
+            Ray ray = MainCamera.ScreenPointToRay(Input.mousePosition);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f))
+            {
+                var obj = hit.transform.gameObject;
+
+                m_objUnderMouseName = obj.transform.GetGameObjectPath();
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    MouseInspect = false;
+                    m_objUnderMouseName = "";
+
+                    WindowManager.InspectObject(obj, out _);
+                }
+            }
+            else
+            {
+                m_objUnderMouseName = "";
+            }
+        }
+
+        // draw Object Under Mouse text
+        internal void OnGUI()
+        {
+            if (MouseInspect)
+            {
+                if (m_objUnderMouseName != "")
+                {
+                    var pos = Input.mousePosition;
+                    var rect = new Rect(
+                        pos.x - (Screen.width / 2), // x
+                        Screen.height - pos.y - 50, // y
+                        Screen.width,               // w
+                        50                          // h
+                    );
+
+                    var origAlign = GUI.skin.label.alignment;
+                    GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+
+                    //shadow text
+                    GUI.Label(rect, $"<color=black>{m_objUnderMouseName}</color>");
+                    //white text
+                    GUI.Label(new Rect(rect.x -1, rect.y + 1, rect.width, rect.height), m_objUnderMouseName);
+
+                    GUI.skin.label.alignment = origAlign;
+                }
+            }
         }
 
         public static void MouseFix()

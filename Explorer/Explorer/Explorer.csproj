@@ -102,6 +102,10 @@
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.StyleSheetsModule">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.StyleSheetsModule.dll</HintPath>
       <Private>False</Private>
@@ -112,6 +116,10 @@
     </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>..\..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.UIElementsModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>

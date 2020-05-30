@@ -101,6 +101,8 @@ namespace Explorer
             }
             GUILayout.EndHorizontal();
 
+            Explorer.Instance.MouseInspect = GUILayout.Toggle(Explorer.Instance.MouseInspect, "Inspect Under Mouse (Shift + RMB)");
+
             GUILayout.BeginHorizontal();
             for (int i = 0; i < Pages.Count; i++)
             {
