@@ -7,7 +7,6 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using SideLoader;
-using SideLoader.CustomSkills;
 using HarmonyLib;
 
 namespace NecromancySkills

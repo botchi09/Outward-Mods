@@ -71,6 +71,17 @@ namespace Dataminer
                 statusEffectHolder.StraightSleepHealTime = disease.StraightSleepHealTime;
             }
 
+            var statusData = status.StatusData.EffectsData;
+            var components = status.GetComponentsInChildren<Effect>();
+            for (int i = 0; i < components.Length; i++)
+            {
+                var comp = components[i];
+                if (comp && comp.Signature.Length > 0)
+                {
+                    comp.SetValue(statusData[i].Data);
+                }
+            }
+
             foreach (Effect effect in prefab.GetComponentsInChildren<Effect>())
             {
                 var effectHolder = EffectHolder.ParseEffect(effect);
@@ -94,37 +105,37 @@ namespace Dataminer
                 }
             }
 
-            for (int i = 0; i < status.StatusData.EffectsData.Length; i++)
-            {
-                if (i >= statusEffectHolder.Effects.Count)
-                {
-                    Debug.LogWarning("we exceeded our effectholder count...");
-                    continue;
-                }
+            //for (int i = 0; i < status.StatusData.EffectsData.Length; i++)
+            //{
+            //    if (i >= statusEffectHolder.Effects.Count)
+            //    {
+            //        Debug.LogWarning("we exceeded our effectholder count...");
+            //        continue;
+            //    }
 
-                // burning and poison. 
-                // this ignores a lot of edge cases, but burning and poison are the only cases atm.
-                // both effects only use one value in the statusdata, used for the damage on players.
-                if (statusEffectHolder.Effects[i] is PunctualDamageHolder)
-                {
-                    var strings = status.StatusData.EffectsData[i].Data[0].Split(new char[] { ':' });
-                    var value = float.Parse(strings[0]);
-                    (statusEffectHolder.Effects[i] as PunctualDamageHolder).Damage[0].Damage = value;
-                }
-                else
-                {
-                    // everything else
-                    try
-                    {
-                        FieldInfo fi = statusEffectHolder.Effects[i].GetType().GetField("AffectQuantity");
-                        fi.SetValue(statusEffectHolder.Effects[i], float.Parse(status.StatusData.EffectsData[i].Data[0]));
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogWarning("Exception parsing StatusData: " + e.Message);
-                    }
-                }
-            }
+            //    // burning and poison. 
+            //    // this ignores a lot of edge cases, but burning and poison are the only cases atm.
+            //    // both effects only use one value in the statusdata, used for the damage on players.
+            //    if (statusEffectHolder.Effects[i] is PunctualDamageHolder)
+            //    {
+            //        var strings = status.StatusData.EffectsData[i].Data[0].Split(new char[] { ':' });
+            //        var value = float.Parse(strings[0]);
+            //        (statusEffectHolder.Effects[i] as PunctualDamageHolder).Damage[0].Damage = value;
+            //    }
+            //    else
+            //    {
+            //        // everything else
+            //        try
+            //        {
+            //            FieldInfo fi = statusEffectHolder.Effects[i].GetType().GetField("AffectQuantity");
+            //            fi.SetValue(statusEffectHolder.Effects[i], float.Parse(status.StatusData.EffectsData[i].Data[0]));
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            Debug.LogWarning("Exception parsing StatusData: " + e.Message);
+            //        }
+            //    }
+            //}
         }
 
         public static void ParseAllEffects()
