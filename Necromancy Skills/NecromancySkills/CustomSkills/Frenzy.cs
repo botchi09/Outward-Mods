@@ -34,14 +34,13 @@ namespace NecromancySkills
         {
             if (SummonManager.Instance == null) { return; }
 
-            if (SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID) is GameObject summonObj)
+            if (SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID) is Character summonChar)
             {
                 bool insideSigil = PlagueAuraProximityCondition.IsInsidePlagueAura(_affectedCharacter.transform.position);
 
                 float healSummon = insideSigil ? 0.66f : 0.33f;
 
                 // restores HP to the summon
-                var summonChar = summonObj.GetComponentInChildren<Character>();
                 summonChar.Stats.AffectHealth(summonChar.ActiveMaxHealth * healSummon);
 
                 // add status effects

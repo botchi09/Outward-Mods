@@ -9,20 +9,18 @@ namespace NecromancySkills
 {
     public class SummonSkeleton : Effect // Inherits from the game's "Effect" class, so it works with those systems automatically.
     {
-		//public static readonly float HealthCost = 0.10f; // 10% of current health
-
 		// Setup (called from SkillManager init)
 		#region Summon Skill Setup
 		public static void SetupSummon()
 		{
-			var resurrect = ResourcesPrefabManager.Instance.GetItemPrefab(8890103) as Skill;
+			var summon = ResourcesPrefabManager.Instance.GetItemPrefab(8890103) as Skill;
 
 			// destroy the existing skills, but keep the rest (VFX / Sound).
-			DestroyImmediate(resurrect.transform.Find("Lightning").gameObject);
-			DestroyImmediate(resurrect.transform.Find("SummonSoul").gameObject);
+			DestroyImmediate(summon.transform.Find("Lightning").gameObject);
+			DestroyImmediate(summon.transform.Find("SummonSoul").gameObject);
 
 			var effects = new GameObject("Effects");
-			effects.transform.parent = resurrect.transform;
+			effects.transform.parent = summon.transform;
 			effects.AddComponent<SummonSkeleton>();
 
 			// setup custom blade visuals
@@ -31,8 +29,13 @@ namespace NecromancySkills
 			{
 				mesh.material.color = new Color(-0.5f, 1.5f, -0.5f);
 			}
-		}
 
+			// make sure the config is applied from the save
+			SummonManager.Skeleton.Health = NecromancyBase.settings.Summon_MaxHealth;
+			SummonManager.Skeleton.HealthRegen = NecromancyBase.settings.Summon_HealthLoss;
+			SummonManager.Ghost.Health = NecromancyBase.settings.StrongSummon_MaxHealth;
+			SummonManager.Ghost.HealthRegen = NecromancyBase.settings.StrongSummon_HealthLoss;
+		}
 		#endregion
 
 
@@ -69,11 +72,12 @@ namespace NecromancySkills
 			{
 				var list = SummonManager.Instance.SummonedCharacters[_affectedCharacter.UID];
 
-				if (list.Count() == MaxSummons)
+				if (list.Count == MaxSummons)
 				{
-					// kill weakest current summon
-					try { SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID).GetComponent<Character>().Stats.ReceiveDamage(999f); } 
-					catch { }
+					if (SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID) is Character summon)
+                    {
+						SummonManager.DestroySummon(summon);
+                    }
 				}
 			}
 
@@ -87,21 +91,12 @@ namespace NecromancySkills
 			if (!PhotonNetwork.isNonMasterClientInRoom)
 			{
 				var uid = UID.Generate().ToString();
-				int sceneViewID = PhotonNetwork.AllocateSceneViewID();
+				//int sceneViewID = PhotonNetwork.AllocateSceneViewID();
 
 				bool insidePlagueAura = PlagueAuraProximityCondition.IsInsidePlagueAura(_affectedCharacter.transform.position);
 
-				// this function will handle RPC through the in-game systems, no need to RPC call it.
-				SummonManager.Instance.SummonSpawn(_affectedCharacter, uid, sceneViewID, insidePlagueAura);
-
-				// this function is for setting things up locally for all characters.
-				RPCManager.Instance.photonView.RPC("SendSummonSpawn", PhotonTargets.All, new object[]
-				{
-					_affectedCharacter.UID.ToString(), 
-					uid, 
-					sceneViewID,
-				    insidePlagueAura
-				});
+				// The main stuff happens here
+				SummonManager.Instance.SummonSpawn(_affectedCharacter, uid, insidePlagueAura);
 			}
 		}
 	}

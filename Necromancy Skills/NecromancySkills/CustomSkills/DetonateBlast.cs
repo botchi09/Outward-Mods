@@ -119,8 +119,7 @@ namespace NecromancySkills
         {
             if (SummonManager.Instance == null) { return; }
 
-            if (SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID) is GameObject summonObj
-                && summonObj.GetComponentInChildren<Character>() is Character summonChar
+            if (SummonManager.Instance.FindWeakestSummon(_affectedCharacter.UID) is Character summonChar
                 && summonChar.isActiveAndEnabled)
             {
 

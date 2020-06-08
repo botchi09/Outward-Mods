@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using SideLoader;
 using UnityEngine;
 using UnityEngine.AI;
 //using SinAPI;
@@ -16,11 +17,132 @@ namespace NecromancySkills
 
 		private float lastUpdateTime = -1f;
 
-		#region Initialization and Tick Update
+		public static readonly SL_Character Skeleton = new SL_Character
+		{
+			UID = "com.sinai.necromancy.skeleton",
+			Name = "Skeleton",
+			AddCombatAI = true,
+			CanBlock = true,
+			CanDodge = false,
+			Faction = Character.Factions.Player,
+			Health = NecromancyBase.settings.Summon_MaxHealth,
+			HealthRegen = NecromancyBase.settings.Summon_HealthLoss,
+			Status_Immunity = new List<string>()
+            {
+				"Bleeding",
+				"Poison"
+            },
+			Weapon_ID = 2598500,
+			Chest_ID = 3200030,
+			Helmet_ID = 3200031,
+			Boots_ID = 3200032,
+		};
+
+		public static readonly SL_Character Ghost = new SL_Character
+		{
+			UID = "com.sinai.necromancy.ghost",
+			Name = "Ghost",
+			AddCombatAI = true,
+			CanBlock = true,
+			CanDodge = true,
+			Faction = Character.Factions.Player,
+			Health = NecromancyBase.settings.StrongSummon_MaxHealth,
+			HealthRegen = NecromancyBase.settings.StrongSummon_HealthLoss,
+			Status_Immunity = new List<string>()
+			{
+				"Bleeding",
+				"Poison"
+			},
+			Weapon_ID = 2598500,
+			Chest_ID = 3200040,
+			Helmet_ID = 3200041,
+			Boots_ID = 3200042,
+			Backpack_ID = 5400010,
+		};
+
+		// Only host calls this directly. This is the Main function for creating a summon. In our case, a skeleton minion.
+		// See the "SummonSkeleton" class for an example of how this works.
+		public GameObject SummonSpawn(Character caster, string summonUID, bool insidePlagueAura)
+		{
+			Vector3 spawnPos = caster.transform.position + (Vector3.forward * 0.5f);
+
+			var template = insidePlagueAura ? Ghost : Skeleton;
+
+			var character = CustomCharacters.CreateCharacter(template, spawnPos, summonUID, caster.UID.ToString());
+
+			// unsheathe
+			character.SheatheInput();
+
+			//// send RPC for everyone to add this character to their dictionary
+			//RPCManager.Instance.SendSummonSpawn(caster.UID.ToString(), summonUID);
+
+			return character.gameObject;
+		}
+
+		private void OnSpawn(Character character, string rpcData)
+		{
+			var ownerUID = rpcData;
+			var summonUID = character.UID;
+
+			// add to dictionary
+			if (SummonedCharacters.ContainsKey(ownerUID))
+			{
+				SummonedCharacters[ownerUID].Add(summonUID);
+			}
+			else
+			{
+				SummonedCharacters.Add(ownerUID, new List<string> { summonUID });
+			}
+
+			if (!PhotonNetwork.isNonMasterClientInRoom)
+			{
+				var owner = CharacterManager.Instance.GetCharacter(ownerUID);
+
+				// get the Wander state, and set the FollowTransfer to our caster character
+				var wander = character.GetComponentInChildren<AISWander>(true);
+				wander.FollowTransform = owner.transform;
+
+				// add auto-teleport component
+				var tele = character.gameObject.AddComponent<SummonTeleport>();
+				tele.m_character = character;
+				tele.TargetCharacter = owner.transform;
+			}
+		}
+
+		// find the weakest current summon for a character. can be used arbitrarily by anything.
+		public Character FindWeakestSummon(string ownerUID)
+		{
+			UpdateSummonedCharacters(); // force update of characters to remove dead ones etc
+
+			Character character = null;
+
+			if (SummonedCharacters.ContainsKey(ownerUID) && SummonedCharacters[ownerUID].Count() > 0)
+			{
+				float lowest = float.MaxValue;
+				foreach (string uid in SummonedCharacters[ownerUID])
+				{
+					if (CharacterManager.Instance.GetCharacter(uid) is Character c && c.Stats.CurrentHealth < lowest)
+					{
+						lowest = c.Stats.CurrentHealth;
+						character = c;
+					}
+				}
+			}
+
+			return character;
+		}
+
+		// ========= internal ==========
 
 		internal void Awake()
 		{
-			if (Instance == null) { Instance = this; }
+			Instance = this;
+
+			Ghost.Prepare();
+			Skeleton.Prepare();
+
+			Ghost.OnSpawn += OnSpawn;
+			Skeleton.OnSpawn += OnSpawn;
 		}
 
 		// the tick update is limited to 0.5 secs, since its just for cleaning up dead summons and low priority stuff.
@@ -47,7 +169,7 @@ namespace NecromancySkills
 						if (c.IsDead)
 						{
 							//OLogger.Warning(c.Name + " is dead! Removing from list and destroying object.");
-							DestroySummon(c.transform.parent.gameObject);
+							DestroySummon(c);
 							toRemove.Add(uid);
 						}
 					}
@@ -67,172 +189,10 @@ namespace NecromancySkills
 				}
 			}
 		}
-		#endregion
 
-		// find the weakest current summon for a character. can be used arbitrarily by anything.
-		public GameObject FindWeakestSummon(string ownerUID)
+		public static void DestroySummon(Character summon)
 		{
-			UpdateSummonedCharacters(); // force update of characters to remove dead ones etc
-
-			GameObject _obj = null;
-
-			if (SummonedCharacters.ContainsKey(ownerUID) && SummonedCharacters[ownerUID].Count() > 0)
-			{
-				float lowest = float.MaxValue;
-				foreach (string uid in SummonedCharacters[ownerUID])
-				{
-					if (CharacterManager.Instance.GetCharacter(uid) is Character c && c.Stats.CurrentHealth < lowest)
-					{
-						lowest = c.Stats.CurrentHealth;
-						_obj = c.gameObject;
-					}
-				}
-			}
-
-			return _obj;
-		}
-
-		public static void DestroySummon(GameObject summon)
-		{
-			if (summon.GetComponentInChildren<Character>() is Character c)
-			{
-				// just disable to "kill" the npc. safest way for now to ensure smooth online play, can cause bugs if you try destroy a character.
-				summon.SetActive(false);
-			}
-		}
-
-		// Only HOST should call this directly. This is the Main function for creating a summon. In our case, a skeleton minion.
-		// See the "SummonSkeleton" class for an example of how this works.
-
-		public GameObject SummonSpawn(Character caster, string summonUID, int sceneViewID, bool insidePlagueAura)
-		{
-			//Debug.Log("Create base character: " + summonUID + ", scene view: " + sceneViewID);
-
-			Vector3 castPos = caster.transform.position + (Vector3.forward * 0.5f);
-
-			// use SideLoader's CustomCharacters to create a basic player prefab
-			var playerPrefab = SideLoader.CustomCharacters.CreateCharacter(castPos, summonUID, "NecroSummon");
-
-			Character _char = playerPrefab.GetComponent<Character>();
-			_char.SetUID(summonUID);
-			//_char.photonView.viewID = sceneViewID;
-
-			float healthLoss = insidePlagueAura ? NecromancyBase.settings.StrongSummon_HealthLoss : NecromancyBase.settings.Summon_HealthLoss;
-			float maxHealth = insidePlagueAura ? NecromancyBase.settings.StrongSummon_MaxHealth : NecromancyBase.settings.Summon_MaxHealth;
-
-			// set custom stats
-			At.SetValue(new Stat(healthLoss), typeof(CharacterStats), _char.Stats, "m_healthRegen");
-			At.SetValue(new Stat(maxHealth), typeof(CharacterStats), _char.Stats, "m_maxHealthStat");
-			At.SetValue(new Stat(500f), typeof(CharacterStats), _char.Stats, "m_maxStamina");
-
-			if (insidePlagueAura)
-			{
-				foreach (int id in TrainerManager.TrainerEquipment) // equip the spectral ghost set
-				{
-					_char.Inventory.Equipment.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(id) as Equipment);
-				}
-				// 5400010_BackpackStatBooster2
-				_char.Inventory.Equipment.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(5400010) as Equipment);
-			}
-			else
-			{
-				// equip Mertons Set
-				_char.Inventory.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(3200030) as Equipment);
-				_char.Inventory.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(3200031) as Equipment);
-				_char.Inventory.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(3200032) as Equipment);
-			}
-
-			// setup custom weapon (using SideLoader, requires slightly different method to equip)
-			var blade = ItemManager.Instance.GenerateItemNetwork(2598500) as Weapon;
-			_char.Inventory.TakeItem(blade.UID);
-			At.Call(_char.Inventory.Equipment, "EquipWithoutAssociating", new object[] { blade as Equipment, false });
-			_char.SheatheInput(); //unsheathe
-
-			playerPrefab.SetActive(true);
-
-			//Debug.Log("(Host) Summoned Skeleton with UID: " + _char.UID + ", photon view ID: " + _char.GetComponent<PhotonView>().viewID);
-
-			return playerPrefab;
-		}
-
-		// local summon setup. This is called from RPCmanager.SendSummonSpawn.
-		// Used for doing the local init for a custom summon, including adding the AI
-
-		public void AddLocalSummon(Character summonChar, string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura = false)
-		{
-			var owner = CharacterManager.Instance.GetCharacter(ownerUID);
-
-			// setup parent transform
-			GameObject rootObject = new GameObject(summonChar.Name + "_" + summonUID);
-			rootObject.SetActive(false);
-			summonChar.transform.parent = rootObject.transform;
-
-			// set name
-			At.SetValue("SkeletonAlly", typeof(Character), summonChar, "m_name");
-
-			// setup basic AI components
-			SideLoader.CustomCharacters.SetupBasicAI(summonChar);
-
-			// only the host should do this bit
-			if (!PhotonNetwork.isNonMasterClientInRoom)
-			{
-				// get the Wander state, and set the FollowTransfer to our caster character
-				var wander = summonChar.GetComponent<CharacterAI>().AiStates[0] as AISWander;
-				wander.FollowTransform = owner.transform;
-
-				// add auto-teleport component
-				var tele = summonChar.gameObject.AddComponent<SummonTeleport>();
-				tele.m_character = summonChar;
-				tele.TargetCharacter = wander.FollowTransform;
-
-			}
-
-			// add observed components after setting active?
-			if (summonChar.photonView.ObservedComponents == null)
-			{
-				summonChar.photonView.ObservedComponents = new List<Component>
-				{
-					summonChar
-				};
-			}
-
-			// set skeleton active
-			rootObject.SetActive(true);
-
-			// add to dictionary
-			if (SummonedCharacters.ContainsKey(ownerUID))
-			{
-				SummonedCharacters[ownerUID].Add(summonUID);
-			}
-			else
-			{
-				SummonedCharacters.Add(ownerUID, new List<string> { summonUID });
-			}
-
-			StartCoroutine(DelayedFixCoroutine(summonChar));
-
-			//Debug.Log("added local summon: " + summonUID);
-		}
-
-		private IEnumerator DelayedFixCoroutine(Character summonChar)
-		{
-			yield return new WaitForSeconds(2f);
-
-			// restore stats 
-			summonChar.Stats.FullHealth();
-			summonChar.Stats.FullStamina();
-
-			//Debug.Log("Fixing observed components");
-
-			// add observed components after setting active?
-			if (summonChar.photonView.ObservedComponents == null)
-			{
-				Debug.Log("Observed components is null, adding again...");
-				summonChar.photonView.ObservedComponents = new List<Component>
-				{
-					summonChar
-				};
-			}
+			CustomCharacters.DestroyCharacterRPC(summon);
 		}
 	}
 }

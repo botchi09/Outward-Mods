@@ -38,9 +38,9 @@ namespace Combat_Dummy
             if (m_character == null)
             {
                 // create character with SideLoader
-                var newCharacter = CustomCharacters.CreateCharacter(pos, UID.Generate(), Name ?? DUMMY_NAME);
+                var newCharacter = CustomCharacters.CreateCharacter(pos, UID.Generate(), Name ?? DUMMY_NAME, null, true);
                 m_character = newCharacter.GetComponent<Character>();
-                CustomCharacters.SetupBasicAI(m_character);
+                // CustomCharacters.SetupBasicAI(m_character);
 
                 newspawn = true;
             }
@@ -100,7 +100,7 @@ namespace Combat_Dummy
 
         public void HealCharacter()
         {
-            At.Call(m_character.Stats, "RefreshVitalMaxStat", new object[] { false });
+            At.Call(typeof(CharacterStats), m_character.Stats, "RefreshVitalMaxStat", null, new object[] { false });
 
             if (m_character.IsDead)
             {

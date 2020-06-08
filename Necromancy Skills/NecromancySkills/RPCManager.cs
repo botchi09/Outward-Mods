@@ -1,115 +1,91 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Photon;
-using UnityEngine;
+﻿//using System;
+//using System.Collections;
+//using System.Collections.Generic;
+//using System.Linq;
+//using System.Text;
+//using Photon;
+//using UnityEngine;
 
-namespace NecromancySkills
-{
-    public class RPCManager : Photon.MonoBehaviour
-    {
-        // This class is not used much, just for a little bit of custom Photon functions for setting up summoned AIs and custom trainer NPCs.
+//namespace NecromancySkills
+//{
+//    public class RPCManager : Photon.MonoBehaviour
+//    {
+//        // This class is not used much, just for a little bit of custom Photon functions for setting up summoned AIs and custom trainer NPCs.
 
-        // If you want to a function to be remote-callable, you must declare the [PunRPC] tag above it.
-        // This will allow you to do a photonView.RPC("MethodName", PhotonTargets.All, new object[] { parameters for method go here });
-        // Note: your parameter arguments MUST be primitive types! (string, int, float, bool, etc).
+//        // If you want to a function to be remote-callable, you must declare the [PunRPC] tag above it.
+//        // This will allow you to do a photonView.RPC("MethodName", PhotonTargets.All, new object[] { parameters for method go here });
+//        // Note: your parameter arguments MUST be primitive types! (string, int, float, bool, etc).
 
-        public static GameObject obj;
-        public static RPCManager Instance;
+//        public static GameObject obj;
+//        public static RPCManager Instance;
 
-        internal void Start()
-        {
-            Instance = this;
+//        internal void Start()
+//        {
+//            Instance = this;
 
-            var view = this.gameObject.AddComponent<PhotonView>();
-            view.viewID = 900;
-            Debug.Log("Registered NecromancySkills with ViewID " + this.photonView.viewID);
-        }
+//            var view = this.gameObject.AddComponent<PhotonView>();
+//            view.viewID = 900;
+//            Debug.Log("Registered NecromancySkills with ViewID " + this.photonView.viewID);
+//        }
 
-        // ===================== SUMMON MANAGER RPC ===================== // 
+//        // ===================== SUMMON MANAGER RPC ===================== // 
 
-        [PunRPC]
-        public void SendSummonSpawn(string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura)
-        {
-            //Debug.Log("SendSummonSpawn received with UID: " + summonUID + " and scene view ID: " + sceneViewID);
+//        public void SendSummonSpawn(string ownerUID, string summonUID)
+//        {
+//            this.photonView.RPC("RPCSendSummonSpawn", PhotonTargets.All, new object[] { ownerUID, summonUID });
+//        }
 
-            if (CharacterManager.Instance.GetCharacter(summonUID) is Character c)
-            {
-                SummonManager.Instance.AddLocalSummon(c, ownerUID, summonUID, sceneViewID, insidePlagueAura);
-            }
-            else
-            {
-                StartCoroutine(SummonSpawnCoroutine(ownerUID, summonUID, sceneViewID, insidePlagueAura));
-            }
-        }
+//        [PunRPC]
+//        private void RPCSendSummonSpawn(string ownerUID, string summonUID)
+//        {
+//            SummonManager.Instance.AddLocalSummon(ownerUID, summonUID);
+//        }
 
-        private IEnumerator SummonSpawnCoroutine(string ownerUID, string summonUID, int sceneViewID, bool insidePlagueAura)
-        {
-            // Debug.Log("Couldn't get character immediately, starting coroutine to find character...");
+//        // ===================== TRAINER MANAGER RPC ===================== // 
 
-            float t = Time.time;
+//        public void RPCSendTrainerSpawn()
+//        {
+//            this.photonView.RPC("SendTrainerSpawn", PhotonTargets.All, new object[0]);
+//        }
 
-            while (Time.time - t < 5)
-            {
-                if (CharacterManager.Instance.GetCharacter(summonUID) is Character c)
-                {
-                    SummonManager.Instance.AddLocalSummon(c, ownerUID, summonUID, sceneViewID, insidePlagueAura);
-                    break;
-                }
-                else
-                {
-                    yield return new WaitForSeconds(0.1f);
-                }
-            }
+//        [PunRPC]
+//        private void SendTrainerSpawn()
+//        {
+//            //Debug.Log("TrainerSpawn received with UID: " + trainerUID + " and scene view ID: " + sceneViewID);
 
-            //if (!CharacterManager.Instance.GetCharacter(summonUID))
-            //{
-            //    OLogger.Warning("Timed out trying to find character!");
-            //}
-        }
+//            if (CharacterManager.Instance.GetCharacter(TrainerManager.TRAINER_UID) is Character c)
+//            {
+//                TrainerManager.Instance.LocalTrainerSetup(c.gameObject);
+//            }
+//            else
+//            {
+//                StartCoroutine(TrainerSetupCoroutine());
+//            }
+//        }
 
-        // ===================== TRAINER MANAGER RPC ===================== // 
+//        private IEnumerator TrainerSetupCoroutine()
+//        {
+//            // Debug.Log("Couldn't get character immediately, starting coroutine to find character...");
 
-        [PunRPC]
-        public void SendTrainerSpawn(string trainerUID, int sceneViewID)
-        {
-            //Debug.Log("TrainerSpawn received with UID: " + trainerUID + " and scene view ID: " + sceneViewID);
+//            float t = Time.time;
 
-            if (CharacterManager.Instance.GetCharacter(trainerUID) is Character c)
-            {
-                TrainerManager.Instance.LocalTrainerSetup(c.gameObject, sceneViewID);
-            }
-            else
-            {
-                StartCoroutine(TrainerSetupCoroutine(trainerUID, sceneViewID));
-            }
-        }
+//            while (Time.time - t < 5)
+//            {
+//                if (CharacterManager.Instance.GetCharacter(TrainerManager.TRAINER_UID) is Character c)
+//                {
+//                    TrainerManager.Instance.LocalTrainerSetup(c.gameObject);
+//                    break;
+//                }
+//                else
+//                {
+//                    yield return new WaitForSeconds(0.1f);
+//                }
+//            }
 
-        private IEnumerator TrainerSetupCoroutine(string trainerUID, int trainerViewID)
-        {
-            // Debug.Log("Couldn't get character immediately, starting coroutine to find character...");
-
-            float t = Time.time;
-
-            while (Time.time - t < 5)
-            {
-                if (CharacterManager.Instance.GetCharacter(trainerUID) is Character c)
-                {
-                    TrainerManager.Instance.LocalTrainerSetup(c.gameObject, trainerViewID);
-                    break;
-                }
-                else
-                {
-                    yield return new WaitForSeconds(0.1f);
-                }
-            }
-
-            //if (!CharacterManager.Instance.GetCharacter(trainerUID))
-            //{
-            //    OLogger.Warning("Timed out trying to find character!");
-            //}
-        }
-    }
-}
+//            if (!CharacterManager.Instance.GetCharacter(TrainerManager.TRAINER_UID))
+//            {
+//                Debug.LogWarning("Timed out trying to find character!");
+//            }
+//        }
+//    }
+//}

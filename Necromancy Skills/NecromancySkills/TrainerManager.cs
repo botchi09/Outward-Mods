@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
-//using SinAPI;
 using NodeCanvas.DialogueTrees;
 using NodeCanvas.Framework;
 using NodeCanvas.Tasks.Actions;
@@ -18,94 +17,39 @@ namespace NecromancySkills
     {
         // This class is just used for setting up the Trainer NPC. The Skill Tree is set up by the SkillManager.
 
-        //public ModBase global;
+        public const string TRAINER_UID = "com.sinai.necromancy.trainer";
+
         public static TrainerManager Instance;
 
-        public static string TrainerName = "Spectral Wanderer";
-        public static string TrainerSceneName = "Hallowed_Dungeon4_Interior";
-        public Vector3 TrainerLocation = new Vector3(-138.3397f, 58.99699f, -102.4192f); 
-        public static List<int> TrainerEquipment = new List<int> { 3200040, 3200041, 3200042 }; // blue ghost robes
+        private static readonly SL_Character trainerTemplate = new SL_Character()
+        {
+            UID = TRAINER_UID,
+            Faction = Character.Factions.NONE,
+            Name = "Spectral Wanderer",
+            SceneToSpawn = "Hallowed_Dungeon4_Interior",
+            SpawnPosition = new Vector3(-138.3397f, 58.99699f, -102.4192f),
+            Chest_ID = 3200040,
+            Helmet_ID = 3200041,
+            Boots_ID = 3200042,
+            AddCombatAI = false,
+        };
 
         internal void Awake()
         {
             Instance = this;
 
-            SL.OnSceneLoaded += OnSceneChange;
+            trainerTemplate.Prepare();
+            trainerTemplate.OnSpawn += LocalTrainerSetup;
         }
 
-        private void OnSceneChange()
+        public void LocalTrainerSetup(Character trainer, string _)
         {
-            if (GameObject.Find("UNPC_" + TrainerName) is GameObject obj)
-            {
-                //OLogger.Warning("Trainer already exists on scene change, skipping setup!");
-                if (SceneManagerHelper.ActiveSceneName != TrainerSceneName)
-                {
-                    //Debug.Log("Destroying trainer");
-                    DestroyImmediate(obj);
-                }
-                return;
-            }
-
-            if (SceneManagerHelper.ActiveSceneName == TrainerSceneName && !PhotonNetwork.isNonMasterClientInRoom)
-            {
-                HostSetupTrainer();
-            }
-        }
-
-        private GameObject HostSetupTrainer()
-        {
-            GameObject trainer;
-
-            // ============= setup base NPC object ================
-
-            var pos = TrainerLocation;
-
-            var uid = UID.Generate().ToString();
-            var viewID = PhotonNetwork.AllocateSceneViewID();
-
-            trainer = CustomCharacters.CreateCharacter(pos, uid);
-
-            // setup Equipment
-            Character c = trainer.GetComponent<Character>();
-            At.SetValue(CharacterManager.CharacterInstantiationTypes.Item, typeof(Character), c, "m_instantiationType");
-            foreach (int id in TrainerEquipment)
-            {
-                c.Inventory.Equipment.EquipInstantiate(ResourcesPrefabManager.Instance.GetItemPrefab(id) as Equipment);
-            }
-
-            // set faction to NONE
-            c.ChangeFaction(Character.Factions.NONE); 
-
-            // call RPC for non-hosts to set up the character
-            //RPCManager.Instance.SendTrainerSpawn(uid, viewID);
-            RPCManager.Instance.photonView.RPC("SendTrainerSpawn", PhotonTargets.All, new object[] { uid.ToString(), viewID });
-
-            trainer.SetActive(true);
-            return trainer;
-        }
-
-        public void LocalTrainerSetup(GameObject trainer, int trainerViewID)
-        {
-            var obj = new GameObject("UNPC_" + TrainerName);
-            obj.transform.position = TrainerLocation;
-
-            trainer.transform.parent = obj.transform;
-            trainer.transform.position = obj.transform.position;
-
-            //if (trainer.GetPhotonView() is PhotonView view)
-            //{
-            //    Destroy(view);
-            //}
-            //var pView = trainer.AddComponent<PhotonView>();
-            //pView.viewID = trainerViewID;
-            //pView.onSerializeTransformOption = OnSerializeTransform.All;
-
             // remove unwanted components
             DestroyImmediate(trainer.GetComponent<CharacterStats>());
             DestroyImmediate(trainer.GetComponent<StartingEquipment>());
 
             // add NPCLookFollow component
-            trainer.AddComponent<NPCLookFollow>();
+            trainer.gameObject.AddComponent<NPCLookFollow>();
 
             // =========== setup Trainer DialogueTree from the template ===========
 
@@ -115,7 +59,7 @@ namespace NecromancySkills
 
             // set Dialogue Actor name
             var necroActor = trainertemplate.GetComponentInChildren<DialogueActor>();
-            necroActor.SetName(TrainerName);
+            necroActor.SetName(trainerTemplate.Name);
 
             // get "Trainer" component, and set the SkillTreeUID to our custom tree UID
             Trainer trainerComp = trainertemplate.GetComponentInChildren<Trainer>();
@@ -174,7 +118,7 @@ namespace NecromancySkills
             // set root node    
 
             // set the trainer active
-            obj.SetActive(true);
+            trainer.gameObject.SetActive(true);
         }
     }
 }
