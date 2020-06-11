@@ -40,7 +40,6 @@ namespace Combat_Dummy
                 // create character with SideLoader
                 var newCharacter = CustomCharacters.CreateCharacter(pos, UID.Generate(), Name ?? DUMMY_NAME, null, true);
                 m_character = newCharacter.GetComponent<Character>();
-                // CustomCharacters.SetupBasicAI(m_character);
 
                 newspawn = true;
             }
