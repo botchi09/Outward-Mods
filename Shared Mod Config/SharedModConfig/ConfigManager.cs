@@ -9,17 +9,35 @@ using System.Xml.Serialization;
 
 namespace SharedModConfig
 {
+    /// <summary>
+    /// The internal manager for config registration, saving and loading.
+    /// </summary>
     public class ConfigManager : MonoBehaviour
     {
         public static ConfigManager Instance;
 
         public bool InitDone { get => MenuManager.Instance.InitDone; }
-        public bool IsInitDone() { return InitDone; } // legacy
 
         public static Dictionary<string, ModConfig> RegisteredConfigs = new Dictionary<string, ModConfig>();
         private static readonly string saveFolder = @"Mods/ModConfigs";
 
         private static List<ModConfig> m_delayedConfigs = new List<ModConfig>();
+
+        /// <summary>
+        /// XML Serializer for ModConfigs.
+        /// </summary>
+        public static XmlSerializer XML
+        {
+            get
+            {
+                if (xmlSerializer == null)
+                {
+                    xmlSerializer = new XmlSerializer(typeof(ModConfig), new Type[] { typeof(BBSetting), typeof(BoolSetting), typeof(FloatSetting), typeof(StringSetting) });
+                }
+                return xmlSerializer;
+            }
+        }
+        private static XmlSerializer xmlSerializer;
 
         internal void Awake()
         {
@@ -97,35 +115,31 @@ namespace SharedModConfig
 
         private static bool LoadXML(string path, ModConfig config)
         {
-            Type[] extraTypes = { typeof(BBSetting), typeof(BoolSetting), typeof(FloatSetting), typeof(StringSetting) };
-            XmlSerializer xmlSerializer = new XmlSerializer(typeof(ModConfig), extraTypes);
-            using (StreamReader streamReader = new StreamReader(path))
+            var file = File.OpenRead(path);
+            var tempCfg = (ModConfig)XML.Deserialize(file);
+            file.Close();
+
+            if (tempCfg != null)
             {
-                var tempCfg = (ModConfig)xmlSerializer.Deserialize(streamReader);
-
-                if (tempCfg != null)
+                foreach (BBSetting setting in config.Settings)
                 {
-                    foreach (BBSetting setting in config.Settings)
+                    if (tempCfg.Settings.Find(x => x.Name == setting.Name) is BBSetting tempSetting)
                     {
-                        if (tempCfg.Settings.Find(x => x.Name == setting.Name) is BBSetting tempSetting)
-                        {
-                            setting.SetValue(tempSetting.GetValue());
-                        }
-                        else
-                        {
-                            setting.SetValue(setting.DefaultValue);
-                        }
+                        setting.SetValue(tempSetting.GetValue());
                     }
-                    streamReader.Close();
-                    return true;
+                    else
+                    {
+                        setting.SetValue(setting.DefaultValue);
+                    }
                 }
-                else
-                {
-                    Debug.LogError("[SharedModConfig] Fatal error trying to load settings from: " + path);
-                    streamReader.Close();
-                    return false;
-                }
-
+                
+                return true;
+            }
+            else
+            {
+                Debug.LogError("[SharedModConfig] Fatal error trying to load settings from: " + path);
+                
+                return false;
             }
         }
 
@@ -135,11 +149,9 @@ namespace SharedModConfig
 
             var path = saveFolder + "/" + config.ModName + ".xml";
             if (File.Exists(path)) { File.Delete(path); }
-
-            Type[] extraTypes = { typeof(BBSetting), typeof(BoolSetting), typeof(FloatSetting), typeof(StringSetting) };
-            XmlSerializer xml = new XmlSerializer(typeof(ModConfig), extraTypes);
+            
             FileStream file = File.Create(path);
-            xml.Serialize(file, config);
+            XML.Serialize(file, config);
             file.Close();
         }
 

@@ -349,11 +349,11 @@
     <Compile Include="MenuManager.cs" />
     <Compile Include="SharedModConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsClasses\BBSetting.cs" />
-    <Compile Include="SettingsClasses\BoolSetting.cs" />
-    <Compile Include="SettingsClasses\FloatSetting.cs" />
-    <Compile Include="SettingsClasses\ModConfig.cs" />
-    <Compile Include="SettingsClasses\StringSetting.cs" />
+    <Compile Include="ModConfig\BBSetting.cs" />
+    <Compile Include="ModConfig\BoolSetting.cs" />
+    <Compile Include="ModConfig\FloatSetting.cs" />
+    <Compile Include="ModConfig\ModConfig.cs" />
+    <Compile Include="ModConfig\StringSetting.cs" />
     <Compile Include="utils\CustomKeybindings.cs" />
     <Compile Include="utils\SinAPI.cs" />
   </ItemGroup>

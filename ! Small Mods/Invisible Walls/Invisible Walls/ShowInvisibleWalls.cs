@@ -2,85 +2,95 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Partiality.Modloader;
 using UnityEngine;
+using BepInEx;
+using HarmonyLib;
+using SharedModConfig;
 
 namespace ShowInvisibleWalls
 {
-    public class ShowInvisibleWalls : PartialityMod
+    [BepInPlugin(GUID, NAME, VERSION)]
+    [BepInDependency(SharedModConfig.SharedModConfig.GUID)]
+    public class ShowInvisibleWalls : BaseUnityPlugin
     {
-        public GameObject obj;
-        public string ID = "ShowInvisWalls";
-        public double version = 1.0;
+        const string GUID = "com.sinai.invisiblewalls";
+        const string NAME = "InvisibleWallMod";
+        const string VERSION = "1.1.0";
 
-        public static WallScript Instance;
-
-        public ShowInvisibleWalls()
+        private static readonly ModConfig config = new ModConfig
         {
-            this.author = "Sinai";
-            this.ModID = ID;
-            this.Version = version.ToString("0.00");
-        }
-
-        public override void OnEnable()
-        {
-            base.OnEnable();
-
-            obj = new GameObject(ID);
-            GameObject.DontDestroyOnLoad(obj);
-
-            Instance = obj.AddComponent<WallScript>();
-            Instance._base = this;
-        }
-
-        public override void OnDisable()
-        {
-            base.OnDisable();
-        }
-    }
-
-    public class WallScript : MonoBehaviour
-    {
-        public ShowInvisibleWalls _base;
-
-        public string CurrentScene = "";
-        public bool SceneChangeFlag = false;
-
-        internal void Update()
-        {
-            if (CurrentScene != SceneManagerHelper.ActiveSceneName) { SceneChangeFlag = true; }
-
-            if (Global.Lobby.PlayersInLobbyCount < 1 || NetworkLevelLoader.Instance.IsGameplayPaused)
+            ModName = NAME,
+            Settings = new List<BBSetting>
             {
-                return;
-            }
+                new BoolSetting
+                {
+                    Name = Settings.Disable,
+                    DefaultValue = true,
+                    Description = "Disable invisible boundaries"
+                },
+                new BoolSetting
+                {
+                    Name = Settings.Reveal,
+                    DefaultValue = false,
+                    Description = "Reveal invisible boundaries (overrides 'Disable Boundaries')",
+                }
+            },
+        };
 
-            if (SceneChangeFlag)
-            {
-                SceneChangeFlag = false;
-                CurrentScene = SceneManagerHelper.ActiveSceneName;
-                RevealWalls();
-
-                //foreach (PlayerSystem ps in Global.Lobby.PlayersInLobby.Where(x => x.IsLocalPlayer))
-                //{
-
-                //    ps.ControlledCharacter.CharacterCamera.OverrideTransform = ps.ControlledCharacter.Visuals.HeadTrans;
-                //    DisableVisuals(ps.ControlledCharacter);
-                //}
-            }
+        private class Settings
+        {
+            public const string Disable = "Disable";
+            public const string Reveal = "Reveal";
         }
 
-        private void RevealWalls()
+        internal void Awake()
+        {
+            config.Register();
+
+            config.OnSettingsSaved += OnSceneChange;
+            NetworkLevelLoader.Instance.onGameplayLoadingDone += OnSceneChange;
+        }
+
+        private void OnSceneChange()
+        {
+            SetWalls();
+        }
+
+        private void SetWalls()
         {
             foreach (GameObject obj in Resources.FindObjectsOfTypeAll<GameObject>())
             {
+                if (obj.scene.name != SceneManagerHelper.ActiveSceneName)
+                {
+                    continue;
+                }
+
                 string s = obj.name.ToLower();
                 if (s.Contains("cube") || s.Contains("collision") || s.Contains("collider") || s.Contains("bounds"))
                 {
-                    if (obj.GetComponent<MeshRenderer>())
-                        DestroyImmediate(obj.GetComponent<MeshRenderer>());
+                    // put this more costly check here
+                    if (obj.GetComponentInParent<Item>())
+                    {
+                        continue;
+                    }
 
-                    obj.AddComponent<MeshRenderer>();
+                    Debug.Log(s);
+
+                    //obj.SetActive(!(bool)config.GetValue(Settings.Disable));
+                    if (obj.GetComponent<Collider>() is Collider col)
+                    {
+                        col.enabled = !(bool)config.GetValue(Settings.Disable);
+                    }
+
+                    var renderer = obj.GetOrAddComponent<MeshRenderer>();
+                    if ((bool)config.GetValue(Settings.Reveal))
+                    {
+                        renderer.material = null;
+                    }
+                    else
+                    {
+                        DestroyImmediate(renderer);
+                    }
                 }
             }
         }

@@ -8,6 +8,9 @@ using UnityEngine.UI;
 
 namespace SharedModConfig
 {
+    /// <summary>
+    /// The internal manager for the UI display.
+    /// </summary>
     public class MenuManager : MonoBehaviour
     {
         public static MenuManager Instance;

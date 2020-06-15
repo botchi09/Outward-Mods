@@ -29,9 +29,18 @@ namespace NecromancySkills
         {
             Debug.Log("Setting up necromancy skills");
 
-            SetupSkills(); // setup the actual skills
+            try
+            {
+                SetupSkills(); // setup the actual skills
 
-            SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)
+                SetupSkillTree(); // setup the trainer menu, and link these skills to the SkillTreeHolder (the game's skill manager)
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Exception setting up Necromancy skills!");
+                Debug.LogWarning(e.Message);
+                Debug.LogWarning(e.StackTrace);
+            }
         }
 
         // patch for skill activation (pretty lazy method, but works)
