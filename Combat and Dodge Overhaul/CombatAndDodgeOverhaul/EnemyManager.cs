@@ -7,6 +7,7 @@ using UnityEngine;
 using System.Reflection;
 using SharedModConfig;
 using HarmonyLib;
+using UnityEngine.Assertions.Must;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -233,12 +234,16 @@ namespace CombatAndDodgeOverhaul
                 {
                     SetEnemyMods(m_currentSyncInfos, c.Stats, c);
                 }
+                
             }
+
         }
+
 
         // actual function to set an enemy's stats
         private void SetEnemyMods(ModConfig _config, CharacterStats _stats, Character m_character)
         {
+            
             if (m_character == null || !m_character.IsAI || m_character.Faction == Character.Factions.Player)
             {
                 //Debug.Log("trying to set stats for a null character, or a non-AI character");

@@ -40,6 +40,9 @@ namespace CombatAndDodgeOverhaul
                     && At.GetValue(typeof(Character), self, "m_currentlyChargingAttack") is bool m_currentlyChargingAttack
                     && At.GetValue(typeof(Character), self, "m_animator") is Animator m_animator)
                 {
+                    String m_nameLocKey = (String)At.GetValue(typeof(Character), self, "m_nameLocKey");
+                    String m_name = (String)At.GetValue(typeof(Character), self, "m_name");
+
                     // Begin actual stability hit function
                     var hit = _knockValue;
                     if (hit < 0)
@@ -96,7 +99,35 @@ namespace CombatAndDodgeOverhaul
                             m_stability = num2;
                         }
                         // if hit takes us below knockdown threshold, or if AI auto-knockdown stagger count was reached...
-                        if (m_stability <= (float)CombatOverhaul.config.GetValue(Settings.Knockdown_Threshold)
+                        float knockdownThreshold = (float)CombatOverhaul.config.GetValue(Settings.Knockdown_Threshold);
+
+                        if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
+                        {
+                            if ((int)EnemyClass.getEnemyLevel(self) >= (int)EnemyLevel.MINIBOSS)
+                            {
+                                knockdownThreshold = -100f; //Bosses MUST be staggered. They can't be knocked down so easily.
+                            }                 
+                        }
+
+                        float staggerThreshold = (float)CombatOverhaul.config.GetValue(Settings.Stagger_Threshold);
+
+                        //TODO: Boss stagger thresholds
+                        if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
+                        {                    
+                            //TODO: Test if this is really necessary. Maybe bosses already get good poise.
+                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.BOSS)
+                            {
+                                staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.BossStaggerMultiplier);
+                            }
+                            
+                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.MINIBOSS)
+                            {
+                                staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.MinibossStaggerMultiplier);
+                            }
+
+                        }
+
+                        if (m_stability <= knockdownThreshold
                             || (self.IsAI && m_knockbackCount >= (float)CombatOverhaul.config.GetValue(Settings.Enemy_AutoKD_Count)))
                         {
                             //Debug.LogError("Knockdown! Hit Value: " + _knockValue + ", current stability: " + m_stability);
@@ -123,14 +154,15 @@ namespace CombatAndDodgeOverhaul
                                 self.BlockInput(false);
                             }
                         }
-                        // else if hit is a stagger...
-                        else if (m_stability <= (float)CombatOverhaul.config.GetValue(Settings.Stagger_Threshold) && (Time.time - lastStagger > (float)CombatOverhaul.config.GetValue(Settings.Stagger_Immunity_Period)))
+                        else if (m_stability <= staggerThreshold && (Time.time - lastStagger > (float)CombatOverhaul.config.GetValue(Settings.Stagger_Immunity_Period)))
                         {
-                            // Debug.LogWarning("Stagger! Hit Value: " + _knockValue + ", current stability: " + m_stability);
+                            Debug.LogWarning("Stagger! Hit Value: " + _knockValue + ", current stability: " + m_stability);
+                            
 
                             // update Stagger Immunity dictionary
                             if (!Instance.LastStaggerTimes.ContainsKey(self.UID))
                             {
+                                
                                 Instance.LastStaggerTimes.Add(self.UID, Time.time);
                             }
                             else
@@ -140,6 +172,11 @@ namespace CombatAndDodgeOverhaul
 
                             if ((!self.IsAI && _base.photonView.isMine) || (self.IsAI && (_dealerChar == null || _dealerChar.photonView.isMine)))
                             {
+                                if ((bool)CombatOverhaul.config.GetValue(Settings.Poise))
+                                {
+                                    m_stability = 100f;
+                                    At.SetValue(100f, typeof(Character), self, "m_stability");
+                                }
                                 _base.photonView.RPC("SendKnock", PhotonTargets.All, new object[]
                                 {
                                 false,
@@ -157,6 +194,7 @@ namespace CombatAndDodgeOverhaul
                             {
                                 self.BlockInput(false);
                             }
+                            //At.SetValue(100f, typeof(Character), self, "m_stability");
                         }
                         // else if we are not blocking...
                         else if (!_block)
@@ -203,6 +241,8 @@ namespace CombatAndDodgeOverhaul
 
         private void StaggerAttacker(Character self, Animator m_animator, Character _dealerChar)
         {
+            String m_nameLocKey = (String)At.GetValue(typeof(Character), self, "m_nameLocKey");
+            String m_name = (String)At.GetValue(typeof(Character), self, "m_name");
             // Debug.Log(self.Name + " blocked the attack. Shield stability: " + m_shieldStability);
             At.SetValue(Character.HurtType.NONE, typeof(Character), self, "m_hurtType");
             if (self.InLocomotion)
@@ -215,10 +255,22 @@ namespace CombatAndDodgeOverhaul
                 // Debug.Log("autoknocking " + _dealerChar.Name);
                 if (_dealerChar.CurrentWeapon.Type != Weapon.WeaponType.Bow)
                 {
-                    _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
+                    if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
+                    {
+                        if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
+                        {
+                            _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
+                        }
+                    }
+                    else
+                    {
+                        _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
+                    }
                 }
             }
         }
+
+  
 
         [HarmonyPatch(typeof(Character), "UpdateStability")]
         public class Character_UpdateStability
@@ -228,19 +280,26 @@ namespace CombatAndDodgeOverhaul
             {
                 var self = __instance;
 
+
                 if (At.GetValue(typeof(Character), self, "m_stability") is float m_stability
                 && At.GetValue(typeof(Character), self, "m_timeOfLastStabilityHit") is float m_timeOfLastStabilityHit
                 && At.GetValue(typeof(Character), self, "m_shieldStability") is float m_shieldStability
                 && At.GetValue(typeof(Character), self, "m_knockbackCount") is float m_knockbackCount)
                 {
+
+                    String m_nameLocKey = (String)At.GetValue(typeof(Character), self, "m_nameLocKey");
+                    String m_name = (String)At.GetValue(typeof(Character), self, "m_name");
+
                     // ----------- original method, unchanged other than to reflect custom values -------------
                     if ((bool)CombatOverhaul.config.GetValue(Settings.No_Stability_Regen_When_Blocking) && self.Blocking) // no stability regen while blocking! otherwise too op
                         return false;
 
                     float num = Time.time - m_timeOfLastStabilityHit;
+
+                    
                     if (num > (float)CombatOverhaul.config.GetValue(Settings.Stability_Regen_Delay))
                     {
-                        if (m_stability < 100f)
+                        if (m_stability < 100f && !(bool)CombatOverhaul.config.GetValue(Settings.Poise))
                         {
                             var num2 = Mathf.Clamp(m_stability + (self.StabilityRegen * (float)CombatOverhaul.config.GetValue(Settings.Stability_Regen_Speed)) * Time.deltaTime, 0f, 100f);
                             At.SetValue(num2, typeof(Character), self, "m_stability");
@@ -255,11 +314,71 @@ namespace CombatAndDodgeOverhaul
                         {
                             bool flag = m_knockbackCount > 0;
                             var num2 = Mathf.Clamp(m_knockbackCount - Time.deltaTime, 0f, 4f);
-                            At.SetValue(num2, typeof(Character), self, "m_knockbackCount");
+                            if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
+                            {
+                                if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
+                                {
+                                    At.SetValue(num2, typeof(Character), self, "m_knockbackCount");
+                                }                      
+                            }
+                            else
+                            {
+                                At.SetValue(num2, typeof(Character), self, "m_knockbackCount");
+                            }
                             if (flag && num2 <= 0)
                             {
                                 // Debug.Log("Resetting AI stagger count for " + self.Name);
                             }
+                        }
+                    }
+
+                    //float m_rawWeight
+                    //float m_hitboxYScale
+                    //Vector3 m_middlePos
+                    float m_rawWeight = (float)At.GetValue(typeof(Character), self, "m_rawWeight");
+                    //Debug.Log(m_nameLocKey + "   " + m_knockbackCount.ToString());
+
+                    Debug.Log(m_nameLocKey + " " + EnemyClass.getCleanName(self) + " lvl" + ((int)EnemyClass.getEnemyLevel(self) ).ToString());
+                    //Debug.Log("Enemy weight: " + m_nameLocKey + " : " + m_rawWeight.ToString());
+                    //Debug.Log("Boss? " + m_nameLocKey + "   " + EnemyClass.isBoss(m_nameLocKey, m_name).ToString());
+
+                    if ((bool)CombatOverhaul.config.GetValue(Settings.Poise))
+                    {
+                        if (num > (float)CombatOverhaul.config.GetValue(Settings.PoiseResetTime))
+                        {
+                           
+
+                            if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
+                            {
+                                //Minibosses do NOT regenerate stamina.
+                                if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
+                                {  
+                                    At.SetValue(100f, typeof(Character), self, "m_stability");
+                                }
+                            }
+                            else
+                            {
+                                At.SetValue(100f, typeof(Character), self, "m_stability");
+                            }
+
+
+                        }
+                        if (m_knockbackCount > 0 && num > 0.3) //Delay is for visibility purposes. TODO: Could cause coop issues?
+                        {
+                           
+                            //At.SetValue(100f, typeof(Character), self, "m_stability");
+                            /*if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
+                            {
+                                if (EnemyClass.isBoss(m_nameLocKey, m_name) || EnemyClass.isMiniBoss(m_nameLocKey, m_name))
+                                {
+                                    At.SetValue(100f, typeof(Character), self, "m_stability");
+                                }
+                            }
+                            else
+                            {
+                                At.SetValue(100f, typeof(Character), self, "m_stability");
+                                //At.SetValue(0, typeof(Character), self, "m_knockbackCount");
+                            }   */
                         }
                     }
                 }

@@ -56,10 +56,80 @@ namespace CombatAndDodgeOverhaul
         {
             var newConfig = new ModConfig
             {
-                ModName = "Combat and Dodge Overhaul",
+                ModName = "Combat and Dodge Overhaul (modded)",
                 SettingsVersion = 1.2,
                 Settings = new List<BBSetting>
                 {
+                    new BoolSetting
+                    {
+                        Name = Settings.Poise,
+                        SectionTitle = "Dark Souls Settings",
+                        Description = "Use Poise",
+                        DefaultValue = false
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.BossPoise,
+                        Description = "Bosses have extra poise and don't regen poise",
+                        DefaultValue = false
+                    },
+                     //This is the dark souls value (more or less)
+                    new FloatSetting
+                    {
+                        Name = Settings.PoiseResetTime,
+                        Description = "How long before poise resets to maximum",
+                        DefaultValue = 3.4f,
+                        MinValue = 0f,
+                        MaxValue = 10f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.MinibossStaggerMultiplier,
+                        Description = "Miniboss stagger break point multiplier",
+                        DefaultValue = 1.6f,
+                        MinValue = 0.1f,
+                        MaxValue = 10f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.BossStaggerMultiplier,
+                        Description = "Boss stagger break point multiplier",
+                        DefaultValue = 3.2f,
+                        MinValue = 0.1f,
+                        MaxValue = 10f,
+                        RoundTo = 2,
+                        ShowPercent = false
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.BossShieldBounce,
+                        Description = "Bosses/Minibosses attacks bounce off blocks.",
+                        DefaultValue = false
+                    },
+                    /*new FloatSetting //Introduce if knockdown becomes an issue. StaggerMultiplier should mitigate this well.
+                    {
+                        Name = Settings.BossAutoKDCount,
+                        Description = "Amount of staggers in a row before bosses are auto-knocked down",
+                        DefaultValue = 2f,
+                        MinValue = 0f,
+                        MaxValue = 10.0f,
+                        ShowPercent = false,
+                        RoundTo = 0
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.MiniBossAutoKDCount,
+                        Description = "Amount of staggers in a row before minibosses are auto-knocked down",
+                        DefaultValue = 3f,
+                        MinValue = 0f,
+                        MaxValue = 10.0f,
+                        ShowPercent = false,
+                        RoundTo = 0
+                    },*/
                     new BoolSetting
                     {
                         Name = Settings.Dodge_Cancelling,
@@ -210,7 +280,7 @@ namespace CombatAndDodgeOverhaul
                         Description = "Modifier for Stability regen speed (higher value = faster regen)",
                         DefaultValue = 1.0f,
                         MinValue = 0.01f,
-                        MaxValue = 3.0f,
+                        MaxValue = 15.0f,
                         ShowPercent = false,
                         RoundTo = 2
                     },
@@ -302,7 +372,7 @@ namespace CombatAndDodgeOverhaul
                         Name = Settings.Enemy_Damages,
                         Description = "Extra enemy damage bonus (added to enemy damage bonuses)",
                         DefaultValue = 0f,
-                        MinValue = 0f,
+                        MinValue = -500f,
                         MaxValue = 500f,
                         ShowPercent = true,
                         RoundTo = 0
@@ -312,7 +382,7 @@ namespace CombatAndDodgeOverhaul
                         Name = Settings.Enemy_ImpactDmg,
                         Description = "Extra enemy Impact damage bonus (added to enemy impact bonus stat)",
                         DefaultValue = 0f,
-                        MinValue = 0f,
+                        MinValue = -500f,
                         MaxValue = 500f,
                         ShowPercent = true,
                         RoundTo = 0
@@ -332,7 +402,7 @@ namespace CombatAndDodgeOverhaul
                         Name = Settings.Enemy_ImpactRes,
                         Description = "Extra enemy Impact resistance (added to enemy impact resist stat)",
                         DefaultValue = 0f,
-                        MinValue = 0f,
+                        MinValue = -500f,
                         MaxValue = 500f,
                         ShowPercent = true,
                         RoundTo = 0
@@ -385,6 +455,16 @@ namespace CombatAndDodgeOverhaul
         public static string Knockdown_Threshold = "Knockdown_Threshold";
         public static string Enemy_AutoKD_Count = "Enemy_AutoKD_Count";
         public static string Enemy_AutoKD_Reset_Time = "Enemy_AutoKD_Reset_Time";
+
+        //dark souls settings
+        public static string Poise = "Poise";
+        public static string BossPoise = "BossPoise";
+        public static string PoiseResetTime = "PoiseResetTime";
+        public static string MinibossStaggerMultiplier = "MinibossStaggerMultiplier";
+        public static string BossStaggerMultiplier = "BossStaggerMultiplier";
+        public static string BossShieldBounce = "BossShieldBounce";
+        public static string MiniBossAutoKDCount = "MiniBossAutoKDCount";
+        public static string BossAutoKDCount = "MiniBossAutoKDCount";
     }
 }
 
