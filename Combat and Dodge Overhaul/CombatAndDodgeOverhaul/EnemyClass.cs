@@ -129,6 +129,10 @@ namespace CombatAndDodgeOverhaul
 			return cleanObjectName;
 		}
 
+		public static bool isPlayer(Character character) {
+			return getCleanName(character) == "PlayerChar";
+		}
+
 		public static EnemyLevel getEnemyLevel(Character character)
 		{
 
@@ -137,7 +141,7 @@ namespace CombatAndDodgeOverhaul
 			//thanks sinai
 			string cleanObjectName = getCleanName(character);
 
-			if (cleanObjectName == "PlayerChar")
+			if (isPlayer(character))
 			{
 				return EnemyLevel.NORMAL;
 			}

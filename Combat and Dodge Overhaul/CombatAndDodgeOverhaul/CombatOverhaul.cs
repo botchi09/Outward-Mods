@@ -69,6 +69,12 @@ namespace CombatAndDodgeOverhaul
                     },
                     new BoolSetting
                     {
+                        Name = Settings.PlayerPoiseBoost,
+                        Description = "Players get miniboss poise levels to help in 1vX situations",
+                        DefaultValue = true
+                    },
+                    new BoolSetting
+                    {
                         Name = Settings.BossPoise,
                         Description = "Bosses have extra poise and don't regen poise",
                         DefaultValue = false
@@ -465,6 +471,7 @@ namespace CombatAndDodgeOverhaul
         public static string BossShieldBounce = "BossShieldBounce";
         public static string MiniBossAutoKDCount = "MiniBossAutoKDCount";
         public static string BossAutoKDCount = "MiniBossAutoKDCount";
+        public static string PlayerPoiseBoost = "PlayerPoiseBoost";
     }
 }
 

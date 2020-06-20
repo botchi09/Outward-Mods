@@ -120,7 +120,7 @@ namespace CombatAndDodgeOverhaul
                                 staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.BossStaggerMultiplier);
                             }
                             
-                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.MINIBOSS)
+                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.MINIBOSS || ((bool)CombatOverhaul.config.GetValue(Settings.PlayerPoiseBoost) && EnemyClass.isPlayer(self)))
                             {
                                 staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.MinibossStaggerMultiplier);
                             }
