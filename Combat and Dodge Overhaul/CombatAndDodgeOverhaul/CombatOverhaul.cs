@@ -94,7 +94,7 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.MinibossStaggerMultiplier,
                         Description = "Miniboss stagger break point multiplier",
-                        DefaultValue = 1.6f,
+                        DefaultValue = 1.4f,
                         MinValue = 0.1f,
                         MaxValue = 10f,
                         RoundTo = 2,
@@ -104,7 +104,7 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.BossStaggerMultiplier,
                         Description = "Boss stagger break point multiplier",
-                        DefaultValue = 3.2f,
+                        DefaultValue = 2.4f,
                         MinValue = 0.1f,
                         MaxValue = 10f,
                         RoundTo = 2,
