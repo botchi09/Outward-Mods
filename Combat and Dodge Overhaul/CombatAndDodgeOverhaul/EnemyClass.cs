@@ -130,7 +130,7 @@ namespace CombatAndDodgeOverhaul
 		}
 
 		public static bool isPlayer(Character character) {
-			return getCleanName(character) == "PlayerChar";
+			return getCleanName(character).StartsWith("PlayerChar");
 		}
 
 		public static EnemyLevel getEnemyLevel(Character character)

@@ -100,10 +100,11 @@ namespace CombatAndDodgeOverhaul
                         }
                         // if hit takes us below knockdown threshold, or if AI auto-knockdown stagger count was reached...
                         float knockdownThreshold = (float)CombatOverhaul.config.GetValue(Settings.Knockdown_Threshold);
+                        bool playerHasPoiseBoost = ((bool)CombatOverhaul.config.GetValue(Settings.PlayerPoiseBoost) && EnemyClass.isPlayer(self));
 
                         if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
                         {
-                            if ((int)EnemyClass.getEnemyLevel(self) >= (int)EnemyLevel.MINIBOSS)
+                            if ((int)EnemyClass.getEnemyLevel(self) >= (int)EnemyLevel.MINIBOSS || playerHasPoiseBoost)
                             {
                                 knockdownThreshold = -100f; //Bosses MUST be staggered. They can't be knocked down so easily.
                             }                 
@@ -120,7 +121,7 @@ namespace CombatAndDodgeOverhaul
                                 staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.BossStaggerMultiplier);
                             }
                             
-                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.MINIBOSS || ((bool)CombatOverhaul.config.GetValue(Settings.PlayerPoiseBoost) && EnemyClass.isPlayer(self)))
+                            if (EnemyClass.getEnemyLevel(self) == EnemyLevel.MINIBOSS || playerHasPoiseBoost)
                             {
                                 staggerThreshold = staggerThreshold / (float)CombatOverhaul.config.GetValue(Settings.MinibossStaggerMultiplier);
                             }
@@ -255,27 +256,24 @@ namespace CombatAndDodgeOverhaul
                 // Debug.Log("autoknocking " + _dealerChar.Name);
                 if (_dealerChar.CurrentWeapon.Type != Weapon.WeaponType.Bow)
                 {
-                    bool OneHBounceOnly = false;
+                    bool ShouldBounce = true;
+                    
+                    
+                    if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
+                    {
+                        ShouldBounce = (int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS;
+                    }
                     if ((bool)CombatOverhaul.config.GetValue(Settings.OneHBounceOnly))
                     {
                         if (_dealerChar.CurrentWeapon.TwoHanded)
                         {
-                            OneHBounceOnly = true; //2h weapons should not bounce off shields
+                            ShouldBounce = false; //2h weapons should not bounce off shields
                         }
                     }
-                    if (!OneHBounceOnly)
-                    { 
-                        if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
-                        {
-                            if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
-                            {
-                                _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
-                            }
-                        }
-                        else
-                        {
-                            _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
-                        }
+                    
+                    if (ShouldBounce)
+                    {                  
+                        _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
                     }
                 }
             }
@@ -343,35 +341,30 @@ namespace CombatAndDodgeOverhaul
                         }
                     }
 
-                    //float m_rawWeight
-                    //float m_hitboxYScale
-                    //Vector3 m_middlePos
-                    float m_rawWeight = (float)At.GetValue(typeof(Character), self, "m_rawWeight");
-                    //Debug.Log(m_nameLocKey + "   " + m_knockbackCount.ToString());
-
-                    Debug.Log(m_nameLocKey + " " + EnemyClass.getCleanName(self) + " lvl" + ((int)EnemyClass.getEnemyLevel(self) ).ToString());
-                    //Debug.Log("Enemy weight: " + m_nameLocKey + " : " + m_rawWeight.ToString());
-                    //Debug.Log("Boss? " + m_nameLocKey + "   " + EnemyClass.isBoss(m_nameLocKey, m_name).ToString());
+                    Debug.Log(EnemyClass.isPlayer(self).ToString() + " " + self.Name);
 
                     if ((bool)CombatOverhaul.config.GetValue(Settings.Poise))
                     {
                         if (num > (float)CombatOverhaul.config.GetValue(Settings.PoiseResetTime))
                         {
-                           
+                            bool resetStability = false;
 
                             if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
                             {
                                 //Minibosses do NOT regenerate stamina.
                                 if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
-                                {  
-                                    At.SetValue(100f, typeof(Character), self, "m_stability");
+                                {
+                                    resetStability = true;
                                 }
                             }
                             else
                             {
+                                resetStability = true;
+                            }
+                            if (resetStability)
+                            {
                                 At.SetValue(100f, typeof(Character), self, "m_stability");
                             }
-
 
                         }
                         if (m_knockbackCount > 0 && num > 0.3) //Delay is for visibility purposes. TODO: Could cause coop issues?
