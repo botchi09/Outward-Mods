@@ -65,13 +65,13 @@ namespace CombatAndDodgeOverhaul
                         Name = Settings.Poise,
                         SectionTitle = "Dark Souls Settings",
                         Description = "Use Poise",
-                        DefaultValue = false
+                        DefaultValue = true
                     },
                     new BoolSetting
                     {
                         Name = Settings.PlayerPoiseBoost,
                         Description = "Players get miniboss poise levels to help in 1vX situations",
-                        DefaultValue = true
+                        DefaultValue = false
                     },
                     new BoolSetting
                     {
@@ -119,7 +119,7 @@ namespace CombatAndDodgeOverhaul
                     new BoolSetting
                     {
                         Name = Settings.OneHBounceOnly,
-                        Description = "Only small weapons bounce off blocks",
+                        Description = "Only one handed weapons bounce off blocks",
                         DefaultValue = true
                     },
                     /*new FloatSetting //Introduce if knockdown becomes an issue. StaggerMultiplier should mitigate this well.
@@ -222,6 +222,16 @@ namespace CombatAndDodgeOverhaul
                         Description = "Custom Stamina Cost Modifier (added to your Stamina Cost stat)",
                         DefaultValue = 0f,
                         MinValue = -500.0f,
+                        MaxValue = 500.0f,
+                        ShowPercent = true,
+                        RoundTo = 1
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Stamina_Burn_Stat,
+                        Description = "Custom Stamina Burn Modifier (added to your Stamina Burn stat)",
+                        DefaultValue = 0f,
+                        MinValue = -100.0f,
                         MaxValue = 500.0f,
                         ShowPercent = true,
                         RoundTo = 1
@@ -435,6 +445,7 @@ namespace CombatAndDodgeOverhaul
         public static string Dodge_DelayAfterHit = "Dodge_DelayAfterHit";
 
         public static string Stamina_Cost_Stat = "Stamina_Cost_Stat";
+        public static string Stamina_Burn_Stat = "Stamina_Burn_Stat";
         public static string Custom_Dodge_Cost = "Custom_Dodge_Cost";
         public static string Custom_Bag_Burden = "Custom_Bag_Burden";
         public static string min_burden_weight = "min_burden_weight";

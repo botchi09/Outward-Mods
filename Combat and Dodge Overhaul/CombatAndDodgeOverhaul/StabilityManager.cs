@@ -341,8 +341,6 @@ namespace CombatAndDodgeOverhaul
                         }
                     }
 
-                    Debug.Log(EnemyClass.isPlayer(self).ToString() + " " + self.Name);
-
                     if ((bool)CombatOverhaul.config.GetValue(Settings.Poise))
                     {
                         if (num > (float)CombatOverhaul.config.GetValue(Settings.PoiseResetTime))

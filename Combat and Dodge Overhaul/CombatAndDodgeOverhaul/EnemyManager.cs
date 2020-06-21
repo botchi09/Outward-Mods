@@ -62,6 +62,16 @@ namespace CombatAndDodgeOverhaul
                 var character = self.GetComponent<Character>();
                 if (!character.IsAI)
                 {
+                    Stat staminaModifiers = (Stat)At.GetValue(typeof(CharacterStats), self, "m_staminaUseModifiers");
+
+                    //TODO: Stamina burn modifier
+                    self.RemoveStatStack(TagSourceManager.Instance.GetTag("162"), "CombatOverhaul", true);
+                    self.AddStatStack(TagSourceManager.Instance.GetTag("162"),
+                        new StatStack(
+                            "CombatOverhaul",
+                            0.01f * (float)CombatOverhaul.config.GetValue(Settings.Stamina_Burn_Stat)),
+                        true);
+
                     self.RemoveStatStack(TagSourceManager.Instance.GetTag("81"), "CombatOverhaul", true);
                     self.AddStatStack(
                         TagSourceManager.Instance.GetTag("81"),
