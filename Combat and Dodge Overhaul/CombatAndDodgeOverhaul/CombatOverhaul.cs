@@ -116,6 +116,12 @@ namespace CombatAndDodgeOverhaul
                         Description = "Bosses/Minibosses attacks bounce off blocks.",
                         DefaultValue = false
                     },
+                    new BoolSetting
+                    {
+                        Name = Settings.OneHBounceOnly,
+                        Description = "Only small weapons bounce off blocks",
+                        DefaultValue = true
+                    },
                     /*new FloatSetting //Introduce if knockdown becomes an issue. StaggerMultiplier should mitigate this well.
                     {
                         Name = Settings.BossAutoKDCount,
@@ -472,6 +478,7 @@ namespace CombatAndDodgeOverhaul
         public static string MiniBossAutoKDCount = "MiniBossAutoKDCount";
         public static string BossAutoKDCount = "MiniBossAutoKDCount";
         public static string PlayerPoiseBoost = "PlayerPoiseBoost";
+        public static string OneHBounceOnly = "SmallWeaponsBounceOnly";
     }
 }
 

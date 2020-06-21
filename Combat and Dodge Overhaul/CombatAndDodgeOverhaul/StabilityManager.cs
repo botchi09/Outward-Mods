@@ -255,16 +255,27 @@ namespace CombatAndDodgeOverhaul
                 // Debug.Log("autoknocking " + _dealerChar.Name);
                 if (_dealerChar.CurrentWeapon.Type != Weapon.WeaponType.Bow)
                 {
-                    if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
+                    bool OneHBounceOnly = false;
+                    if ((bool)CombatOverhaul.config.GetValue(Settings.OneHBounceOnly))
                     {
-                        if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
+                        if (_dealerChar.CurrentWeapon.TwoHanded)
+                        {
+                            OneHBounceOnly = true; //2h weapons should not bounce off shields
+                        }
+                    }
+                    if (!OneHBounceOnly)
+                    { 
+                        if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
+                        {
+                            if ((int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS)
+                            {
+                                _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
+                            }
+                        }
+                        else
                         {
                             _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
                         }
-                    }
-                    else
-                    {
-                        _dealerChar.AutoKnock(false, new Vector3(0, 0, 0));
                     }
                 }
             }
