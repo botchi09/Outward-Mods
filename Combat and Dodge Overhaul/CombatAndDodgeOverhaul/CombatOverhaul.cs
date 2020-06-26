@@ -122,6 +122,18 @@ namespace CombatAndDodgeOverhaul
                         Description = "Only one handed weapons bounce off blocks",
                         DefaultValue = true
                     },
+                    new BoolSetting
+                    {
+                        Name = Settings.Dodges_Pause_Stamina_Regen,
+                        Description = "Enable dodges pausing stamina regeneration",
+                        DefaultValue = false
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Allow_Stamina_Below_Zero,
+                        Description = "Player may use stamina that puts them below zero.",
+                        DefaultValue = true
+                    },
                     /*new FloatSetting //Introduce if knockdown becomes an issue. StaggerMultiplier should mitigate this well.
                     {
                         Name = Settings.BossAutoKDCount,
@@ -218,15 +230,31 @@ namespace CombatAndDodgeOverhaul
                     },
                     new FloatSetting
                     {
-                        Name = Settings.Stamina_Cost_Stat,
-                        Description = "Custom Stamina Cost Modifier (added to your Stamina Cost stat)",
-                        DefaultValue = 0f,
-                        MinValue = -500.0f,
-                        MaxValue = 500.0f,
+                        Name = Settings.Weapon_Stamina_Cost_Stat,
+                        Description = "Custom Weapon Stamina Cost Modifier (multiplies final stamina cost)",
+                        DefaultValue = 1f,
+                        MinValue = 0f,
+                        MaxValue = 1000.0f,
                         ShowPercent = true,
                         RoundTo = 1
                     },
                     new FloatSetting
+                    {
+                        Name = Settings.Sprint_Stamina_Cost_Stat,
+                        Description = "Custom Sprint Stamina Cost Modifier (multiplies final stamina cost)",
+                        DefaultValue = 1f,
+                        MinValue = 0f,
+                        MaxValue = 1000.0f,
+                        ShowPercent = true,
+                        RoundTo = 1
+                    },
+                    new BoolSetting
+                    {
+                        Name = Settings.Stamina_Burn_Offset,
+                        Description = "Use default stamina burn values even if attack stamina cost is high?",
+                        DefaultValue = true
+                    },
+                    /*new FloatSetting
                     {
                         Name = Settings.Stamina_Burn_Stat,
                         Description = "Custom Stamina Burn Modifier (added to your Stamina Burn stat)",
@@ -235,7 +263,7 @@ namespace CombatAndDodgeOverhaul
                         MaxValue = 500.0f,
                         ShowPercent = true,
                         RoundTo = 1
-                    },
+                    },*/
                     new FloatSetting
                     {
                         Name = Settings.Custom_Dodge_Cost,
@@ -444,8 +472,10 @@ namespace CombatAndDodgeOverhaul
         public static string Dodge_DelayAfterKD = "Dodge_Delay_After_KD";
         public static string Dodge_DelayAfterHit = "Dodge_DelayAfterHit";
 
-        public static string Stamina_Cost_Stat = "Stamina_Cost_Stat";
-        public static string Stamina_Burn_Stat = "Stamina_Burn_Stat";
+        public static string Weapon_Stamina_Cost_Stat = "Weapon_Stamina_Cost_Stat";
+        public static string Sprint_Stamina_Cost_Stat = "Sprint_Stamina_Cost_Stat";
+        //public static string Stamina_Burn_Stat = "Stamina_Burn_Stat";
+        public static string Stamina_Burn_Offset = "Stamina_Burn_Offset";
         public static string Custom_Dodge_Cost = "Custom_Dodge_Cost";
         public static string Custom_Bag_Burden = "Custom_Bag_Burden";
         public static string min_burden_weight = "min_burden_weight";
@@ -490,6 +520,8 @@ namespace CombatAndDodgeOverhaul
         public static string BossAutoKDCount = "MiniBossAutoKDCount";
         public static string PlayerPoiseBoost = "PlayerPoiseBoost";
         public static string OneHBounceOnly = "SmallWeaponsBounceOnly";
+        public static string Dodges_Pause_Stamina_Regen = "Dodges_Pause_Stamina_Regen"; //TODO: implement, or remove
+        public static string Allow_Stamina_Below_Zero = "Allow_Stamina_Below_Zero";
     }
 }
 

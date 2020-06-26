@@ -258,14 +258,13 @@ namespace CombatAndDodgeOverhaul
                 {
                     bool ShouldBounce = true;
                     
-                    
                     if (!(bool)CombatOverhaul.config.GetValue(Settings.BossShieldBounce))
                     {
-                        ShouldBounce = (int)EnemyClass.getEnemyLevel(self) < (int)EnemyLevel.MINIBOSS;
+                        ShouldBounce = (int)EnemyClass.getEnemyLevel(_dealerChar) < (int)EnemyLevel.MINIBOSS;
                     }
                     if ((bool)CombatOverhaul.config.GetValue(Settings.OneHBounceOnly))
                     {
-                        if (_dealerChar.CurrentWeapon.TwoHanded)
+                        if (_dealerChar.CurrentWeapon.TwoHanded && EnemyClass.getEnemyLevel(_dealerChar) != EnemyLevel.WEAKLING)
                         {
                             ShouldBounce = false; //2h weapons should not bounce off shields
                         }
@@ -359,32 +358,14 @@ namespace CombatAndDodgeOverhaul
                             {
                                 resetStability = true;
                             }
-                            if (resetStability)
+                            if (resetStability && num > 0.25)
                             {
                                 At.SetValue(100f, typeof(Character), self, "m_stability");
                             }
 
-                        }
-                        if (m_knockbackCount > 0 && num > 0.3) //Delay is for visibility purposes. TODO: Could cause coop issues?
-                        {
-                           
-                            //At.SetValue(100f, typeof(Character), self, "m_stability");
-                            /*if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
-                            {
-                                if (EnemyClass.isBoss(m_nameLocKey, m_name) || EnemyClass.isMiniBoss(m_nameLocKey, m_name))
-                                {
-                                    At.SetValue(100f, typeof(Character), self, "m_stability");
-                                }
-                            }
-                            else
-                            {
-                                At.SetValue(100f, typeof(Character), self, "m_stability");
-                                //At.SetValue(0, typeof(Character), self, "m_knockbackCount");
-                            }   */
                         }
                     }
                 }
-
                 return false;
             }
         }
