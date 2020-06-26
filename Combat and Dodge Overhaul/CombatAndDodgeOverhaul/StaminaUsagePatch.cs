@@ -22,46 +22,6 @@ namespace CombatAndDodgeOverhaul
 			}
 		}
 
-		//Mostly code cloned from decompile
-		/*[HarmonyPatch(typeof(Character), "HitStarted")]
-		public class Character_HitStarted
-		{
-			[HarmonyPrefix]
-			static bool Prefix(Character __instance, int _attackID)
-			{
-				Debug.Log("Called!");
-				Action notify = (Action)At.GetValue(typeof(Character), __instance, "NotifyNearbyAIOfAttack");
-				
-				if (_attackID != -2)
-				{
-					if (__instance.SkillMeleeDetector != null)
-					{
-						__instance.SkillMeleeDetector.HitStarted(_attackID);
-						notify.Invoke();
-						return false;
-					}
-					if (__instance.CurrentWeapon != null)
-					{
-						if (_attackID != -1)
-						{
-							((CharacterStats)At.GetValue(typeof(Character), __instance, "m_characterStats")).UseStamina(null, __instance.CurrentWeapon.GetStamCost(_attackID), -10f);
-						}
-						__instance.CurrentWeapon.HitStarted(_attackID);
-						notify.Invoke();
-						return false;
-					}
-				}
-				else if (__instance.LeftHandWeapon != null)
-				{
-					__instance.LeftHandWeapon.HitStarted(_attackID);
-					notify.Invoke();
-				}
-				return false;
-			}
-		}*/
-
-		//This doesn't work because i suck at reflection
-
 		[HarmonyPatch(typeof(CharacterStats), "UseStamina", new Type[] { typeof(float), typeof(float) })]
 		public class CharacterStats_UseStamina
 		{
@@ -70,11 +30,6 @@ namespace CombatAndDodgeOverhaul
 			{
 				if ((bool)CombatOverhaul.config.GetValue(Settings.Stamina_Burn_Offset))
 				{
-					//staminaConsumed = total
-					// get 1x value.  staminaconsumed divided by staminacost
-					// staminaConsumed - 1x value = our chosen value
-					//__result = 1x value
-
 					Character m_character = (Character)At.GetValue(typeof(CharacterStats), __instance, "m_character");
 					float m_timeOfLastStamUse = (float)At.GetValue(typeof(CharacterStats), __instance, "m_timeOfLastStamUse");
 					float beforeMultStamina; //1x stamina (before setting applied)
