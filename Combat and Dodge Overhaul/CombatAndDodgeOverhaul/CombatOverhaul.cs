@@ -77,13 +77,13 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.BossPoise,
                         Description = "Bosses have extra poise and don't regen poise",
-                        DefaultValue = false
+                        DefaultValue = true
                     },
                      //This is the dark souls value (more or less)
                     new FloatSetting
                     {
                         Name = Settings.PoiseResetTime,
-                        Description = "How long before poise resets to maximum",
+                        Description = "How many seconds before poise resets to maximum",
                         DefaultValue = 3.4f,
                         MinValue = 0f,
                         MaxValue = 10f,
@@ -126,7 +126,7 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.Dodges_Pause_Stamina_Regen,
                         Description = "Enable dodges pausing stamina regeneration",
-                        DefaultValue = false
+                        DefaultValue = true
                     },
                     new BoolSetting
                     {
@@ -232,22 +232,22 @@ namespace CombatAndDodgeOverhaul
                     {
                         Name = Settings.Weapon_Stamina_Cost_Stat,
                         Description = "Custom Weapon Stamina Cost Modifier (multiplies final stamina cost)",
-                        DefaultValue = 1f,
+                        DefaultValue = 100f,
                         MinValue = 0f,
                         MaxValue = 1000.0f,
                         ShowPercent = true,
                         RoundTo = 1
                     },
-                    new FloatSetting
+                    /*new FloatSetting //todo: sprint stam cost mod
                     {
                         Name = Settings.Sprint_Stamina_Cost_Stat,
                         Description = "Custom Sprint Stamina Cost Modifier (multiplies final stamina cost)",
-                        DefaultValue = 1f,
+                        DefaultValue = 100f,
                         MinValue = 0f,
                         MaxValue = 1000.0f,
                         ShowPercent = true,
                         RoundTo = 1
-                    },
+                    },*/
                     new BoolSetting
                     {
                         Name = Settings.Stamina_Burn_Offset,

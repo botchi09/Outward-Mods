@@ -141,13 +141,11 @@ namespace CombatAndDodgeOverhaul
             {
                 At.SetValue(f - staminaCost, typeof(CharacterStats), self.Stats, "m_stamina");
 
-                //TODO: dodges don't pause stamina regen if we're in the "regen" phase
                 if ((bool)CombatOverhaul.config.GetValue(Settings.Dodges_Pause_Stamina_Regen))
                 {
                      At.SetValue(Time.time, typeof(CharacterStats), self.Stats, "m_timeOfLastStamUse");
 
                 }
-
 
                 At.SetValue(0, typeof(Character), self, "m_dodgeAllowedInAction");
 

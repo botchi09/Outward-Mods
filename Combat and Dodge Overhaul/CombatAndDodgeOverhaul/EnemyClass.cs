@@ -90,7 +90,10 @@ namespace CombatAndDodgeOverhaul
 		};
 		public static string[] weaklingLocNames = new string[]
 		{
-			"Bandit_"
+			"Bandit_",
+			"Troglodyte",
+			"Wildlife_Hound",
+			"Wildlife_PearlBird"
 		};
 
 		private static bool arrayContains(string[] stringArray, string stringToCheck)

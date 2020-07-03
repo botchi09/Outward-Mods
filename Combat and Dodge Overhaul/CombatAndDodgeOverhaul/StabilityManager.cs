@@ -114,7 +114,8 @@ namespace CombatAndDodgeOverhaul
 
                         //TODO: Boss stagger thresholds
                         if ((bool)CombatOverhaul.config.GetValue(Settings.BossPoise))
-                        {                    
+                        {
+                            //Debug.Log("Enemy level: " + EnemyClass.getCleanName(self) + " " + EnemyClass.getEnemyLevel(self));
                             //TODO: Test if this is really necessary. Maybe bosses already get good poise.
                             if (EnemyClass.getEnemyLevel(self) == EnemyLevel.BOSS)
                             {
