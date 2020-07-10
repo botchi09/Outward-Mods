@@ -56,7 +56,6 @@ namespace CombatAndDodgeOverhaul
 			"GolemShielded",
 			"PureIlluminator",
 			"SublimeShell",
-			"Phytoflora",
 			"Grotesque",
 			"ForgeGolemRedHot"
 		};
@@ -81,6 +80,10 @@ namespace CombatAndDodgeOverhaul
 			"EliteTroglodyteQueen",
 			"TitanGolemHammer",
 			"EliteObsidianElemental",
+			"ShellHorror",
+			"Phytoflora",
+			"Phytosaur",
+			"TitanGolemHammer"
 
 
 		};

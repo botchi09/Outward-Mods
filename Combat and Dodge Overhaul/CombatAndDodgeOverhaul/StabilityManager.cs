@@ -304,7 +304,6 @@ namespace CombatAndDodgeOverhaul
                         return false;
 
                     float num = Time.time - m_timeOfLastStabilityHit;
-
                     
                     if (num > (float)CombatOverhaul.config.GetValue(Settings.Stability_Regen_Delay))
                     {
@@ -359,7 +358,8 @@ namespace CombatAndDodgeOverhaul
                             {
                                 resetStability = true;
                             }
-                            if (resetStability && num > 0.25)
+                            //Initially for readability, allowing display of stability hurt on a stagger actually meant (even badly) coordinated strikes knocked down too much.
+                            if (resetStability /*&& num > 0.25*/)
                             {
                                 At.SetValue(100f, typeof(Character), self, "m_stability");
                             }
