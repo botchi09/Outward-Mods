@@ -49,6 +49,7 @@
     </Reference>
     <Reference Include="GalaxyCSharp">
       <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\GalaxyCSharp.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
       <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
@@ -56,6 +57,7 @@
     </Reference>
     <Reference Include="Photon3Unity3D">
       <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="SharedModConfig">
       <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>

@@ -130,7 +130,7 @@ namespace CombatAndDodgeOverhaul
 
                         }
 
-                        if (m_stability <= (float)CombatOverhaul.config.GetValue(Settings.Knockdown_Threshold)
+                        if (m_stability <= knockdownThreshold
                             || (self.IsAI && m_knockbackCount >= (float)CombatOverhaul.config.GetValue(Settings.Enemy_AutoKD_Count)))
                         {
                             //Debug.LogError("Knockdown! Hit Value: " + _knockValue + ", current stability: " + m_stability);
@@ -155,7 +155,7 @@ namespace CombatAndDodgeOverhaul
                             }
                         }
                         // else if hit is a stagger...
-                        else if (m_stability <= (float)CombatOverhaul.config.GetValue(Settings.Stagger_Threshold) && (Time.time - lastStagger > (float)CombatOverhaul.config.GetValue(Settings.Stagger_Immunity_Period)))
+                        else if (m_stability <= staggerThreshold && (Time.time - lastStagger > (float)CombatOverhaul.config.GetValue(Settings.Stagger_Immunity_Period)))
                         {
                             // Debug.LogWarning("Stagger! Hit Value: " + _knockValue + ", current stability: " + m_stability);
                             
