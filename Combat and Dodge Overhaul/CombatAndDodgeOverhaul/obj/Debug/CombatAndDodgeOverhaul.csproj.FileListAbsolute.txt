@@ -4,3 +4,8 @@ D:\Downloads\Check_me\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\bin\Debug\Co
 D:\Downloads\Check_me\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\bin\Debug\CombatAndDodgeOverhaul.pdb
 D:\Downloads\Check_me\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\obj\Debug\CombatAndDodgeOverhaul.dll
 D:\Downloads\Check_me\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\obj\Debug\CombatAndDodgeOverhaul.pdb
+D:\Developer\Games\Outward\Merges\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\bin\Debug\CombatAndDodgeOverhaul.dll
+D:\Developer\Games\Outward\Merges\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\bin\Debug\CombatAndDodgeOverhaul.pdb
+D:\Developer\Games\Outward\Merges\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\obj\Debug\CombatAndDodgeOverhaul.csprojAssemblyReference.cache
+D:\Developer\Games\Outward\Merges\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\obj\Debug\CombatAndDodgeOverhaul.dll
+D:\Developer\Games\Outward\Merges\CombatAndDodgeOverhaul\CombatAndDodgeOverhaul\obj\Debug\CombatAndDodgeOverhaul.pdb
