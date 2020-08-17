@@ -32,31 +32,37 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\0Harmony.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\BepInEx\core\0Harmony.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="BepInEx">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\BepInEx.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\BepInEx\core\BepInEx.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="GalaxyCSharp">
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\GalaxyCSharp.dll</HintPath>
     </Reference>
     <Reference Include="netstandard">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Photon3Unity3D">
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
+    </Reference>
     <Reference Include="SharedModConfig">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="SideLoader">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -67,15 +73,15 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Games\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
