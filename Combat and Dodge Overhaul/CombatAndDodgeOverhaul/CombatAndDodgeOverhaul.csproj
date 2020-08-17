@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2B6018A4-7387-45B9-9FA0-7C7709BD2917}</ProjectGuid>
+    <ProjectGuid>{DB77AC78-FBEF-4DD7-AFC7-EAA4EBA8570E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CombatAndDodgeOverhaul</RootNamespace>
@@ -12,17 +12,15 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <DebugType>none</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>D:\Games\GOG Galaxy\Games\Outward\BepInEx\plugins\</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,76 +31,64 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EnemyLevel.cs" />
-    <Compile Include="EnemyClass.cs" />
-    <Compile Include="EnemyManager.cs" />
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="netstandard">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SharedModConfig">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="SideLoader">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\..\Steam\steamapps\common\Outward\Outward_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="CombatOverhaul.cs" />
+    <Compile Include="EnemyClass.cs" />
+    <Compile Include="EnemyLevel.cs" />
+    <Compile Include="EnemyManager.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RPCManager.cs" />
     <Compile Include="StabilityManager.cs" />
     <Compile Include="StaminaUsagePatch.cs" />
-    <Compile Include="util\SinAPI.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.0.10, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\BepInEx\core\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="BepInEx">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\BepInEx\core\BepInEx.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="GalaxyCSharp">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\GalaxyCSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="netstandard">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\netstandard.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Photon3Unity3D">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\Photon3Unity3D.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SharedModConfig">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\BepInEx\plugins\SharedModConfig\SharedModConfig.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SideLoader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\BepInEx\plugins\SideLoader.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\System.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.Networking">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\GOG Galaxy\Games\Outward\Outward_Data\Managed\UnityEngine.Networking.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

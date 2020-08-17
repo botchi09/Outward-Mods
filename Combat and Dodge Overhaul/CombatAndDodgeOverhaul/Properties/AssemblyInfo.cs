@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("DodgeCancelling")]
+[assembly: AssemblyTitle("CombatAndDodgeOverhaul")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("DodgeCancelling")]
+[assembly: AssemblyProduct("CombatAndDodgeOverhaul")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2b6018a4-7387-45b9-9fa0-7c7709bd2917")]
+[assembly: Guid("db77ac78-fbef-4dd7-afc7-eaa4eba8570e")]
 
 // Version information for an assembly consists of the following four values:
 //

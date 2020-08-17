@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using System.Reflection;
+using SideLoader;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -15,7 +16,7 @@ namespace CombatAndDodgeOverhaul
 		public class WeaponStats_GetAttackStamCost
 		{
 			[HarmonyPostfix]
-			static void Postfix(WeaponStats __instance, ref float __result)
+			public static void Postfix(WeaponStats __instance, ref float __result)
 			{
 				float newStamCost = __result * ((float)CombatOverhaul.config.GetValue(Settings.Weapon_Stamina_Cost_Stat)*0.01f);
 				__result = newStamCost;
