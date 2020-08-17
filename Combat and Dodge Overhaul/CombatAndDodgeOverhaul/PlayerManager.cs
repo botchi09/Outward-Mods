@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using System.Reflection;
 using HarmonyLib;
+using SideLoader;
 
 namespace CombatAndDodgeOverhaul
 {
@@ -159,7 +160,7 @@ namespace CombatAndDodgeOverhaul
 
                 (self as Photon.MonoBehaviour).photonView.RPC("SendDodgeTriggerTrivial", PhotonTargets.All, new object[] { _direction });
 
-                At.Call(self, "ActionPerformed", new object[] { false });
+                At.Call(typeof(Character), self, "ActionPerformed", null, new object[] { false });
 
                 (self as MonoBehaviour).Invoke("ResetDodgeTrigger", 0.5f);
             }
@@ -190,7 +191,7 @@ namespace CombatAndDodgeOverhaul
                 if (self.CurrentlyChargingAttack)
                 {
                     //self.SendCancelCharging();
-                    At.Call(self, "SendCancelCharging", new object[0]);
+                    At.Call(typeof(Character), self, "SendCancelCharging", null);
                 }
 
             // get sound player with null coalescing operator
@@ -200,7 +201,7 @@ namespace CombatAndDodgeOverhaul
                 At.SetValue(true, typeof(Character), self, "m_dodging");
 
                 //self.StopBlocking();
-                At.Call(self, "StopBlocking", new object[0]);
+                At.Call(typeof(Character), self, "StopBlocking", null);
 
                 // null coalescing OnDodgeEvent invoke
                 self.OnDodgeEvent?.Invoke();
@@ -252,7 +253,7 @@ namespace CombatAndDodgeOverhaul
                 if (self.IsLocalPlayer && (bool)CombatOverhaul.config.GetValue(Settings.Attack_Cancels_Blocking) && !self.IsAI && self.Blocking)
                 {
                     Instance.StartCoroutine(Instance.StopBlockingCoroutine(self));
-                    At.Call(self, "StopBlocking", null);
+                    At.Call(typeof(Character), self, "StopBlocking", null);
                     At.SetValue(false, typeof(Character), self, "m_blockDesired");
                 }
 
@@ -265,7 +266,7 @@ namespace CombatAndDodgeOverhaul
         {
             yield return new WaitForSeconds(0.05f); // 50ms wait (1 or 2 frames)
 
-            At.Call(character, "StopBlocking", null);
+            At.Call(typeof(Character), character, "StopBlocking", null);
             At.SetValue(false, typeof(Character), character, "m_blockDesired");
         }
 

@@ -16,7 +16,7 @@ namespace CombatAndDodgeOverhaul
     {
         const string GUID = "com.sinai.combatoverhaul";
         const string NAME = "Combat Overhaul";
-        const string VERSION = "2.1";
+        const string VERSION = "2.3";
 
         public static CombatOverhaul Instance;
 
@@ -60,6 +60,7 @@ namespace CombatAndDodgeOverhaul
                 SettingsVersion = 1.2,
                 Settings = new List<BBSetting>
                 {
+                    //This is the Sark Souls value (more or less).
                     new BoolSetting
                     {
                         Name = Settings.Poise,
@@ -79,7 +80,6 @@ namespace CombatAndDodgeOverhaul
                         Description = "Bosses have extra poise and don't regen poise",
                         DefaultValue = true
                     },
-                     //This is the dark souls value (more or less)
                     new FloatSetting
                     {
                         Name = Settings.PoiseResetTime,
@@ -154,6 +154,8 @@ namespace CombatAndDodgeOverhaul
                         ShowPercent = false,
                         RoundTo = 0
                     },*/
+
+                    //This is Combat and Dodge Overhaul Values.
                     new BoolSetting
                     {
                         Name = Settings.Dodge_Cancelling,
@@ -226,6 +228,16 @@ namespace CombatAndDodgeOverhaul
                         MinValue = 0.0f,
                         MaxValue = 20.0f,
                         ShowPercent = false,
+                        RoundTo = 1
+                    },
+                    new FloatSetting
+                    {
+                        Name = Settings.Stamina_Cost_Stat,
+                        Description = "Custom Stamina Cost Modifier (added to your Stamina Cost stat)",
+                        DefaultValue = 0f,
+                        MinValue = -500.0f,
+                        MaxValue = 500.0f,
+                        ShowPercent = true,
                         RoundTo = 1
                     },
                     new FloatSetting
@@ -472,6 +484,7 @@ namespace CombatAndDodgeOverhaul
         public static string Dodge_DelayAfterKD = "Dodge_Delay_After_KD";
         public static string Dodge_DelayAfterHit = "Dodge_DelayAfterHit";
 
+        public static string Stamina_Cost_Stat = "Stamina_Cost_Stat";
         public static string Weapon_Stamina_Cost_Stat = "Weapon_Stamina_Cost_Stat";
         public static string Sprint_Stamina_Cost_Stat = "Sprint_Stamina_Cost_Stat";
         //public static string Stamina_Burn_Stat = "Stamina_Burn_Stat";
